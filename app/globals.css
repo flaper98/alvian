@@ -1,0 +1,520 @@
+:root {
+  --green-900: #0e2b21;
+  --green-800: #15392c;
+  --green-700: #1c4837;
+  --cream: #f7f3e6;
+  --cream-soft: #fbf9f1;
+  --gold: #c9993c;
+  --gold-dark: #a67c2c;
+  --ink: #1c221e;
+  --ink-soft: #4a5650;
+  --whatsapp: #25d366;
+  --whatsapp-dark: #1ebe57;
+  --danger: #b23b3b;
+  --border: #e4ddc9;
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(14, 43, 33, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  color: var(--green-900);
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  background: radial-gradient(circle at 20% 10%, var(--green-700), var(--green-900) 70%);
+  color: var(--cream-soft);
+  padding: 3rem 1.25rem 4rem;
+  text-align: center;
+}
+
+.hero-logo {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+  object-fit: cover;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.hero-content {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.75rem;
+  color: var(--gold);
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.hero h1 {
+  color: var(--cream-soft);
+  font-size: clamp(2.6rem, 6vw, 4rem);
+  letter-spacing: 0.03em;
+}
+
+.hero-subtitle {
+  margin: 1rem auto 2rem;
+  max-width: 480px;
+  color: rgba(247, 243, 230, 0.85);
+  font-size: 1.05rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--whatsapp);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  text-decoration: none;
+  border: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-whatsapp:hover {
+  background: var(--whatsapp-dark);
+  transform: translateY(-1px);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.btn-primary {
+  background: var(--green-800);
+  color: var(--cream-soft);
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: var(--green-700);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--green-800);
+  border: 1px solid var(--border);
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background: var(--cream-soft);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-danger:hover {
+  background: rgba(178, 59, 59, 0.08);
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Catalog ---------- */
+
+.catalog {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+}
+
+.catalog-title {
+  text-align: center;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  margin-bottom: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--ink-soft);
+  padding: 2rem 0;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+}
+
+@media (min-width: 560px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 860px) {
+  .catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1180px) {
+  .catalog-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.perfume-card {
+  background: var(--cream-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+}
+
+.perfume-card-image-wrap {
+  aspect-ratio: 1 / 1;
+  background: #eee7d4;
+  overflow: hidden;
+}
+
+.perfume-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.perfume-card-body {
+  padding: 1.1rem 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.perfume-card-body h3 {
+  font-size: 1.2rem;
+}
+
+.perfume-price {
+  color: var(--gold-dark);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.perfume-description {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin: 0 0 0.5rem;
+  flex: 1;
+}
+
+/* ---------- Footer & floating button ---------- */
+
+.site-footer {
+  text-align: center;
+  padding: 2rem 1rem 3rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.whatsapp-fab {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--whatsapp);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  z-index: 40;
+}
+
+.whatsapp-fab:hover {
+  background: var(--whatsapp-dark);
+}
+
+/* ---------- Admin ---------- */
+
+.admin-shell {
+  min-height: 100vh;
+  background: var(--cream);
+  padding: 2rem 1.1rem 4rem;
+}
+
+.admin-login-form {
+  max-width: 360px;
+  margin: 4rem auto 0;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.admin-login-form h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-login-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-dashboard {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-header h1 {
+  font-size: 1.5rem;
+}
+
+.back-link {
+  color: var(--green-800);
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+.perfume-form {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.perfume-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green-900);
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.image-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green-900);
+}
+
+.image-field-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.image-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: #eee7d4;
+  flex-shrink: 0;
+}
+
+.image-preview-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-weight: 500;
+  padding: 0.5rem;
+}
+
+.image-field-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.perfume-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.perfume-row {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.perfume-row-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #eee7d4;
+}
+
+.perfume-row-info {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.perfume-row-info p {
+  margin: 0.2rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.perfume-row-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.perfume-row-editing {
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .perfume-row {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+  }
+
+  .perfume-row-actions {
+    justify-content: flex-end;
+  }
+}
