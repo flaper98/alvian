@@ -2,6 +2,7 @@ import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import PerfumeCard from './PerfumeCard';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
+import WhatsAppIcon from './WhatsAppIcon';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,7 @@ export default async function HomePage() {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <WhatsAppIcon width={19} height={19} />
             Escríbenos por WhatsApp
           </a>
         </div>

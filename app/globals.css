@@ -107,20 +107,41 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: var(--whatsapp);
+  gap: 0.55rem;
+  background: linear-gradient(180deg, #2fdb76, var(--whatsapp) 55%, var(--whatsapp-dark));
   color: #fff;
   font-weight: 600;
-  padding: 0.85rem 1.5rem;
+  font-size: 0.96rem;
+  letter-spacing: 0.01em;
+  padding: 0.75rem 1.6rem;
   border-radius: 999px;
   text-decoration: none;
-  border: none;
-  transition: background 0.15s ease, transform 0.15s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 10px 20px -8px rgba(14, 43, 33, 0.55);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-whatsapp svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .btn-whatsapp:hover {
-  background: var(--whatsapp-dark);
-  transform: translateY(-1px);
+  background: linear-gradient(180deg, #39e784, var(--whatsapp-dark) 55%, #17a34a);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 14px 26px -8px rgba(14, 43, 33, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-whatsapp:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 6px 14px -6px rgba(14, 43, 33, 0.5);
 }
 
 .btn-block {
@@ -284,18 +305,26 @@ button {
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: var(--whatsapp);
+  background: linear-gradient(180deg, #2fdb76, var(--whatsapp) 55%, var(--whatsapp-dark));
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 10px 24px -4px rgba(14, 43, 33, 0.5);
   text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
   z-index: 40;
 }
 
 .whatsapp-fab:hover {
-  background: var(--whatsapp-dark);
+  background: linear-gradient(180deg, #39e784, var(--whatsapp-dark) 55%, #17a34a);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 14px 28px -4px rgba(14, 43, 33, 0.55);
+  transform: translateY(-2px);
 }
 
 /* ---------- Admin ---------- */
