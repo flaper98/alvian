@@ -58,4 +58,3 @@ npm run dev
 
 Abre `http://localhost:3000` para el catálogo y `http://localhost:3000/admin`
 para el panel.
-# alvian
