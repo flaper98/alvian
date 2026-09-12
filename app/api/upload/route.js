@@ -18,8 +18,16 @@ export async function POST(request) {
         }
 
         return {
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-          maximumSizeInBytes: 8 * 1024 * 1024,
+          allowedContentTypes: [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+            'video/mp4',
+            'video/webm',
+            'video/quicktime',
+          ],
+          maximumSizeInBytes: 30 * 1024 * 1024,
           addRandomSuffix: true,
         };
       },

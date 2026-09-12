@@ -9,13 +9,26 @@ export default function PerfumeCard({ perfume }) {
   return (
     <article className="perfume-card">
       <div className="perfume-card-image-wrap">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={perfume.image_url}
-          alt={perfume.name}
-          loading="lazy"
-          className="perfume-card-image"
-        />
+        {perfume.video_url ? (
+          <video
+            className="perfume-card-image"
+            src={perfume.video_url}
+            poster={perfume.image_url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={perfume.image_url}
+            alt={perfume.name}
+            loading="lazy"
+            className="perfume-card-image"
+          />
+        )}
       </div>
       <div className="perfume-card-body">
         <h3>{perfume.name}</h3>

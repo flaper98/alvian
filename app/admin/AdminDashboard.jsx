@@ -84,6 +84,77 @@ function ImageField({ defaultValue }) {
   );
 }
 
+function VideoField({ defaultValue }) {
+  const [videoUrl, setVideoUrl] = useState(defaultValue || '');
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+
+  async function handleFileChange(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      setError('Selecciona un archivo de video.');
+      return;
+    }
+
+    setError('');
+    setUploading(true);
+    try {
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      });
+      setVideoUrl(blob.url);
+    } catch (uploadError) {
+      setError('No se pudo subir el video. Intenta con otro o pega una URL abajo.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  return (
+    <div className="image-field">
+      <label>Video del perfume (opcional)</label>
+      <div className="image-field-row">
+        {videoUrl ? (
+          <video
+            src={videoUrl}
+            className="image-preview"
+            muted
+            loop
+            autoPlay
+            playsInline
+          />
+        ) : (
+          <div className="image-preview image-preview-empty">Sin video</div>
+        )}
+        <div className="image-field-controls">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/*"
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
+          <input
+            type="text"
+            name="videoUrl"
+            placeholder="o pega la URL de un video (ej. /videos/mi-video.mp4)"
+            value={videoUrl}
+            onChange={(event) => setVideoUrl(event.target.value)}
+          />
+          {uploading ? <span className="hint">Subiendo video...</span> : null}
+          {error ? <span className="form-error">{error}</span> : null}
+          <span className="hint">Si se agrega, reemplaza la foto por el video en la tienda.</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AddPerfumeForm() {
   // La key fuerza un remontaje completo del formulario (incluida la imagen)
   // después de un guardado exitoso, para dejarlo limpio y listo para el siguiente.
@@ -110,6 +181,7 @@ function AddPerfumeFormFields({ onSaved }) {
         <input name="price" type="number" step="0.01" min="0" required />
       </label>
       <ImageField />
+      <VideoField />
       <label>
         Detalle
         <textarea name="description" rows={3} />
@@ -146,6 +218,7 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         />
       </label>
       <ImageField defaultValue={perfume.image_url} />
+      <VideoField defaultValue={perfume.video_url} />
       <label>
         Detalle
         <textarea name="description" rows={3} defaultValue={perfume.description || ''} />
