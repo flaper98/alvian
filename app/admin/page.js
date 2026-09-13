@@ -1,51 +1,84 @@
-import { cookies } from 'next/headers';
-import { COOKIE_NAME, isValidSession } from '@/lib/auth';
-import { listPerfumes } from '@/lib/db';
-import LoginForm from './LoginForm';
-import AdminDashboard from './AdminDashboard';
+import { getCurrentRole } from '@/lib/session';
+import { getSummary } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  title: 'Admin — Alvian',
-  robots: { index: false, follow: false },
-};
+export default async function ResumenPage() {
+  const role = await getCurrentRole();
 
-export default async function AdminPage() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get(COOKIE_NAME)?.value;
-
-  let authenticated;
+  let summary = null;
   try {
-    authenticated = isValidSession(session);
+    summary = await getSummary(role);
   } catch (error) {
     return (
-      <main className="admin-shell">
-        <div className="admin-login-form">
-          <h1>Falta configuración</h1>
-          <p>
-            Configura las variables de entorno <code>ADMIN_PASSWORD</code> y{' '}
-            <code>SESSION_SECRET</code> en Vercel (Settings → Environment Variables) y
-            vuelve a desplegar.
-          </p>
-        </div>
-      </main>
+      <section className="admin-section">
+        <h1>Resumen</h1>
+        <p className="form-error">{error.message}</p>
+      </section>
     );
   }
 
-  if (!authenticated) {
+  if (role === 'vendedora') {
     return (
-      <main className="admin-shell">
-        <LoginForm />
-      </main>
+      <section className="admin-section">
+        <h1>Resumen</h1>
+        <div className="summary-grid">
+          <div className="summary-card">
+            <span className="summary-label">Tus ventas</span>
+            <strong className="summary-value">{summary.salesCount}</strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Total vendido</span>
+            <strong className="summary-value">S/ {Number(summary.salesTotal).toFixed(2)}</strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Comisión pendiente</span>
+            <strong className="summary-value">
+              S/ {Number(summary.commissionPending).toFixed(2)}
+            </strong>
+          </div>
+          <div className="summary-card">
+            <span className="summary-label">Comisión ya pagada</span>
+            <strong className="summary-value">
+              S/ {Number(summary.commissionPaidTotal).toFixed(2)}
+            </strong>
+          </div>
+        </div>
+      </section>
     );
   }
-
-  const perfumes = await listPerfumes();
 
   return (
-    <main className="admin-shell">
-      <AdminDashboard perfumes={perfumes} />
-    </main>
+    <section className="admin-section">
+      <h1>Resumen</h1>
+      <div className="summary-grid">
+        <div className="summary-card">
+          <span className="summary-label">Perfumes en catálogo</span>
+          <strong className="summary-value">{summary.perfumesCount}</strong>
+        </div>
+        <div className="summary-card">
+          <span className="summary-label">Stock total</span>
+          <strong className="summary-value">{summary.stockTotal}</strong>
+        </div>
+        <div className="summary-card">
+          <span className="summary-label">Ventas registradas</span>
+          <strong className="summary-value">{summary.salesCount}</strong>
+        </div>
+        <div className="summary-card">
+          <span className="summary-label">Total vendido</span>
+          <strong className="summary-value">S/ {Number(summary.salesTotal).toFixed(2)}</strong>
+        </div>
+        <div className="summary-card">
+          <span className="summary-label">Crédito pendiente de cobro</span>
+          <strong className="summary-value">S/ {Number(summary.creditPending).toFixed(2)}</strong>
+        </div>
+        <div className="summary-card">
+          <span className="summary-label">Comisión pendiente de pago</span>
+          <strong className="summary-value">
+            S/ {Number(summary.commissionPending).toFixed(2)}
+          </strong>
+        </div>
+      </div>
+    </section>
   );
 }

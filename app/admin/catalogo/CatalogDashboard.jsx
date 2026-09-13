@@ -1,14 +1,10 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { upload } from '@vercel/blob/client';
-import {
-  addPerfumeAction,
-  deletePerfumeAction,
-  editPerfumeAction,
-  logoutAction,
-} from '@/lib/actions';
+import { addPerfumeAction, deletePerfumeAction, editPerfumeAction } from '@/lib/actions';
 
 function SubmitButton({ label, pendingLabel }) {
   const { pending } = useFormStatus();
@@ -188,6 +184,7 @@ function AddPerfumeFormFields({ onSaved }) {
       </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton label="Agregar perfume" pendingLabel="Guardando..." />
+      <p className="hint">El stock inicial es 0 — regístralo desde Compras.</p>
     </form>
   );
 }
@@ -267,7 +264,9 @@ function PerfumeRow({ perfume }) {
       <img src={perfume.image_url} alt={perfume.name} className="perfume-row-image" />
       <div className="perfume-row-info">
         <strong>{perfume.name}</strong>
-        <span>S/ {Number(perfume.price).toFixed(2)}</span>
+        <span>
+          S/ {Number(perfume.price).toFixed(2)} · Stock: {perfume.stock}
+        </span>
         {perfume.description ? <p>{perfume.description}</p> : null}
       </div>
       <div className="perfume-row-actions">
@@ -282,22 +281,9 @@ function PerfumeRow({ perfume }) {
   );
 }
 
-export default function AdminDashboard({ perfumes }) {
+export default function CatalogDashboard({ perfumes }) {
   return (
     <div className="admin-dashboard">
-      <header className="admin-header">
-        <h1>Panel de administración — Alvian</h1>
-        <form action={logoutAction}>
-          <button type="submit" className="btn-secondary">
-            Cerrar sesión
-          </button>
-        </form>
-      </header>
-
-      <a href="/" className="back-link">
-        ← Ver sitio público
-      </a>
-
       <AddPerfumeForm />
 
       <section>

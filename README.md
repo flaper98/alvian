@@ -1,19 +1,26 @@
 # Alvian Perfumes
 
 Sitio web de catálogo de perfumes con compra por WhatsApp y un panel de
-administración privado (`/admin`) para agregar, editar y eliminar perfumes
-(nombre, precio, imagen y detalle). Hecho con Next.js, pensado para
-desplegarse en Vercel.
+administración privado (`/admin`) con dos roles de acceso. Hecho con
+Next.js, pensado para desplegarse en Vercel.
 
 - **Catálogo público (`/`)**: responsive, sin ningún enlace ni botón hacia el
   panel de admin. Cada perfume tiene un botón "Comprar por WhatsApp" que abre
   un chat a **994379917** con un mensaje ya redactado mencionando ese
   perfume. También hay un botón flotante de WhatsApp para consultas generales.
-- **Panel privado (`/admin`)**: pide una clave antes de mostrar nada. Solo
-  quien conozca la URL y la clave puede entrar, agregar/editar/eliminar
-  perfumes y subir imágenes. Los perfumes se guardan en una base de datos
-  (Postgres), así que los cambios se ven al instante para todos los
-  visitantes, desde cualquier dispositivo.
+- **Panel privado (`/admin`)**: pide una clave antes de mostrar nada, con menú
+  hamburguesa para navegar entre secciones. Hay dos roles, cada uno con su
+  propia clave:
+  - **Administrador** (`ADMIN_PASSWORD`): acceso completo — Catálogo (alta,
+    edición y baja de perfumes con imagen y stock), Compras (reponer stock),
+    Ventas, Crédito/Pandero, Comisiones (asignar montos y marcarlas pagadas) y
+    el Resumen del negocio.
+  - **Vendedora** (`SELLER_PASSWORD`, opcional): puede registrar Ventas,
+    registrar abonos en Crédito/Pandero, y ver sus propias Comisiones y su
+    Resumen — sin acceso a Catálogo ni Compras.
+
+  Todo se guarda en una base de datos Postgres, así que los cambios se ven al
+  instante para todos, desde cualquier dispositivo.
 
 ## Antes de desplegar: crea el proyecto en Vercel
 
@@ -28,7 +35,8 @@ desplegarse en Vercel.
    conéctalo al proyecto. Esto agrega automáticamente la variable
    `BLOB_READ_WRITE_TOKEN`.
 5. Ve a **Settings → Environment Variables** y agrega:
-   - `ADMIN_PASSWORD` → la clave que usarás para entrar a `/admin`.
+   - `ADMIN_PASSWORD` → tu clave, con acceso completo al panel.
+   - `SELLER_PASSWORD` → la clave de la vendedora, con acceso limitado (opcional).
    - `SESSION_SECRET` → una cadena larga y aleatoria (por ejemplo, generada
      con `openssl rand -hex 32`).
 6. Vuelve a desplegar el proyecto (**Deployments → Redeploy**) para que tome

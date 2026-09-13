@@ -411,29 +411,279 @@ button {
 }
 
 .admin-dashboard {
-  max-width: 900px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-}
-
-.admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.admin-header h1 {
-  font-size: 1.5rem;
 }
 
 .back-link {
   color: var(--green-800);
   text-decoration: underline;
   font-size: 0.9rem;
+}
+
+/* ---------- Admin topbar + hamburger nav ---------- */
+
+.admin-topbar {
+  background: var(--green-900);
+  color: var(--cream-soft);
+}
+
+.admin-topbar-row {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-brand {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+}
+
+.hamburger-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(247, 243, 230, 0.3);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--cream-soft);
+  border-radius: 2px;
+}
+
+.admin-nav-panel {
+  border-top: 1px solid rgba(247, 243, 230, 0.15);
+  background: var(--green-800);
+}
+
+.admin-nav-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1.1rem;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-nav-panel a {
+  display: block;
+  padding: 0.75rem 0.25rem;
+  color: var(--cream-soft);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(247, 243, 230, 0.1);
+}
+
+.admin-nav-panel a.active {
+  color: var(--gold);
+}
+
+.admin-nav-footer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-nav-footer .back-link {
+  color: var(--cream-soft);
+  opacity: 0.85;
+}
+
+.admin-content {
+  max-width: 900px;
+  margin: 2rem auto 0;
+  padding: 0 1.1rem;
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-section h1 {
+  font-size: 1.5rem;
+}
+
+.admin-no-access {
+  max-width: 900px;
+  margin: 2rem auto 0;
+  padding: 0 1.1rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- Resumen ---------- */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 560px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 860px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.summary-card {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.summary-value {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--green-900);
+}
+
+/* ---------- Historiales (compras, ventas, crédito, comisiones) ---------- */
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.history-row {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.history-row p {
+  margin: 0.25rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.history-row time {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--border);
+  color: var(--ink);
+}
+
+.badge-credito {
+  background: rgba(201, 153, 60, 0.2);
+  color: var(--gold-dark);
+}
+
+.badge-contado {
+  background: rgba(37, 211, 102, 0.15);
+  color: var(--whatsapp-dark);
+}
+
+.badge-paid {
+  background: rgba(37, 211, 102, 0.15);
+  color: var(--whatsapp-dark);
+}
+
+.badge-pending {
+  background: rgba(178, 59, 59, 0.12);
+  color: var(--danger);
+}
+
+.credit-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.credit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.credit-payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.credit-payment-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green-900);
+}
+
+.commission-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+  min-width: 180px;
+}
+
+.inline-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.inline-form input {
+  width: 110px;
 }
 
 .perfume-form {
