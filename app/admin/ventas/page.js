@@ -10,7 +10,18 @@ export default async function VentasPage() {
     return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
   }
 
-  const [perfumes, sales] = await Promise.all([listPerfumes(), listSales()]);
+  let perfumes;
+  let sales;
+  try {
+    [perfumes, sales] = await Promise.all([listPerfumes(), listSales()]);
+  } catch (error) {
+    return (
+      <section className="admin-section">
+        <h1>Ventas</h1>
+        <p className="form-error">{error.message}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-section">

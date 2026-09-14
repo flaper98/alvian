@@ -10,7 +10,17 @@ export default async function ComisionesPage() {
     return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
   }
 
-  const sales = await listSalesBySeller('vendedora');
+  let sales;
+  try {
+    sales = await listSalesBySeller('vendedora');
+  } catch (error) {
+    return (
+      <section className="admin-section">
+        <h1>Comisiones</h1>
+        <p className="form-error">{error.message}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-section">

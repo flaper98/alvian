@@ -10,7 +10,17 @@ export default async function CreditosPage() {
     return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
   }
 
-  const creditSales = await listCreditSales();
+  let creditSales;
+  try {
+    creditSales = await listCreditSales();
+  } catch (error) {
+    return (
+      <section className="admin-section">
+        <h1>Crédito / Pandero</h1>
+        <p className="form-error">{error.message}</p>
+      </section>
+    );
+  }
 
   return (
     <section className="admin-section">
