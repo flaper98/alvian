@@ -30,6 +30,13 @@ export default async function ComprasPage() {
                   <span>
                     {' '}
                     · {purchase.quantity} unid. · S/ {Number(purchase.unit_cost).toFixed(2)} c/u
+                    {Number(purchase.freight_cost) > 0 ? (
+                      <>
+                        {' '}
+                        + S/ {Number(purchase.freight_cost).toFixed(2)} flete = S/{' '}
+                        {Number(purchase.landed_unit_cost).toFixed(2)} c/u real
+                      </>
+                    ) : null}
                   </span>
                   {purchase.note ? <p>{purchase.note}</p> : null}
                 </div>
