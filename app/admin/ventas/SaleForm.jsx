@@ -80,12 +80,13 @@ function SaleFormFields({ perfumes, onSaved }) {
           onChange={(event) => setPaymentType(event.target.value)}
         >
           <option value="contado">Contado</option>
-          <option value="credito">Crédito / Pandero</option>
+          <option value="credito">Crédito</option>
+          <option value="pandero">Pandero</option>
         </select>
       </label>
       <label>
-        Cliente {paymentType === 'credito' ? '(obligatorio)' : '(opcional)'}
-        <input name="customerName" type="text" required={paymentType === 'credito'} />
+        Cliente {['credito', 'pandero'].includes(paymentType) ? '(obligatorio)' : '(opcional)'}
+        <input name="customerName" type="text" required={['credito', 'pandero'].includes(paymentType)} />
       </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />

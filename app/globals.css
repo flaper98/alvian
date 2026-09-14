@@ -23,9 +23,10 @@
   --status-attention-bg: rgba(138, 90, 0, 0.12);
   --status-critical: #b23b3b;
   --status-critical-bg: rgba(178, 59, 59, 0.12);
-  /* Categorical — 2-slot pair for payment type, CVD ΔE 9.0 / normal 16.1 */
+  /* Categorical — payment type set, CVD ΔE 9.0 / normal 16.1 (contado/credito pair) */
   --series-contado: #0e8f76;
   --series-credito: #a67c2c;
+  --series-pandero: #6b4a8f;
 }
 
 * {
@@ -908,12 +909,14 @@ button {
 
 .split-bar-contado {
   background: var(--series-contado);
-  border-radius: 4px 0 0 4px;
 }
 
 .split-bar-credito {
   background: var(--series-credito);
-  border-radius: 0 4px 4px 0;
+}
+
+.split-bar-pandero {
+  background: var(--series-pandero);
 }
 
 .split-bar-legend {
@@ -942,6 +945,10 @@ button {
 
 .legend-dot-credito {
   background: var(--series-credito);
+}
+
+.legend-dot-pandero {
+  background: var(--series-pandero);
 }
 
 /* ---------- Historiales (compras, ventas, crédito, comisiones) ---------- */
@@ -999,6 +1006,11 @@ button {
   color: var(--series-contado);
 }
 
+.badge-pandero {
+  background: rgba(107, 74, 143, 0.14);
+  color: var(--series-pandero);
+}
+
 .badge-paid {
   background: var(--status-good-bg);
   color: var(--status-good);
@@ -1023,6 +1035,48 @@ button {
 .credit-row {
   flex-direction: column;
   align-items: stretch;
+}
+
+.customer-credit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.customer-credit-card {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.customer-credit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.customer-credit-header strong {
+  font-size: 1.05rem;
+  color: var(--green-900);
+}
+
+.customer-credit-card .history-list {
+  gap: 0.6rem;
+}
+
+.customer-credit-card .history-row {
+  background: var(--cream);
+  box-shadow: none;
 }
 
 .credit-actions {

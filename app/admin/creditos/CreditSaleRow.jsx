@@ -6,6 +6,8 @@ import { useFormStatus } from 'react-dom';
 import { addCreditPaymentAction } from '@/lib/actions';
 import { IconCheck } from '../icons';
 
+const PAYMENT_LABELS = { credito: 'Crédito', pandero: 'Pandero' };
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -27,8 +29,10 @@ export default function CreditSaleRow({ sale }) {
   return (
     <li className="history-row credit-row">
       <div>
-        <strong>{sale.perfume_name}</strong>
-        <span> · Cliente: {sale.customer_name || 'Sin nombre'}</span>
+        <strong>{sale.perfume_name}</strong>{' '}
+        <span className={`badge badge-${sale.payment_type}`}>
+          {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
+        </span>
         <p>
           Total S/ {Number(sale.total).toFixed(2)} · Pagado S/ {Number(sale.paid_amount).toFixed(2)}{' '}
           · <strong>Saldo S/ {balance.toFixed(2)}</strong>

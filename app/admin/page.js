@@ -92,8 +92,10 @@ export default async function ResumenPage() {
         <PaymentSplitBar
           contadoCount={summary.contadoCount}
           creditoCount={summary.creditoCount}
+          panderoCount={summary.panderoCount}
           contadoTotal={summary.contadoTotal}
           creditoTotal={summary.creditoTotal}
+          panderoTotal={summary.panderoTotal}
         />
       </div>
     </section>
