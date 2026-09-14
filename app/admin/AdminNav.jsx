@@ -12,12 +12,19 @@ import {
   IconWallet,
   IconCoin,
   IconUser,
+  IconClipboard,
 } from './icons';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'], icon: IconHome },
   { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'], icon: IconBottle },
   { href: '/admin/compras', label: 'Compras', roles: ['admin'], icon: IconCart },
+  {
+    href: '/admin/pedidos',
+    label: 'Pedidos',
+    roles: ['admin', 'vendedora'],
+    icon: IconClipboard,
+  },
   { href: '/admin/ventas', label: 'Ventas', roles: ['admin', 'vendedora'], icon: IconReceipt },
   {
     href: '/admin/creditos',

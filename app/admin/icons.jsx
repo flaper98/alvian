@@ -107,3 +107,13 @@ export function IconUser(props) {
     </Base>
   );
 }
+
+export function IconClipboard(props) {
+  return (
+    <Base {...props}>
+      <rect x="6" y="4" width="12" height="17" rx="2" />
+      <rect x="9" y="2.5" width="6" height="3" rx="1" />
+      <path d="M9 11h6M9 15h4" />
+    </Base>
+  );
+}

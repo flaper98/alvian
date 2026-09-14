@@ -1,0 +1,72 @@
+import { getCurrentRole } from '@/lib/session';
+import { listPerfumes, listOrders, listOrderShortfalls } from '@/lib/db';
+import OrderForm from './OrderForm';
+import OrderRow from './OrderRow';
+
+export const dynamic = 'force-dynamic';
+
+export default async function PedidosPage() {
+  const role = await getCurrentRole();
+  if (!['admin', 'vendedora'].includes(role)) {
+    return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
+  }
+
+  let perfumes;
+  let orders;
+  let shortfalls;
+  try {
+    [perfumes, orders, shortfalls] = await Promise.all([
+      listPerfumes(),
+      listOrders(),
+      listOrderShortfalls(),
+    ]);
+  } catch (error) {
+    return (
+      <section className="admin-section">
+        <h1>Pedidos</h1>
+        <p className="form-error">{error.message}</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="admin-section">
+      <h1>Pedidos</h1>
+      <OrderForm perfumes={perfumes} />
+
+      <div>
+        <h2>Qué te falta comprar ({shortfalls.length})</h2>
+        {shortfalls.length === 0 ? (
+          <p>No hay pedidos pendientes que superen tu stock actual.</p>
+        ) : (
+          <ul className="history-list">
+            {shortfalls.map((row) => (
+              <li key={row.perfume_id} className="history-row">
+                <div>
+                  <strong>{row.perfume_name}</strong>
+                  <p>
+                    Pedido: {row.ordered_quantity} unid. · Stock actual: {row.perfume_stock} unid.
+                  </p>
+                </div>
+                <span className="badge badge-pending">Faltan {row.shortfall} unid.</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <h2>Pedidos registrados ({orders.length})</h2>
+        {orders.length === 0 ? (
+          <p>Todavía no hay pedidos. Agrega el primero arriba.</p>
+        ) : (
+          <ul className="history-list">
+            {orders.map((order) => (
+              <OrderRow key={order.id} order={order} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
