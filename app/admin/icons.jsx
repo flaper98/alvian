@@ -117,3 +117,12 @@ export function IconClipboard(props) {
     </Base>
   );
 }
+
+export function IconRepeat(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 12a8 8 0 0 1 14-5.2M20 4v4h-4" />
+      <path d="M20 12a8 8 0 0 1-14 5.2M4 20v-4h4" />
+    </Base>
+  );
+}

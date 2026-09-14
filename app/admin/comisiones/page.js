@@ -1,6 +1,7 @@
 import { getCurrentRole } from '@/lib/session';
-import { listSalesBySeller } from '@/lib/db';
+import { listSalesBySeller, getCommissionPercent } from '@/lib/db';
 import CommissionRow from './CommissionRow';
+import CommissionPercentForm from './CommissionPercentForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,8 +12,10 @@ export default async function ComisionesPage() {
   }
 
   let sales;
+  let percent;
   try {
     sales = await listSalesBySeller('vendedora');
+    percent = await getCommissionPercent();
   } catch (error) {
     return (
       <section className="admin-section">
@@ -22,9 +25,25 @@ export default async function ComisionesPage() {
     );
   }
 
+  const pendingTotal = sales
+    .filter((sale) => !sale.commission_paid)
+    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
+  const paidTotal = sales
+    .filter((sale) => sale.commission_paid)
+    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
+
   return (
     <section className="admin-section">
       <h1>Comisiones</h1>
+
+      {role === 'admin' ? <CommissionPercentForm percent={percent} /> : null}
+
+      <p>
+        Comisión actual: <strong>{Number(percent).toFixed(1)}%</strong> por venta · Pendiente de
+        pago: <strong>S/ {pendingTotal.toFixed(2)}</strong> · Ya pagada:{' '}
+        <strong>S/ {paidTotal.toFixed(2)}</strong>
+      </p>
+
       {sales.length === 0 ? (
         <p>Todavía no hay ventas de la vendedora.</p>
       ) : (
