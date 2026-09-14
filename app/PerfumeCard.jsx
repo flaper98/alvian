@@ -24,7 +24,7 @@ export default function PerfumeCard({ perfume }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={perfume.image_url}
-            alt={perfume.name}
+            alt={`Perfume ${perfume.name} - Alvian Perfumes Pucallpa`}
             loading="lazy"
             className="perfume-card-image"
           />

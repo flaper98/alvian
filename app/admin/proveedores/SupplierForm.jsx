@@ -14,9 +14,17 @@ function SubmitButton() {
   );
 }
 
-export default function SupplierForm() {
+export default function SupplierForm({ onSaved }) {
   const [formKey, setFormKey] = useState(0);
-  return <SupplierFormFields key={formKey} onSaved={() => setFormKey((k) => k + 1)} />;
+  return (
+    <SupplierFormFields
+      key={formKey}
+      onSaved={() => {
+        setFormKey((k) => k + 1);
+        onSaved?.();
+      }}
+    />
+  );
 }
 
 function SupplierFormFields({ onSaved }) {

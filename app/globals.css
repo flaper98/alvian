@@ -1276,7 +1276,7 @@ button {
   margin: 0;
 }
 
-.comparison-toolbar {
+.list-toolbar {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
@@ -1289,21 +1289,64 @@ button {
   box-shadow: var(--shadow);
 }
 
-.comparison-toolbar input,
-.comparison-toolbar select {
+.list-toolbar input,
+.list-toolbar select {
   flex: 1;
   min-width: 200px;
 }
 
-.comparison-toolbar select {
+.list-toolbar select {
   flex: 0 1 240px;
 }
 
-.comparison-count {
+.list-count {
   flex: 0 0 auto;
   font-size: 0.85rem;
   color: var(--ink-soft, #6b6558);
   white-space: nowrap;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  background: var(--cream-soft);
+}
+
+.filter-chip.active {
+  background: var(--green-800);
+  border-color: var(--green-800);
+  color: #fff;
+}
+
+.filter-chip-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.filter-chip.active .filter-chip-count {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .comparison-table-scroll {

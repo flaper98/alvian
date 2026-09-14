@@ -14,9 +14,18 @@ function SubmitButton() {
   );
 }
 
-export default function OrderForm({ perfumes }) {
+export default function OrderForm({ perfumes, onSaved }) {
   const [formKey, setFormKey] = useState(0);
-  return <OrderFormFields key={formKey} perfumes={perfumes} onSaved={() => setFormKey((k) => k + 1)} />;
+  return (
+    <OrderFormFields
+      key={formKey}
+      perfumes={perfumes}
+      onSaved={() => {
+        setFormKey((k) => k + 1);
+        onSaved?.();
+      }}
+    />
+  );
 }
 
 function OrderFormFields({ perfumes, onSaved }) {

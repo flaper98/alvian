@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import { listPerfumes, listPanderoGroups } from '@/lib/db';
-import PanderoGroupForm from './PanderoGroupForm';
+import PanderoGroupFormModal from './PanderoGroupFormModal';
 import PanderoGroupCard from './PanderoGroupCard';
 
 export const dynamic = 'force-dynamic';
@@ -26,12 +26,14 @@ export default async function PanderosPage() {
 
   return (
     <section className="admin-section">
-      <h1>Panderos</h1>
+      <div className="admin-header">
+        <h1>Panderos</h1>
+        <PanderoGroupFormModal />
+      </div>
       <p className="hint">
         Aquí llevas la lista numerada de cada pandero: quién va en cada turno, qué perfume le toca
         y cuándo. Esto es distinto de "Crédito / Pandero" (que es para cobrar lo ya vendido).
       </p>
-      <PanderoGroupForm />
 
       {groups.length === 0 ? (
         <p>Todavía no has creado ningún pandero.</p>

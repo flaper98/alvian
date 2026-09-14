@@ -3,9 +3,17 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
+const FILTERS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'catalog', label: 'En mi catálogo' },
+  { value: 'missing', label: 'Me falta agregar' },
+  { value: 'multi', label: 'Con varios proveedores' },
+];
+
 export default function PriceComparison({ comparison }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [filterBy, setFilterBy] = useState('all');
 
   const suppliers = useMemo(() => {
     const seen = new Map();
@@ -17,8 +25,8 @@ export default function PriceComparison({ comparison }) {
     return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }, [comparison]);
 
-  const rows = useMemo(() => {
-    const withStats = comparison.map((row) => {
+  const withStats = useMemo(() => {
+    return comparison.map((row) => {
       // Precio más bajo que ofrece cada proveedor para este perfume (un
       // proveedor puede tener varios niveles; nos interesa su mejor precio).
       const bySupplier = new Map();
@@ -40,16 +48,37 @@ export default function PriceComparison({ comparison }) {
 
       return { ...row, bySupplier, cheapest, priciest, average, savings: Number(priciest.price) - Number(cheapest.price) };
     });
+  }, [comparison]);
 
-    const filtered = search.trim()
+  const searched = useMemo(() => {
+    return search.trim()
       ? withStats.filter((row) => row.perfumeName.toLowerCase().includes(search.trim().toLowerCase()))
       : withStats;
+  }, [withStats, search]);
+
+  const filterCounts = useMemo(
+    () => ({
+      all: searched.length,
+      catalog: searched.filter((row) => !row.unlinked).length,
+      missing: searched.filter((row) => row.unlinked).length,
+      multi: searched.filter((row) => row.bySupplier.size > 1).length,
+    }),
+    [searched],
+  );
+
+  const rows = useMemo(() => {
+    const filtered = searched.filter((row) => {
+      if (filterBy === 'catalog') return !row.unlinked;
+      if (filterBy === 'missing') return row.unlinked;
+      if (filterBy === 'multi') return row.bySupplier.size > 1;
+      return true;
+    });
 
     return [...filtered].sort((a, b) => {
       if (sortBy === 'savings') return b.savings - a.savings;
       return a.perfumeName.localeCompare(b.perfumeName);
     });
-  }, [comparison, search, sortBy]);
+  }, [searched, filterBy, sortBy]);
 
   if (comparison.length === 0) {
     return <p>Todavía no hay precios registrados para comparar.</p>;
@@ -57,7 +86,7 @@ export default function PriceComparison({ comparison }) {
 
   return (
     <div>
-      <div className="comparison-toolbar">
+      <div className="list-toolbar">
         <input
           type="search"
           placeholder="Buscar perfume..."
@@ -68,13 +97,30 @@ export default function PriceComparison({ comparison }) {
           <option value="name">Ordenar: nombre (A-Z)</option>
           <option value="savings">Ordenar: mayor ahorro primero</option>
         </select>
-        <span className="comparison-count">
+        <span className="list-count">
           {rows.length} de {comparison.length} perfume{comparison.length === 1 ? '' : 's'}
         </span>
       </div>
 
+      <div className="filter-chips">
+        {FILTERS.map((filter) => (
+          <button
+            key={filter.value}
+            type="button"
+            className={`filter-chip${filterBy === filter.value ? ' active' : ''}`}
+            onClick={() => setFilterBy(filter.value)}
+          >
+            {filter.label} <span className="filter-chip-count">{filterCounts[filter.value]}</span>
+          </button>
+        ))}
+      </div>
+
       {rows.length === 0 ? (
-        <p className="hint">Ningún perfume coincide con &quot;{search}&quot;.</p>
+        <p className="hint">
+          {search.trim()
+            ? <>Ningún perfume coincide con &quot;{search}&quot;.</>
+            : 'Ningún perfume coincide con este filtro.'}
+        </p>
       ) : (
         <div className="comparison-table-scroll">
           <table className="comparison-matrix">

@@ -14,14 +14,17 @@ function SubmitButton() {
   );
 }
 
-export default function PurchaseForm({ perfumes, prefill }) {
+export default function PurchaseForm({ perfumes, prefill, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <PurchaseFormFields
       key={formKey}
       perfumes={perfumes}
       prefill={prefill}
-      onSaved={() => setFormKey((key) => key + 1)}
+      onSaved={() => {
+        setFormKey((key) => key + 1);
+        onSaved?.();
+      }}
     />
   );
 }

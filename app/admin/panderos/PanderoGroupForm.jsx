@@ -14,9 +14,17 @@ function SubmitButton() {
   );
 }
 
-export default function PanderoGroupForm() {
+export default function PanderoGroupForm({ onSaved }) {
   const [formKey, setFormKey] = useState(0);
-  return <PanderoGroupFormFields key={formKey} onSaved={() => setFormKey((k) => k + 1)} />;
+  return (
+    <PanderoGroupFormFields
+      key={formKey}
+      onSaved={() => {
+        setFormKey((k) => k + 1);
+        onSaved?.();
+      }}
+    />
+  );
 }
 
 function PanderoGroupFormFields({ onSaved }) {

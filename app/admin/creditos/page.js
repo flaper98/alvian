@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import { listCreditSales } from '@/lib/db';
-import CreditSaleRow from './CreditSaleRow';
+import CreditosDashboard from './CreditosDashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,29 +46,7 @@ export default async function CreditosPage() {
   return (
     <section className="admin-section">
       <h1>Crédito</h1>
-      {customerGroups.length === 0 ? (
-        <p>No hay ventas a crédito o pandero registradas.</p>
-      ) : (
-        <ul className="customer-credit-list">
-          {customerGroups.map((group) => (
-            <li key={group.customerName} className="customer-credit-card">
-              <div className="customer-credit-header">
-                <strong>{group.customerName}</strong>
-                <span
-                  className={`badge ${group.totalDebt > 0 ? 'badge-pending' : 'badge-paid'}`}
-                >
-                  Deuda total: S/ {group.totalDebt.toFixed(2)}
-                </span>
-              </div>
-              <ul className="history-list">
-                {group.sales.map((sale) => (
-                  <CreditSaleRow key={sale.id} sale={sale} />
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CreditosDashboard customerGroups={customerGroups} />
     </section>
   );
 }

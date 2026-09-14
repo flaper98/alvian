@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import { listSalesBySeller, getCommissionPercent } from '@/lib/db';
-import CommissionRow from './CommissionRow';
+import CommissionsList from './CommissionsList';
 import CommissionPercentForm from './CommissionPercentForm';
 
 export const dynamic = 'force-dynamic';
@@ -61,15 +61,7 @@ export default async function ComisionesPage() {
         · Ya pagada: <strong>S/ {paidTotal.toFixed(2)}</strong>
       </p>
 
-      {sales.length === 0 ? (
-        <p>Todavía no hay ventas de la vendedora.</p>
-      ) : (
-        <ul className="history-list">
-          {sales.map((sale) => (
-            <CommissionRow key={sale.id} sale={sale} canEdit={role === 'admin'} />
-          ))}
-        </ul>
-      )}
+      <CommissionsList sales={sales} canEdit={role === 'admin'} />
     </section>
   );
 }

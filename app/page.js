@@ -17,17 +17,47 @@ export default async function HomePage() {
     perfumes = [];
   }
 
+  const productsJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: perfumes.map((perfume, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        name: perfume.name,
+        image: perfume.image_url,
+        description: perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa.`,
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: 'PEN',
+          price: Number(perfume.price).toFixed(2),
+          availability:
+            perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          areaServed: 'Pucallpa',
+        },
+      },
+    })),
+  };
+
   return (
     <>
+      {perfumes.length > 0 ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
+        />
+      ) : null}
+
       <header className="hero">
         <div className="hero-content">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Alvian" className="hero-logo" />
-          <p className="eyebrow">Perfumería</p>
+          <img src="/logo.jpg" alt="Alvian Perfumes - Perfumería en Pucallpa" className="hero-logo" />
+          <p className="eyebrow">Perfumería en Pucallpa</p>
           <h1>Alvian</h1>
           <p className="hero-subtitle">
-            Fragancias originales seleccionadas para ti. Escríbenos por WhatsApp y te
-            ayudamos a elegir tu perfume ideal.
+            Fragancias originales seleccionadas para ti en Pucallpa. Escríbenos por WhatsApp y te
+            ayudamos a elegir tu perfume ideal, con entrega rápida en toda la ciudad.
           </p>
           <a
             className="btn-whatsapp"
@@ -42,7 +72,7 @@ export default async function HomePage() {
       </header>
 
       <main className="catalog">
-        <h2 className="catalog-title">Nuestros perfumes</h2>
+        <h2 className="catalog-title">Perfumes originales en Pucallpa</h2>
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
         ) : (
@@ -55,7 +85,7 @@ export default async function HomePage() {
       </main>
 
       <footer className="site-footer">
-        <p>© {new Date().getFullYear()} Alvian Perfumes</p>
+        <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
       </footer>
 
       <WhatsAppFloatingButton />

@@ -1,7 +1,7 @@
 import { getCurrentRole } from '@/lib/session';
 import { listPerfumes, listSales, listUsers } from '@/lib/db';
 import SaleFormModal from './SaleFormModal';
-import SaleRow from './SaleRow';
+import SalesList from './SalesList';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,20 +38,7 @@ export default async function VentasPage() {
 
       <div>
         <h2>Historial de ventas ({sales.length})</h2>
-        {sales.length === 0 ? (
-          <p>Todavía no hay ventas registradas.</p>
-        ) : (
-          <ul className="history-list">
-            {sales.map((sale) => (
-              <SaleRow
-                key={sale.id}
-                sale={sale}
-                canManage={role === 'admin'}
-                users={activeUsers}
-              />
-            ))}
-          </ul>
-        )}
+        <SalesList sales={sales} canManage={role === 'admin'} users={activeUsers} />
       </div>
     </section>
   );

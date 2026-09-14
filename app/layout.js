@@ -1,5 +1,8 @@
 import { Playfair_Display, Inter } from 'next/font/google';
+import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import './globals.css';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
 
 const display = Playfair_Display({
   subsets: ['latin'],
@@ -16,8 +19,38 @@ const body = Inter({
 });
 
 export const metadata = {
-  title: 'Alvian Perfumes',
-  description: 'Perfumería Alvian — fragancias originales. Escríbenos y compra por WhatsApp.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Alvian Perfumes | Perfumería original en Pucallpa',
+    template: '%s | Alvian Perfumes',
+  },
+  description:
+    'Perfumería Alvian en Pucallpa: fragancias originales para dama y caballero. Elige tu perfume y compra fácil por WhatsApp, con entrega en Pucallpa y alrededores.',
+  keywords: [
+    'perfumes Pucallpa',
+    'perfumería Pucallpa',
+    'perfumes originales Pucallpa',
+    'fragancias Pucallpa',
+    'comprar perfumes Pucallpa',
+    'Alvian Perfumes',
+  ],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'es_PE',
+    url: '/',
+    siteName: 'Alvian Perfumes',
+    title: 'Alvian Perfumes | Perfumería original en Pucallpa',
+    description:
+      'Fragancias originales para dama y caballero. Compra por WhatsApp con entrega en Pucallpa.',
+    images: [{ url: '/logo.jpg', width: 512, height: 512, alt: 'Alvian Perfumes' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Alvian Perfumes | Perfumería original en Pucallpa',
+    description: 'Fragancias originales para dama y caballero en Pucallpa. Compra por WhatsApp.',
+    images: ['/logo.jpg'],
+  },
   icons: {
     icon: '/logo.jpg',
   },
@@ -28,10 +61,36 @@ export const viewport = {
   initialScale: 1,
 };
 
+const businessJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  name: 'Alvian Perfumes',
+  url: SITE_URL,
+  image: `${SITE_URL}/logo.jpg`,
+  telephone: `+${WHATSAPP_NUMBER}`,
+  priceRange: 'S/',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Pucallpa',
+    addressRegion: 'Ucayali',
+    addressCountry: 'PE',
+  },
+  areaServed: {
+    '@type': 'City',
+    name: 'Pucallpa',
+  },
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

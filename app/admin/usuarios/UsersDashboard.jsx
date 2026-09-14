@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
@@ -20,9 +20,17 @@ function SubmitButton({ label, pendingLabel }) {
   );
 }
 
-function CreateUserForm() {
+function CreateUserForm({ onSaved }) {
   const [formKey, setFormKey] = useState(0);
-  return <CreateUserFormFields key={formKey} onSaved={() => setFormKey((k) => k + 1)} />;
+  return (
+    <CreateUserFormFields
+      key={formKey}
+      onSaved={() => {
+        setFormKey((k) => k + 1);
+        onSaved?.();
+      }}
+    />
+  );
 }
 
 function CreateUserFormFields({ onSaved }) {
@@ -63,6 +71,34 @@ function CreateUserFormFields({ onSaved }) {
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton label="Crear usuario" pendingLabel="Creando..." />
     </form>
+  );
+}
+
+function CreateUserModal() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button type="button" className="btn-primary" onClick={() => setOpen(true)}>
+        + Nuevo usuario
+      </button>
+
+      {open ? (
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              aria-label="Cerrar"
+              onClick={() => setOpen(false)}
+            >
+              ×
+            </button>
+            <CreateUserForm onSaved={() => setOpen(false)} />
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -119,23 +155,88 @@ function UserRow({ user }) {
   );
 }
 
+const FILTERS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'active', label: 'Activos' },
+  { value: 'inactive', label: 'Desactivados' },
+];
+
 export default function UsersDashboard({ users }) {
+  const [search, setSearch] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+
+  const searched = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return users;
+    return users.filter(
+      (u) => u.name.toLowerCase().includes(term) || u.username.toLowerCase().includes(term),
+    );
+  }, [users, search]);
+
+  const filterCounts = useMemo(
+    () => ({
+      all: searched.length,
+      active: searched.filter((u) => u.active).length,
+      inactive: searched.filter((u) => !u.active).length,
+    }),
+    [searched],
+  );
+
+  const rows = useMemo(() => {
+    return searched.filter((u) => {
+      if (filterBy === 'active') return u.active;
+      if (filterBy === 'inactive') return !u.active;
+      return true;
+    });
+  }, [searched, filterBy]);
+
   return (
     <div className="admin-dashboard">
-      <CreateUserForm />
-
-      <section>
+      <div className="admin-header">
         <h2>Usuarios registrados ({users.length})</h2>
-        {users.length === 0 ? (
-          <p>Todavía no hay usuarios. Agrega el primero arriba.</p>
-        ) : (
-          <ul className="perfume-list">
-            {users.map((user) => (
-              <UserRow key={user.id} user={user} />
+        <CreateUserModal />
+      </div>
+
+      {users.length === 0 ? (
+        <p>Todavía no hay usuarios. Agrega el primero arriba.</p>
+      ) : (
+        <section>
+          <div className="list-toolbar">
+            <input
+              type="search"
+              placeholder="Buscar por nombre o usuario..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <span className="list-count">
+              {rows.length} de {users.length} usuario{users.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          <div className="filter-chips">
+            {FILTERS.map((filter) => (
+              <button
+                key={filter.value}
+                type="button"
+                className={`filter-chip${filterBy === filter.value ? ' active' : ''}`}
+                onClick={() => setFilterBy(filter.value)}
+              >
+                {filter.label} <span className="filter-chip-count">{filterCounts[filter.value]}</span>
+              </button>
             ))}
-          </ul>
-        )}
-      </section>
+          </div>
+
+          {rows.length === 0 ? (
+            <p className="hint">Ningún usuario coincide con este filtro.</p>
+          ) : (
+            <ul className="perfume-list">
+              {rows.map((user) => (
+                <UserRow key={user.id} user={user} />
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </div>
   );
 }

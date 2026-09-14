@@ -1,7 +1,7 @@
 import { getCurrentRole } from '@/lib/session';
 import { listPerfumes, listOrders, listOrderShortfalls } from '@/lib/db';
-import OrderForm from './OrderForm';
-import OrderRow from './OrderRow';
+import OrderFormModal from './OrderFormModal';
+import OrdersList from './OrdersList';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,8 +31,10 @@ export default async function PedidosPage() {
 
   return (
     <section className="admin-section">
-      <h1>Pedidos</h1>
-      <OrderForm perfumes={perfumes} />
+      <div className="admin-header">
+        <h1>Pedidos</h1>
+        <OrderFormModal perfumes={perfumes} />
+      </div>
 
       <div>
         <h2>Qué te falta comprar ({shortfalls.length})</h2>
@@ -57,15 +59,7 @@ export default async function PedidosPage() {
 
       <div>
         <h2>Pedidos registrados ({orders.length})</h2>
-        {orders.length === 0 ? (
-          <p>Todavía no hay pedidos. Agrega el primero arriba.</p>
-        ) : (
-          <ul className="history-list">
-            {orders.map((order) => (
-              <OrderRow key={order.id} order={order} />
-            ))}
-          </ul>
-        )}
+        <OrdersList orders={orders} />
       </div>
     </section>
   );

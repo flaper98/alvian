@@ -1,0 +1,91 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import OrderRow from './OrderRow';
+
+const FILTERS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'shortage', label: 'Falta comprar' },
+  { value: 'ready', label: 'Listos para entregar' },
+  { value: 'fulfilled', label: 'Cumplidos' },
+];
+
+export default function OrdersList({ orders }) {
+  const [search, setSearch] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
+
+  const withStatus = useMemo(
+    () => orders.map((order) => ({ ...order, shortOnStock: order.perfume_stock < order.quantity })),
+    [orders],
+  );
+
+  const searched = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return withStatus;
+    return withStatus.filter(
+      (o) => o.customer_name.toLowerCase().includes(term) || o.perfume_name.toLowerCase().includes(term),
+    );
+  }, [withStatus, search]);
+
+  const filterCounts = useMemo(
+    () => ({
+      all: searched.length,
+      shortage: searched.filter((o) => !o.fulfilled && o.shortOnStock).length,
+      ready: searched.filter((o) => !o.fulfilled && !o.shortOnStock).length,
+      fulfilled: searched.filter((o) => o.fulfilled).length,
+    }),
+    [searched],
+  );
+
+  const rows = useMemo(() => {
+    return searched.filter((order) => {
+      if (filterBy === 'shortage') return !order.fulfilled && order.shortOnStock;
+      if (filterBy === 'ready') return !order.fulfilled && !order.shortOnStock;
+      if (filterBy === 'fulfilled') return order.fulfilled;
+      return true;
+    });
+  }, [searched, filterBy]);
+
+  if (orders.length === 0) {
+    return <p>Todavía no hay pedidos. Agrega el primero arriba.</p>;
+  }
+
+  return (
+    <div>
+      <div className="list-toolbar">
+        <input
+          type="search"
+          placeholder="Buscar cliente o perfume..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <span className="list-count">
+          {rows.length} de {orders.length} pedido{orders.length === 1 ? '' : 's'}
+        </span>
+      </div>
+
+      <div className="filter-chips">
+        {FILTERS.map((filter) => (
+          <button
+            key={filter.value}
+            type="button"
+            className={`filter-chip${filterBy === filter.value ? ' active' : ''}`}
+            onClick={() => setFilterBy(filter.value)}
+          >
+            {filter.label} <span className="filter-chip-count">{filterCounts[filter.value]}</span>
+          </button>
+        ))}
+      </div>
+
+      {rows.length === 0 ? (
+        <p className="hint">Ningún pedido coincide con este filtro.</p>
+      ) : (
+        <ul className="history-list">
+          {rows.map((order) => (
+            <OrderRow key={order.id} order={order} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

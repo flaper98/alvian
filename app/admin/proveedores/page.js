@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import { listPerfumes, listSuppliers, listSupplierPrices, listPriceComparison } from '@/lib/db';
-import SupplierForm from './SupplierForm';
+import SupplierFormModal from './SupplierFormModal';
 import SupplierCard from './SupplierCard';
 import PriceComparison from './PriceComparison';
 
@@ -47,7 +47,10 @@ export default async function ProveedoresPage() {
         <PriceComparison comparison={comparison} />
       </div>
 
-      <SupplierForm />
+      <div className="admin-header">
+        <h2>Mis proveedores ({suppliers.length})</h2>
+        <SupplierFormModal />
+      </div>
 
       {suppliers.length === 0 ? (
         <p>Todavía no has agregado ningún proveedor.</p>
