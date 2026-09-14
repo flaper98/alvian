@@ -25,8 +25,16 @@ export default async function ComisionesPage() {
     );
   }
 
-  const pendingTotal = sales
-    .filter((sale) => !sale.commission_paid)
+  function isFullyCollected(sale) {
+    return sale.payment_type === 'contado' || Number(sale.balance) <= 0;
+  }
+
+  const unpaid = sales.filter((sale) => !sale.commission_paid);
+  const readyTotal = unpaid
+    .filter(isFullyCollected)
+    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
+  const waitingTotal = unpaid
+    .filter((sale) => !isFullyCollected(sale))
     .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
   const paidTotal = sales
     .filter((sale) => sale.commission_paid)
@@ -39,9 +47,18 @@ export default async function ComisionesPage() {
       {role === 'admin' ? <CommissionPercentForm percent={percent} /> : null}
 
       <p>
-        Comisión actual: <strong>{Number(percent).toFixed(1)}%</strong> por venta · Pendiente de
-        pago: <strong>S/ {pendingTotal.toFixed(2)}</strong> · Ya pagada:{' '}
-        <strong>S/ {paidTotal.toFixed(2)}</strong>
+        Comisión actual: <strong>{Number(percent).toFixed(1)}%</strong> por venta.
+      </p>
+      <p>
+        Lista para pagar (fin de mes): <strong>S/ {readyTotal.toFixed(2)}</strong>
+        {waitingTotal > 0 ? (
+          <>
+            {' '}
+            · Depende de que el cliente termine de pagar:{' '}
+            <strong>S/ {waitingTotal.toFixed(2)}</strong>
+          </>
+        ) : null}{' '}
+        · Ya pagada: <strong>S/ {paidTotal.toFixed(2)}</strong>
       </p>
 
       {sales.length === 0 ? (

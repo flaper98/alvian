@@ -45,7 +45,7 @@ export default async function CreditosPage() {
 
   return (
     <section className="admin-section">
-      <h1>Crédito / Pandero</h1>
+      <h1>Crédito</h1>
       {customerGroups.length === 0 ? (
         <p>No hay ventas a crédito o pandero registradas.</p>
       ) : (
