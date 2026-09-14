@@ -151,14 +151,20 @@ function VideoField({ defaultValue }) {
   );
 }
 
-function AddPerfumeForm() {
+function AddPerfumeForm({ prefillName }) {
   // La key fuerza un remontaje completo del formulario (incluida la imagen)
   // después de un guardado exitoso, para dejarlo limpio y listo para el siguiente.
   const [formKey, setFormKey] = useState(0);
-  return <AddPerfumeFormFields key={formKey} onSaved={() => setFormKey((key) => key + 1)} />;
+  return (
+    <AddPerfumeFormFields
+      key={formKey}
+      prefillName={formKey === 0 ? prefillName : ''}
+      onSaved={() => setFormKey((key) => key + 1)}
+    />
+  );
 }
 
-function AddPerfumeFormFields({ onSaved }) {
+function AddPerfumeFormFields({ prefillName, onSaved }) {
   const [state, formAction] = useActionState(addPerfumeAction, { error: null });
 
   useEffect(() => {
@@ -168,9 +174,15 @@ function AddPerfumeFormFields({ onSaved }) {
   return (
     <form action={formAction} className="perfume-form">
       <h2>Agregar perfume</h2>
+      {prefillName ? (
+        <p className="hint">
+          Precargado desde Proveedores: tu proveedor ofrece &quot;{prefillName}&quot; y todavía no
+          está en tu catálogo.
+        </p>
+      ) : null}
       <label>
         Nombre
-        <input name="name" type="text" required />
+        <input name="name" type="text" defaultValue={prefillName || ''} required />
       </label>
       <label>
         Precio de venta (S/) — opcional
@@ -283,10 +295,10 @@ function PerfumeRow({ perfume }) {
   );
 }
 
-export default function CatalogDashboard({ perfumes }) {
+export default function CatalogDashboard({ perfumes, prefillName }) {
   return (
     <div className="admin-dashboard">
-      <AddPerfumeForm />
+      <AddPerfumeForm prefillName={prefillName} />
 
       <section>
         <h2>Perfumes registrados ({perfumes.length})</h2>

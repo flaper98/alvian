@@ -80,20 +80,27 @@ function BulkAddForm({ supplierId }) {
         <div className="supplier-bulk-result">
           {state.result.matched.length > 0 ? (
             <p className="supplier-bulk-ok">
-              ✓ Guardado ({state.result.matched.length}):{' '}
+              ✓ Guardado, vinculado a tu catálogo ({state.result.matched.length}):{' '}
               {state.result.matched.map((m) => `${m.perfumeName} (S/ ${Number(m.price).toFixed(2)})`).join(', ')}
+            </p>
+          ) : null}
+          {state.result.unlinked?.length > 0 ? (
+            <p className="supplier-bulk-warn">
+              ✓ Guardado, pero no está en tu catálogo todavía ({state.result.unlinked.length}):{' '}
+              {state.result.unlinked.map((u) => `${u.perfumeName} (S/ ${Number(u.price).toFixed(2)})`).join(', ')} —
+              igual aparecerá en la comparación de precios de abajo.
             </p>
           ) : null}
           {state.result.ambiguous.length > 0 ? (
             <p className="form-error">
-              Ambiguo, coincide con más de un perfume ({state.result.ambiguous.length}):{' '}
+              Ambiguo, coincide con más de un perfume de tu catálogo ({state.result.ambiguous.length}):{' '}
               {state.result.ambiguous.map((a) => a.productRaw).join(', ')}
             </p>
           ) : null}
-          {state.result.unmatched.length > 0 ? (
+          {state.result.failed?.length > 0 ? (
             <p className="form-error">
-              No encontrado en tu catálogo ({state.result.unmatched.length}):{' '}
-              {state.result.unmatched.map((u) => u.line).join(' / ')}
+              No se pudo leer la línea ({state.result.failed.length}):{' '}
+              {state.result.failed.map((u) => u.line).join(' / ')}
             </p>
           ) : null}
         </div>
@@ -113,7 +120,10 @@ function PriceRow({ price }) {
 
   return (
     <li className="supplier-price-row">
-      <span>{price.perfume_name}</span>
+      <span>
+        {price.perfume_name}
+        {price.unlinked ? <span className="badge badge-pending"> Sin catálogo</span> : null}
+      </span>
       <span className="badge badge-contado">{price.tier_label}</span>
       <strong>S/ {Number(price.price).toFixed(2)}</strong>
       <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>

@@ -68,6 +68,9 @@ export default function PriceComparison({ comparison }) {
           <option value="name">Ordenar: nombre (A-Z)</option>
           <option value="savings">Ordenar: mayor ahorro primero</option>
         </select>
+        <span className="comparison-count">
+          {rows.length} de {comparison.length} perfume{comparison.length === 1 ? '' : 's'}
+        </span>
       </div>
 
       {rows.length === 0 ? (
@@ -89,13 +92,16 @@ export default function PriceComparison({ comparison }) {
             </thead>
             <tbody>
               {rows.map((row) => {
-                const purchaseHref = `/admin/compras?perfumeId=${row.perfumeId}&unitCost=${row.cheapest.price}&note=${encodeURIComponent(
-                  `${row.cheapest.supplierName} · ${row.cheapest.tierLabel}`,
-                )}`;
+                const purchaseHref = row.unlinked
+                  ? `/admin/catalogo?name=${encodeURIComponent(row.perfumeName)}`
+                  : `/admin/compras?perfumeId=${row.perfumeId}&unitCost=${row.cheapest.price}&note=${encodeURIComponent(
+                      `${row.cheapest.supplierName} · ${row.cheapest.tierLabel}`,
+                    )}`;
                 return (
-                  <tr key={row.perfumeId}>
+                  <tr key={row.perfumeId ?? `u-${row.perfumeName}`}>
                     <td className="comparison-matrix-sticky">
                       <strong>{row.perfumeName}</strong>
+                      {row.unlinked ? <span className="badge badge-pending"> Sin catálogo</span> : null}
                     </td>
                     {suppliers.map((supplier) => {
                       const option = row.bySupplier.get(supplier.id);
@@ -125,7 +131,7 @@ export default function PriceComparison({ comparison }) {
                     </td>
                     <td>
                       <Link href={purchaseHref} className="btn-primary comparison-buy-link">
-                        Comprar
+                        {row.unlinked ? 'Agregar a catálogo' : 'Comprar'}
                       </Link>
                     </td>
                   </tr>
