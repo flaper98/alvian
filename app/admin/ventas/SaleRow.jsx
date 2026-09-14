@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { editSaleAction, deleteSaleAction } from '@/lib/actions';
+import { editSaleAction, deleteSaleAction, setSaleDeliveredAction } from '@/lib/actions';
+import { IconCheck, IconClock } from '../icons';
 
 const PAYMENT_LABELS = { contado: 'Contado', credito: 'Crédito', pandero: 'Pandero' };
 
@@ -97,6 +98,16 @@ export default function SaleRow({ sale, canManage }) {
     });
   }
 
+  function toggleDelivered() {
+    startTransition(async () => {
+      try {
+        await setSaleDeliveredAction(sale.id, !sale.delivered);
+      } catch (error) {
+        alert(error?.message || 'No se pudo actualizar la entrega.');
+      }
+    });
+  }
+
   if (editing) {
     return (
       <li className="history-row perfume-row-editing">
@@ -119,12 +130,21 @@ export default function SaleRow({ sale, canManage }) {
         </span>{' '}
         <span className={`badge badge-${sale.payment_type}`}>
           {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
+        </span>{' '}
+        <span className={`badge ${sale.delivered ? 'badge-paid' : 'badge-pending'}`}>
+          <span className="badge-icon">
+            {sale.delivered ? <IconCheck size={12} /> : <IconClock size={12} />}
+          </span>
+          {sale.delivered ? 'Entregado' : 'Pendiente de entrega'}
         </span>
         {sale.customer_name ? <p>Cliente: {sale.customer_name}</p> : null}
         <p className="hint">Vendido por: {sale.sold_by_role === 'admin' ? 'Admin' : 'Vendedora'}</p>
       </div>
       <div className="perfume-row-actions">
         <time>{new Date(sale.created_at).toLocaleDateString('es-PE')}</time>
+        <button type="button" className="btn-secondary" onClick={toggleDelivered} disabled={isPending}>
+          {sale.delivered ? 'Marcar pendiente' : 'Marcar entregado'}
+        </button>
         {canManage ? (
           <>
             <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>

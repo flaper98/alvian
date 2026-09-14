@@ -1,8 +1,9 @@
 import { getCurrentRole } from '@/lib/session';
-import { getSummary } from '@/lib/db';
+import { getSummary, listPendingDeliveries } from '@/lib/db';
 import { IconBottle, IconLayers, IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import StockBarChart from './StockBarChart';
 import PaymentSplitBar from './PaymentSplitBar';
+import PendingDeliveryRow from './PendingDeliveryRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,12 +19,29 @@ function StatTile({ icon, label, value, tone }) {
   );
 }
 
+function PendingDeliveriesSection({ pendingDeliveries }) {
+  if (pendingDeliveries.length === 0) return null;
+
+  return (
+    <div>
+      <h2>Pendientes de entrega ({pendingDeliveries.length})</h2>
+      <ul className="history-list">
+        {pendingDeliveries.map((sale) => (
+          <PendingDeliveryRow key={sale.id} sale={sale} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default async function ResumenPage() {
   const role = await getCurrentRole();
 
   let summary = null;
+  let pendingDeliveries = [];
   try {
     summary = await getSummary(role);
+    pendingDeliveries = await listPendingDeliveries();
   } catch (error) {
     return (
       <section className="admin-section">
@@ -57,6 +75,8 @@ export default async function ResumenPage() {
             value={`S/ ${Number(summary.commissionPaidTotal).toFixed(2)}`}
           />
         </div>
+
+        <PendingDeliveriesSection pendingDeliveries={pendingDeliveries} />
       </section>
     );
   }
@@ -85,6 +105,12 @@ export default async function ResumenPage() {
           tone="attention"
           value={`S/ ${Number(summary.commissionPending).toFixed(2)}`}
         />
+        <StatTile
+          icon={<IconClock size={22} />}
+          label="Perfumes pendientes de entrega"
+          tone="attention"
+          value={summary.pendingDeliveriesCount}
+        />
       </div>
 
       <div className="chart-grid">
@@ -98,6 +124,8 @@ export default async function ResumenPage() {
           panderoTotal={summary.panderoTotal}
         />
       </div>
+
+      <PendingDeliveriesSection pendingDeliveries={pendingDeliveries} />
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
-import PerfumeCarousel from './PerfumeCarousel';
+import PerfumeCard from './PerfumeCard';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import WhatsAppIcon from './WhatsAppIcon';
 
@@ -46,7 +46,11 @@ export default async function HomePage() {
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
         ) : (
-          <PerfumeCarousel perfumes={perfumes} />
+          <div className="catalog-grid">
+            {perfumes.map((perfume) => (
+              <PerfumeCard key={perfume.id} perfume={perfume} />
+            ))}
+          </div>
         )}
       </main>
 

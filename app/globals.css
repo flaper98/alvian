@@ -229,80 +229,30 @@ button {
   padding: 2rem 1.25rem;
 }
 
-/* ---------- Product carousel ---------- */
+/* ---------- Product grid ---------- */
 
-.perfume-carousel {
-  position: relative;
-}
-
-.carousel-track {
-  display: flex;
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  overflow-x: auto;
-  overflow-anchor: none;
-  scroll-behavior: smooth;
-  padding: 0.25rem clamp(1.25rem, 6vw, 4rem) 1rem;
-  scrollbar-width: none;
-}
-
-.carousel-track::-webkit-scrollbar {
-  display: none;
-}
-
-.carousel-item {
-  flex: 0 0 auto;
-  width: min(260px, 72vw);
-}
-
-.carousel-arrow {
-  position: absolute;
-  top: 40%;
-  transform: translateY(-50%);
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--cream-soft);
-  color: var(--green-900);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  z-index: 2;
-  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
-}
-
-.carousel-arrow svg {
-  width: 20px;
-  height: 20px;
-}
-
-.carousel-arrow:hover:not(:disabled) {
-  background: #fff;
-  transform: translateY(-50%) scale(1.06);
-}
-
-.carousel-arrow:disabled {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.carousel-arrow-prev {
-  left: 0.5rem;
-}
-
-.carousel-arrow-next {
-  right: 0.5rem;
+  padding: 0 clamp(1.25rem, 6vw, 3rem);
 }
 
 @media (min-width: 640px) {
-  .carousel-arrow-prev {
-    left: 1rem;
+  .catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
+}
 
-  .carousel-arrow-next {
-    right: 1rem;
+@media (min-width: 960px) {
+  .catalog-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .catalog-grid {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
@@ -1138,6 +1088,18 @@ button {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--green-900);
+}
+
+.perfume-form label.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.checkbox-field input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green-800);
 }
 
 input,

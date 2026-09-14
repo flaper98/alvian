@@ -88,6 +88,15 @@ function SaleFormFields({ perfumes, onSaved }) {
         Cliente {['credito', 'pandero'].includes(paymentType) ? '(obligatorio)' : '(opcional)'}
         <input name="customerName" type="text" required={['credito', 'pandero'].includes(paymentType)} />
       </label>
+      <label className="checkbox-field">
+        <input name="delivered" type="checkbox" defaultChecked />
+        Ya le entregué el/los perfume(s)
+      </label>
+      <p className="hint">
+        Desmarca esta casilla si todavía no le entregas el producto al cliente (por ejemplo,
+        vendió varios perfumes a crédito y solo entregaste algunos). Podrás marcarlo como
+        entregado más adelante desde Ventas o desde Resumen.
+      </p>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />
     </form>
