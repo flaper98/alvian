@@ -4,11 +4,18 @@ import PurchaseForm from './PurchaseForm';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ComprasPage() {
+export default async function ComprasPage({ searchParams }) {
   const role = await getCurrentRole();
   if (role !== 'admin') {
     return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
   }
+
+  const params = await searchParams;
+  const prefill = {
+    perfumeId: params?.perfumeId || '',
+    unitCost: params?.unitCost || '',
+    note: params?.note || '',
+  };
 
   let perfumes;
   let purchases;
@@ -26,7 +33,7 @@ export default async function ComprasPage() {
   return (
     <section className="admin-section">
       <h1>Compras</h1>
-      <PurchaseForm perfumes={perfumes} />
+      <PurchaseForm perfumes={perfumes} prefill={prefill} />
 
       <div>
         <h2>Historial de compras ({purchases.length})</h2>

@@ -117,6 +117,11 @@ export default async function ResumenPage() {
           tone="good"
           value={`S/ ${Number(summary.collectedTotal).toFixed(2)}`}
         />
+        <StatTile
+          icon={<IconCoin size={22} />}
+          label="Invertido en compras (histórico)"
+          value={`S/ ${Number(summary.totalInvested).toFixed(2)}`}
+        />
       </div>
 
       <div className="chart-grid">
@@ -153,6 +158,28 @@ export default async function ResumenPage() {
             El costo se calcula con el costo promedio de compra de cada perfume (incluye flete). Si
             un perfume se vendió sin tener ninguna compra registrada, su costo cuenta como S/ 0.00
             y la ganancia se ve inflada hasta que registres esa compra.
+          </p>
+        </div>
+
+        <div className="chart-card">
+          <h3 className="chart-title">Si vendes todo tu stock actual</h3>
+          <ul className="profit-list">
+            <li>
+              <span>Ingreso proyectado</span>
+              <strong>S/ {Number(summary.potentialRevenue).toFixed(2)}</strong>
+            </li>
+            <li>
+              <span>Costo de ese stock</span>
+              <strong>S/ {Number(summary.potentialCost).toFixed(2)}</strong>
+            </li>
+            <li className="profit-highlight">
+              <span>Ganancia proyectada</span>
+              <strong>S/ {Number(summary.potentialProfit).toFixed(2)}</strong>
+            </li>
+          </ul>
+          <p className="hint">
+            Es una proyección: cuánto ganarías si en este momento vendieras todo el stock que tienes
+            en mano, al precio de venta actual de cada perfume.
           </p>
         </div>
       </div>

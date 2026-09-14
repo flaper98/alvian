@@ -14,21 +14,22 @@ function SubmitButton() {
   );
 }
 
-export default function PurchaseForm({ perfumes }) {
+export default function PurchaseForm({ perfumes, prefill }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <PurchaseFormFields
       key={formKey}
       perfumes={perfumes}
+      prefill={prefill}
       onSaved={() => setFormKey((key) => key + 1)}
     />
   );
 }
 
-function PurchaseFormFields({ perfumes, onSaved }) {
+function PurchaseFormFields({ perfumes, prefill, onSaved }) {
   const [state, formAction] = useActionState(registerPurchaseAction, { error: null });
   const [quantity, setQuantity] = useState('');
-  const [unitCost, setUnitCost] = useState('');
+  const [unitCost, setUnitCost] = useState(prefill?.unitCost || '');
   const [freightCost, setFreightCost] = useState('');
   const [marginPerUnit, setMarginPerUnit] = useState('');
 
@@ -56,7 +57,7 @@ function PurchaseFormFields({ perfumes, onSaved }) {
       <h2>Registrar compra</h2>
       <label>
         Perfume
-        <select name="perfumeId" required defaultValue="">
+        <select name="perfumeId" required defaultValue={prefill?.perfumeId || ''}>
           <option value="" disabled>
             Selecciona un perfume
           </option>
@@ -128,7 +129,12 @@ function PurchaseFormFields({ perfumes, onSaved }) {
 
       <label>
         Nota (opcional)
-        <input name="note" type="text" placeholder="Ej: proveedor, lote, etc." />
+        <input
+          name="note"
+          type="text"
+          placeholder="Ej: proveedor, lote, etc."
+          defaultValue={prefill?.note || ''}
+        />
       </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />

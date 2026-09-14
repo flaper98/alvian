@@ -14,6 +14,7 @@ import {
   IconUser,
   IconClipboard,
   IconTruck,
+  IconRepeat,
 } from './icons';
 
 const NAV_ITEMS = [
@@ -33,6 +34,12 @@ const NAV_ITEMS = [
     label: 'Crédito / Pandero',
     roles: ['admin', 'vendedora'],
     icon: IconWallet,
+  },
+  {
+    href: '/admin/panderos',
+    label: 'Panderos',
+    roles: ['admin', 'vendedora'],
+    icon: IconRepeat,
   },
   { href: '/admin/comisiones', label: 'Comisiones', roles: ['admin', 'vendedora'], icon: IconCoin },
   { href: '/admin/usuarios', label: 'Usuarios', roles: ['admin'], icon: IconUser },
