@@ -4,15 +4,26 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/lib/actions';
+import { IconHome, IconBottle, IconCart, IconReceipt, IconWallet, IconCoin } from './icons';
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'] },
-  { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'] },
-  { href: '/admin/compras', label: 'Compras', roles: ['admin'] },
-  { href: '/admin/ventas', label: 'Ventas', roles: ['admin', 'vendedora'] },
-  { href: '/admin/creditos', label: 'Crédito / Pandero', roles: ['admin', 'vendedora'] },
-  { href: '/admin/comisiones', label: 'Comisiones', roles: ['admin', 'vendedora'] },
+  { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'], icon: IconHome },
+  { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'], icon: IconBottle },
+  { href: '/admin/compras', label: 'Compras', roles: ['admin'], icon: IconCart },
+  { href: '/admin/ventas', label: 'Ventas', roles: ['admin', 'vendedora'], icon: IconReceipt },
+  {
+    href: '/admin/creditos',
+    label: 'Crédito / Pandero',
+    roles: ['admin', 'vendedora'],
+    icon: IconWallet,
+  },
+  { href: '/admin/comisiones', label: 'Comisiones', roles: ['admin', 'vendedora'], icon: IconCoin },
 ];
+
+const ROLE_LABELS = {
+  admin: 'Administrador',
+  vendedora: 'Vendedora',
+};
 
 export default function AdminNav({ role }) {
   const [open, setOpen] = useState(false);
@@ -22,7 +33,10 @@ export default function AdminNav({ role }) {
   return (
     <header className="admin-topbar">
       <div className="admin-topbar-row">
-        <span className="admin-brand">Alvian Admin</span>
+        <div className="admin-brand-block">
+          <span className="admin-brand">Alvian Admin</span>
+          <span className="admin-role-badge">{ROLE_LABELS[role] || role}</span>
+        </div>
         <button
           type="button"
           className={`hamburger-btn${open ? ' open' : ''}`}
@@ -44,17 +58,22 @@ export default function AdminNav({ role }) {
 
       <nav className={`admin-nav-panel${open ? ' open' : ''}`} aria-hidden={!open}>
         <ul>
-          {items.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={pathname === item.href ? 'active' : ''}
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
+          {items.map((item) => {
+            const Icon = item.icon;
+            const active = pathname === item.href;
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={active ? 'active' : ''}
+                  onClick={() => setOpen(false)}
+                >
+                  <Icon size={19} />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
         <div className="admin-nav-footer">
           <a href="/" className="back-link">

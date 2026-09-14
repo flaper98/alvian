@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }) {
   }
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell admin-shell-dashboard">
       <AdminNav role={role} />
       <main className="admin-content">{children}</main>
     </div>

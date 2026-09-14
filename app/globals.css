@@ -452,10 +452,33 @@ button {
   justify-content: space-between;
 }
 
+.admin-brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .admin-brand {
   font-family: var(--font-display);
   font-size: 1.2rem;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-role-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hamburger-btn {
@@ -545,22 +568,45 @@ button {
 .admin-nav-panel ul {
   list-style: none;
   margin: 0;
-  padding: 0 1.25rem;
+  padding: 0.5rem 0.85rem;
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
 .admin-nav-panel a {
-  display: block;
-  padding: 0.85rem 0.25rem;
-  color: var(--cream-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  color: rgba(247, 243, 230, 0.85);
   text-decoration: none;
   font-weight: 600;
-  border-bottom: 1px solid rgba(247, 243, 230, 0.12);
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-nav-panel a svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+}
+
+.admin-nav-panel a:hover {
+  background: rgba(247, 243, 230, 0.08);
+  color: var(--cream-soft);
 }
 
 .admin-nav-panel a.active {
+  background: rgba(201, 153, 60, 0.16);
   color: var(--gold);
+  border-left-color: var(--gold);
+}
+
+.admin-nav-panel a.active svg {
+  opacity: 1;
 }
 
 .admin-nav-footer {
@@ -596,6 +642,60 @@ button {
   max-width: 900px;
   margin: 2rem auto 0;
   padding: 0 1.1rem;
+}
+
+@media (min-width: 960px) {
+  .admin-shell-dashboard {
+    display: flex;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .admin-topbar {
+    width: 270px;
+    flex-shrink: 0;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(247, 243, 230, 0.12);
+  }
+
+  .admin-topbar-row {
+    max-width: none;
+    padding: 1.75rem 1.5rem 1rem;
+  }
+
+  .hamburger-btn {
+    display: none;
+  }
+
+  .admin-nav-backdrop {
+    display: none;
+  }
+
+  .admin-nav-panel {
+    position: static;
+    transform: none;
+    width: 100%;
+    height: auto;
+    flex: 1;
+    background: transparent;
+    box-shadow: none;
+    border-right: none;
+    padding-top: 0.5rem;
+    overflow-y: visible;
+  }
+
+  .admin-content {
+    flex: 1;
+    max-width: 1100px;
+    margin: 0;
+    padding: 2.5rem 2.5rem 4rem;
+    min-width: 0;
+  }
 }
 
 .admin-section {

@@ -16,6 +16,25 @@ function Base({ children, size = 20 }) {
   );
 }
 
+export function IconHome(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 11.5 12 4l8 7.5" />
+      <path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" />
+      <path d="M10 20v-5h4v5" />
+    </Base>
+  );
+}
+
+export function IconCart(props) {
+  return (
+    <Base {...props}>
+      <path d="M6 8h12l-1.2 10.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </Base>
+  );
+}
+
 export function IconBottle(props) {
   return (
     <Base {...props}>
