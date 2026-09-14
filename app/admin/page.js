@@ -111,6 +111,12 @@ export default async function ResumenPage() {
           tone="attention"
           value={summary.pendingDeliveriesCount}
         />
+        <StatTile
+          icon={<IconWallet size={22} />}
+          label="Cobrado (recibido en efectivo/abonos)"
+          tone="good"
+          value={`S/ ${Number(summary.collectedTotal).toFixed(2)}`}
+        />
       </div>
 
       <div className="chart-grid">
@@ -123,6 +129,32 @@ export default async function ResumenPage() {
           creditoTotal={summary.creditoTotal}
           panderoTotal={summary.panderoTotal}
         />
+        <div className="chart-card">
+          <h3 className="chart-title">Rentabilidad</h3>
+          <ul className="profit-list">
+            <li>
+              <span>Total vendido</span>
+              <strong>S/ {Number(summary.salesTotal).toFixed(2)}</strong>
+            </li>
+            <li>
+              <span>Costo estimado</span>
+              <strong>S/ {Number(summary.estimatedCost).toFixed(2)}</strong>
+            </li>
+            <li className="profit-highlight">
+              <span>Ganancia bruta</span>
+              <strong>S/ {Number(summary.grossProfit).toFixed(2)}</strong>
+            </li>
+            <li>
+              <span>Margen</span>
+              <strong>{Number(summary.profitMarginPct).toFixed(1)}%</strong>
+            </li>
+          </ul>
+          <p className="hint">
+            El costo se calcula con el costo promedio de compra de cada perfume (incluye flete). Si
+            un perfume se vendió sin tener ninguna compra registrada, su costo cuenta como S/ 0.00
+            y la ganancia se ve inflada hasta que registres esa compra.
+          </p>
+        </div>
       </div>
 
       <PendingDeliveriesSection pendingDeliveries={pendingDeliveries} />

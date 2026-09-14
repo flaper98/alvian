@@ -17,7 +17,7 @@ function SubmitButton() {
   );
 }
 
-function EditSaleForm({ sale, onCancel, onSaved }) {
+function EditSaleForm({ sale, users, onCancel, onSaved }) {
   const boundAction = editSaleAction.bind(null, sale.id);
   const [state, formAction] = useActionState(boundAction, { error: null });
   const [paymentType, setPaymentType] = useState(sale.payment_type);
@@ -25,6 +25,15 @@ function EditSaleForm({ sale, onCancel, onSaved }) {
   useEffect(() => {
     if (state?.success) onSaved();
   }, [state, onSaved]);
+
+  const soldByOptions = [
+    { role: 'admin', name: 'Admin' },
+    ...users.map((user) => ({ role: user.role, name: user.name })),
+  ];
+  const currentOption =
+    soldByOptions.find((opt) => opt.role === sale.sold_by_role && opt.name === sale.sold_by_name) ||
+    soldByOptions.find((opt) => opt.role === sale.sold_by_role) ||
+    soldByOptions[0];
 
   return (
     <form action={formAction} className="perfume-form">
@@ -67,9 +76,12 @@ function EditSaleForm({ sale, onCancel, onSaved }) {
       </label>
       <label>
         Vendido por
-        <select name="soldByRole" required defaultValue={sale.sold_by_role}>
-          <option value="admin">Admin</option>
-          <option value="vendedora">Vendedora</option>
+        <select name="soldBy" required defaultValue={JSON.stringify(currentOption)}>
+          {soldByOptions.map((opt) => (
+            <option key={`${opt.role}-${opt.name}`} value={JSON.stringify(opt)}>
+              {opt.name}
+            </option>
+          ))}
         </select>
       </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
@@ -83,7 +95,7 @@ function EditSaleForm({ sale, onCancel, onSaved }) {
   );
 }
 
-export default function SaleRow({ sale, canManage }) {
+export default function SaleRow({ sale, canManage, users = [] }) {
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -113,6 +125,7 @@ export default function SaleRow({ sale, canManage }) {
       <li className="history-row perfume-row-editing">
         <EditSaleForm
           sale={sale}
+          users={users}
           onCancel={() => setEditing(false)}
           onSaved={() => setEditing(false)}
         />

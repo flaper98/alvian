@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes, listSales } from '@/lib/db';
+import { listPerfumes, listSales, listUsers } from '@/lib/db';
 import SaleFormModal from './SaleFormModal';
 import SaleRow from './SaleRow';
 
@@ -13,8 +13,12 @@ export default async function VentasPage() {
 
   let perfumes;
   let sales;
+  let users = [];
   try {
     [perfumes, sales] = await Promise.all([listPerfumes(), listSales()]);
+    if (role === 'admin') {
+      users = await listUsers();
+    }
   } catch (error) {
     return (
       <section className="admin-section">
@@ -23,6 +27,7 @@ export default async function VentasPage() {
       </section>
     );
   }
+  const activeUsers = users.filter((user) => user.active);
 
   return (
     <section className="admin-section">
@@ -38,7 +43,12 @@ export default async function VentasPage() {
         ) : (
           <ul className="history-list">
             {sales.map((sale) => (
-              <SaleRow key={sale.id} sale={sale} canManage={role === 'admin'} />
+              <SaleRow
+                key={sale.id}
+                sale={sale}
+                canManage={role === 'admin'}
+                users={activeUsers}
+              />
             ))}
           </ul>
         )}
