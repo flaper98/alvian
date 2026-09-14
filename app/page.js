@@ -9,7 +9,10 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   let perfumes = [];
   try {
-    perfumes = await listPerfumes();
+    const allPerfumes = await listPerfumes();
+    // Un producto recién creado empieza sin precio (se define al registrar la
+    // primera compra), así que no se muestra en la tienda hasta tener precio.
+    perfumes = allPerfumes.filter((perfume) => Number(perfume.price) > 0);
   } catch (error) {
     perfumes = [];
   }

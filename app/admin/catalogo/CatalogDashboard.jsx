@@ -173,8 +173,8 @@ function AddPerfumeFormFields({ onSaved }) {
         <input name="name" type="text" required />
       </label>
       <label>
-        Precio (S/)
-        <input name="price" type="number" step="0.01" min="0" required />
+        Precio de venta (S/) — opcional
+        <input name="price" type="number" step="0.01" min="0" placeholder="0.00" />
       </label>
       <ImageField />
       <VideoField />
@@ -184,7 +184,10 @@ function AddPerfumeFormFields({ onSaved }) {
       </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton label="Agregar perfume" pendingLabel="Guardando..." />
-      <p className="hint">El stock inicial es 0 — regístralo desde Compras.</p>
+      <p className="hint">
+        Puedes dejar el precio en blanco: se calcula solo cuando registres la primera compra
+        (costo + ganancia) en la sección Compras. El stock inicial es 0.
+      </p>
     </form>
   );
 }
@@ -204,15 +207,8 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         <input name="name" type="text" defaultValue={perfume.name} required />
       </label>
       <label>
-        Precio (S/)
-        <input
-          name="price"
-          type="number"
-          step="0.01"
-          min="0"
-          defaultValue={perfume.price}
-          required
-        />
+        Precio de venta (S/)
+        <input name="price" type="number" step="0.01" min="0" defaultValue={perfume.price} />
       </label>
       <ImageField defaultValue={perfume.image_url} />
       <VideoField defaultValue={perfume.video_url} />
@@ -265,7 +261,13 @@ function PerfumeRow({ perfume }) {
       <div className="perfume-row-info">
         <strong>{perfume.name}</strong>
         <span>
-          S/ {Number(perfume.price).toFixed(2)} · Stock: {perfume.stock}
+          {Number(perfume.price) > 0 ? (
+            `S/ ${Number(perfume.price).toFixed(2)}`
+          ) : (
+            <span className="badge-pending">Pendiente de compra (sin precio aún)</span>
+          )}
+          {' · Stock: '}
+          {perfume.stock}
         </span>
         {perfume.description ? <p>{perfume.description}</p> : null}
       </div>

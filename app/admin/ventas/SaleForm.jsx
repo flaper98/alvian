@@ -28,17 +28,23 @@ export default function SaleForm({ perfumes }) {
 function SaleFormFields({ perfumes, onSaved }) {
   const [state, formAction] = useActionState(registerSaleAction, { error: null });
   const [paymentType, setPaymentType] = useState('contado');
+  const [unitPrice, setUnitPrice] = useState('');
 
   useEffect(() => {
     if (state?.success) onSaved();
   }, [state, onSaved]);
+
+  function handlePerfumeChange(event) {
+    const perfume = perfumes.find((item) => String(item.id) === event.target.value);
+    setUnitPrice(perfume && Number(perfume.price) > 0 ? Number(perfume.price).toFixed(2) : '');
+  }
 
   return (
     <form action={formAction} className="perfume-form">
       <h2>Registrar venta</h2>
       <label>
         Perfume
-        <select name="perfumeId" required defaultValue="">
+        <select name="perfumeId" required defaultValue="" onChange={handlePerfumeChange}>
           <option value="" disabled>
             Selecciona un perfume
           </option>
@@ -55,7 +61,15 @@ function SaleFormFields({ perfumes, onSaved }) {
       </label>
       <label>
         Precio de venta (S/)
-        <input name="unitPrice" type="number" min="0" step="0.01" required />
+        <input
+          name="unitPrice"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          value={unitPrice}
+          onChange={(event) => setUnitPrice(event.target.value)}
+        />
       </label>
       <label>
         Forma de pago
