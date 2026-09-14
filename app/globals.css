@@ -14,6 +14,18 @@
   --border: #e4ddc9;
   --radius: 14px;
   --shadow: 0 10px 30px rgba(14, 43, 33, 0.12);
+
+  /* ---- Dataviz tokens (validated: node scripts/validate_palette.js) ---- */
+  /* Status — fixed meaning, text-safe darks (>=4.5:1 on --cream-soft) */
+  --status-good: #0a7d2e;
+  --status-good-bg: rgba(10, 125, 46, 0.12);
+  --status-attention: #8a5a00;
+  --status-attention-bg: rgba(138, 90, 0, 0.12);
+  --status-critical: #b23b3b;
+  --status-critical-bg: rgba(178, 59, 59, 0.12);
+  /* Categorical — 2-slot pair for payment type, CVD ΔE 9.0 / normal 16.1 */
+  --series-contado: #0e8f76;
+  --series-credito: #a67c2c;
 }
 
 * {
@@ -532,27 +544,110 @@ button {
   color: var(--ink-soft);
 }
 
-/* ---------- Resumen ---------- */
+/* ---------- Resumen: stat tiles ---------- */
 
-.summary-grid {
+.stat-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
 }
 
 @media (min-width: 560px) {
-  .summary-grid {
+  .stat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 860px) {
-  .summary-grid {
+  .stat-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.summary-card {
+.stat-tile {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -10px rgba(14, 43, 33, 0.22);
+}
+
+.stat-tile-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 57, 44, 0.08);
+  color: var(--green-800);
+}
+
+.stat-tile-attention .stat-tile-icon {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.stat-tile-good .stat-tile-icon {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.stat-tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.stat-tile-label {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.stat-tile-value {
+  font-family: var(--font-body);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--green-900);
+  line-height: 1.2;
+}
+
+.stat-tile-attention .stat-tile-value {
+  color: var(--status-attention);
+}
+
+.stat-tile-good .stat-tile-value {
+  color: var(--status-good);
+}
+
+/* ---------- Resumen: charts ---------- */
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 860px) {
+  .chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.chart-card {
   background: var(--cream-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -560,19 +655,122 @@ button {
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 1rem;
 }
 
-.summary-label {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  font-weight: 600;
-}
-
-.summary-value {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
+.chart-title {
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--green-900);
+}
+
+.chart-footnote {
+  font-size: 0.82rem;
+  color: var(--green-800);
+  text-decoration: underline;
+  align-self: flex-start;
+}
+
+.bar-chart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bar-chart-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2fr auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bar-chart-label {
+  font-size: 0.85rem;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-chart-track {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+  display: block;
+}
+
+.bar-chart-fill {
+  display: block;
+  height: 100%;
+  background: var(--series-contado);
+  border-radius: 0 4px 4px 0;
+}
+
+.bar-chart-fill-low {
+  background: var(--status-critical);
+}
+
+.bar-chart-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.split-bar {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--cream-soft);
+}
+
+.split-bar-segment {
+  display: block;
+  height: 100%;
+}
+
+.split-bar-contado {
+  background: var(--series-contado);
+  border-radius: 4px 0 0 4px;
+}
+
+.split-bar-credito {
+  background: var(--series-credito);
+  border-radius: 0 4px 4px 0;
+}
+
+.split-bar-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: -1px;
+}
+
+.legend-dot-contado {
+  background: var(--series-contado);
+}
+
+.legend-dot-credito {
+  background: var(--series-credito);
 }
 
 /* ---------- Historiales (compras, ventas, crédito, comisiones) ---------- */
@@ -621,23 +819,34 @@ button {
 }
 
 .badge-credito {
-  background: rgba(201, 153, 60, 0.2);
-  color: var(--gold-dark);
+  background: rgba(166, 124, 44, 0.16);
+  color: var(--series-credito);
 }
 
 .badge-contado {
-  background: rgba(37, 211, 102, 0.15);
-  color: var(--whatsapp-dark);
+  background: rgba(14, 143, 118, 0.14);
+  color: var(--series-contado);
 }
 
 .badge-paid {
-  background: rgba(37, 211, 102, 0.15);
-  color: var(--whatsapp-dark);
+  background: var(--status-good-bg);
+  color: var(--status-good);
 }
 
 .badge-pending {
-  background: rgba(178, 59, 59, 0.12);
-  color: var(--danger);
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.badge-icon {
+  display: inline-flex;
+  margin-right: 0.3rem;
+  vertical-align: -2px;
+}
+
+.text-critical {
+  color: var(--status-critical);
+  font-weight: 700;
 }
 
 .credit-row {

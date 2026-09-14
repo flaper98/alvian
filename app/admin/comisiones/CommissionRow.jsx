@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { setCommissionAction, setCommissionPaidAction } from '@/lib/actions';
+import { IconCheck, IconClock } from '../icons';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -61,6 +62,9 @@ export default function CommissionRow({ sale, canEdit }) {
           </button>
         ) : (
           <span className={`badge ${sale.commission_paid ? 'badge-paid' : 'badge-pending'}`}>
+            <span className="badge-icon">
+              {sale.commission_paid ? <IconCheck size={12} /> : <IconClock size={12} />}
+            </span>
             {sale.commission_paid ? 'Pagada' : 'Pendiente'}
           </span>
         )}

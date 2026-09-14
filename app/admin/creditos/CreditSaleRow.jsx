@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { addCreditPaymentAction } from '@/lib/actions';
+import { IconCheck } from '../icons';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -59,7 +60,12 @@ export default function CreditSaleRow({ sale }) {
           ) : null}
         </div>
       ) : (
-        <span className="badge badge-paid">Pagado</span>
+        <span className="badge badge-paid">
+          <span className="badge-icon">
+            <IconCheck size={12} />
+          </span>
+          Pagado
+        </span>
       )}
     </li>
   );
