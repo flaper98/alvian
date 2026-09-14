@@ -126,3 +126,14 @@ export function IconRepeat(props) {
     </Base>
   );
 }
+
+export function IconTruck(props) {
+  return (
+    <Base {...props}>
+      <rect x="2.5" y="7" width="12" height="9" rx="1.5" />
+      <path d="M14.5 10h3.5l3 3v3h-6.5z" />
+      <circle cx="7" cy="18" r="1.6" />
+      <circle cx="17" cy="18" r="1.6" />
+    </Base>
+  );
+}

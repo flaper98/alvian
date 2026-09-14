@@ -13,12 +13,14 @@ import {
   IconCoin,
   IconUser,
   IconClipboard,
+  IconTruck,
 } from './icons';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'], icon: IconHome },
   { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'], icon: IconBottle },
   { href: '/admin/compras', label: 'Compras', roles: ['admin'], icon: IconCart },
+  { href: '/admin/proveedores', label: 'Proveedores', roles: ['admin'], icon: IconTruck },
   {
     href: '/admin/pedidos',
     label: 'Pedidos',
