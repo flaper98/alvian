@@ -25,8 +25,8 @@ export default function AdminNav({ role }) {
         <span className="admin-brand">Alvian Admin</span>
         <button
           type="button"
-          className="hamburger-btn"
-          aria-label="Abrir menú"
+          className={`hamburger-btn${open ? ' open' : ''}`}
+          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
           aria-expanded={open}
           onClick={() => setOpen((value) => !value)}
         >
@@ -36,33 +36,37 @@ export default function AdminNav({ role }) {
         </button>
       </div>
 
-      {open ? (
-        <nav className="admin-nav-panel">
-          <ul>
-            {items.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={pathname === item.href ? 'active' : ''}
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="admin-nav-footer">
-            <a href="/" className="back-link">
-              ← Ver sitio público
-            </a>
-            <form action={logoutAction}>
-              <button type="submit" className="btn-secondary">
-                Cerrar sesión
-              </button>
-            </form>
-          </div>
-        </nav>
-      ) : null}
+      <div
+        className={`admin-nav-backdrop${open ? ' open' : ''}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+
+      <nav className={`admin-nav-panel${open ? ' open' : ''}`} aria-hidden={!open}>
+        <ul>
+          {items.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={pathname === item.href ? 'active' : ''}
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="admin-nav-footer">
+          <a href="/" className="back-link">
+            ← Ver sitio público
+          </a>
+          <form action={logoutAction}>
+            <button type="submit" className="btn-nav-logout">
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
+      </nav>
     </header>
   );
 }
