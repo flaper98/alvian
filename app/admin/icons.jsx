@@ -98,3 +98,12 @@ export function IconCheck(props) {
     </Base>
   );
 }
+
+export function IconUser(props) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6" />
+    </Base>
+  );
+}

@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import { listPerfumes, listSales } from '@/lib/db';
-import SaleForm from './SaleForm';
+import SaleFormModal from './SaleFormModal';
 import SaleRow from './SaleRow';
 
 export const dynamic = 'force-dynamic';
@@ -26,8 +26,10 @@ export default async function VentasPage() {
 
   return (
     <section className="admin-section">
-      <h1>Ventas</h1>
-      <SaleForm perfumes={perfumes} />
+      <div className="admin-header">
+        <h1>Ventas</h1>
+        <SaleFormModal perfumes={perfumes} />
+      </div>
 
       <div>
         <h2>Historial de ventas ({sales.length})</h2>

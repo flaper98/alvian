@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { COOKIE_NAME, getSessionRole } from '@/lib/auth';
+import { COOKIE_NAME, getSessionUser } from '@/lib/auth';
 import LoginForm from './LoginForm';
 import AdminNav from './AdminNav';
 
@@ -14,9 +14,9 @@ export default async function AdminLayout({ children }) {
   const cookieStore = await cookies();
   const session = cookieStore.get(COOKIE_NAME)?.value;
 
-  let role = null;
+  let user = null;
   try {
-    role = getSessionRole(session);
+    user = getSessionUser(session);
   } catch (error) {
     return (
       <main className="admin-shell">
@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }) {
     );
   }
 
-  if (!role) {
+  if (!user) {
     return (
       <main className="admin-shell">
         <LoginForm />
@@ -42,7 +42,7 @@ export default async function AdminLayout({ children }) {
 
   return (
     <div className="admin-shell admin-shell-dashboard">
-      <AdminNav role={role} />
+      <AdminNav role={user.role} name={user.name} />
       <main className="admin-content">{children}</main>
     </div>
   );

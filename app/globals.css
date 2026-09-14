@@ -659,6 +659,58 @@ button {
   font-size: 1.5rem;
 }
 
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ---------- Modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 43, 33, 0.55);
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: fit-content;
+}
+
+.modal-dialog .perfume-form {
+  margin: 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: -0.6rem;
+  right: -0.6rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--cream-soft);
+  color: var(--green-900);
+  font-size: 1.4rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+
 .admin-no-access {
   max-width: 900px;
   margin: 2rem auto 0;
@@ -938,6 +990,7 @@ button {
 
 .badge {
   display: inline-block;
+  align-self: flex-start;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
   font-size: 0.75rem;

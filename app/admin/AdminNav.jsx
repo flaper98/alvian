@@ -4,7 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/lib/actions';
-import { IconHome, IconBottle, IconCart, IconReceipt, IconWallet, IconCoin } from './icons';
+import {
+  IconHome,
+  IconBottle,
+  IconCart,
+  IconReceipt,
+  IconWallet,
+  IconCoin,
+  IconUser,
+} from './icons';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'], icon: IconHome },
@@ -18,6 +26,7 @@ const NAV_ITEMS = [
     icon: IconWallet,
   },
   { href: '/admin/comisiones', label: 'Comisiones', roles: ['admin', 'vendedora'], icon: IconCoin },
+  { href: '/admin/usuarios', label: 'Usuarios', roles: ['admin'], icon: IconUser },
 ];
 
 const ROLE_LABELS = {
@@ -25,7 +34,7 @@ const ROLE_LABELS = {
   vendedora: 'Vendedora',
 };
 
-export default function AdminNav({ role }) {
+export default function AdminNav({ role, name }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
@@ -35,7 +44,7 @@ export default function AdminNav({ role }) {
       <div className="admin-topbar-row">
         <div className="admin-brand-block">
           <span className="admin-brand">Alvian Admin</span>
-          <span className="admin-role-badge">{ROLE_LABELS[role] || role}</span>
+          <span className="admin-role-badge">{name || ROLE_LABELS[role] || role}</span>
         </div>
         <button
           type="button"

@@ -19,8 +19,16 @@ export default function LoginForm() {
   return (
     <form action={formAction} className="admin-login-form">
       <h1>Acceso administrador</h1>
+      <label htmlFor="username">Usuario</label>
+      <input id="username" name="username" type="text" autoComplete="username" required autoFocus />
       <label htmlFor="password">Clave</label>
-      <input id="password" name="password" type="password" required autoFocus />
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        required
+      />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />
     </form>

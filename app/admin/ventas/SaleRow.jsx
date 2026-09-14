@@ -138,7 +138,9 @@ export default function SaleRow({ sale, canManage }) {
           {sale.delivered ? 'Entregado' : 'Pendiente de entrega'}
         </span>
         {sale.customer_name ? <p>Cliente: {sale.customer_name}</p> : null}
-        <p className="hint">Vendido por: {sale.sold_by_role === 'admin' ? 'Admin' : 'Vendedora'}</p>
+        <p className="hint">
+          Vendido por: {sale.sold_by_name || (sale.sold_by_role === 'admin' ? 'Admin' : 'Vendedora')}
+        </p>
       </div>
       <div className="perfume-row-actions">
         <time>{new Date(sale.created_at).toLocaleDateString('es-PE')}</time>

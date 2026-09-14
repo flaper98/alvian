@@ -14,13 +14,16 @@ function SubmitButton() {
   );
 }
 
-export default function SaleForm({ perfumes }) {
+export default function SaleForm({ perfumes, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <SaleFormFields
       key={formKey}
       perfumes={perfumes}
-      onSaved={() => setFormKey((key) => key + 1)}
+      onSaved={() => {
+        setFormKey((key) => key + 1);
+        onSaved?.();
+      }}
     />
   );
 }
