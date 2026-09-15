@@ -19,25 +19,45 @@ export default function CommissionRow({ sale, canEdit }) {
   }
 
   return (
-    <li className="history-row">
-      <div>
+    <tr className="perfume-table-row">
+      <td>
         <strong>{sale.perfume_name}</strong>
-        <span>
-          {' '}
-          · S/ {Number(sale.total).toFixed(2)} · {new Date(sale.created_at).toLocaleDateString('es-PE')}
-        </span>
-        {sale.customer_name ? <p>Cliente: {sale.customer_name}</p> : null}
-        <p>
-          Comisión: <strong>S/ {sale.commission_amount ? Number(sale.commission_amount).toFixed(2) : '0.00'}</strong>
-        </p>
+        {sale.customer_name ? (
+          <p className="perfume-table-description">Cliente: {sale.customer_name}</p>
+        ) : null}
         {!fullyCollected ? (
-          <p className="hint">
-            Cobro pendiente: el cliente todavía debe S/ {Number(sale.balance).toFixed(2)} de esta
-            venta. La comisión se puede pagar recién cuando termine de pagarla.
+          <p className="perfume-table-description">
+            El cliente todavía debe S/ {Number(sale.balance).toFixed(2)} de esta venta.
           </p>
         ) : null}
-      </div>
-      <div className="commission-controls">
+      </td>
+      <td className="perfume-table-price-cell">S/ {Number(sale.total).toFixed(2)}</td>
+      <td className="perfume-table-price-cell">
+        S/ {sale.commission_amount ? Number(sale.commission_amount).toFixed(2) : '0.00'}
+      </td>
+      <td>
+        {sale.commission_paid ? (
+          <span className="badge badge-paid">
+            <span className="badge-icon">
+              <IconCheck size={12} />
+            </span>
+            Pagada
+          </span>
+        ) : fullyCollected ? (
+          <span className="badge badge-credito">Lista para pagar</span>
+        ) : (
+          <span className="badge badge-pending">
+            <span className="badge-icon">
+              <IconClock size={12} />
+            </span>
+            Cobro pendiente
+          </span>
+        )}
+      </td>
+      <td className="perfume-table-stock-cell">
+        {new Date(sale.created_at).toLocaleDateString('es-PE')}
+      </td>
+      <td className="perfume-table-actions-cell">
         {canEdit ? (
           <button
             type="button"
@@ -52,15 +72,8 @@ export default function CommissionRow({ sale, canEdit }) {
           >
             {sale.commission_paid ? 'Marcar como pendiente' : 'Marcar como pagada'}
           </button>
-        ) : (
-          <span className={`badge ${sale.commission_paid ? 'badge-paid' : 'badge-pending'}`}>
-            <span className="badge-icon">
-              {sale.commission_paid ? <IconCheck size={12} /> : <IconClock size={12} />}
-            </span>
-            {sale.commission_paid ? 'Pagada' : fullyCollected ? 'Lista para pagar' : 'Cobro pendiente'}
-          </span>
-        )}
-      </div>
-    </li>
+        ) : null}
+      </td>
+    </tr>
   );
 }

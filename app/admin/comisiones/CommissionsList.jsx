@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CommissionRow from './CommissionRow';
 
 const FILTERS = [
@@ -10,6 +10,8 @@ const FILTERS = [
   { value: 'paid', label: 'Pagadas' },
 ];
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 function isFullyCollected(sale) {
   return sale.payment_type === 'contado' || Number(sale.balance) <= 0;
 }
@@ -17,6 +19,8 @@ function isFullyCollected(sale) {
 export default function CommissionsList({ sales, canEdit }) {
   const [search, setSearch] = useState('');
   const [filterBy, setFilterBy] = useState('all');
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
 
   const searched = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -46,6 +50,14 @@ export default function CommissionsList({ sales, canEdit }) {
       return true;
     });
   }, [searched, filterBy]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterBy, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (sales.length === 0) {
     return <p>Todavía no hay ventas de la vendedora.</p>;
@@ -81,11 +93,62 @@ export default function CommissionsList({ sales, canEdit }) {
       {rows.length === 0 ? (
         <p className="hint">Ninguna venta coincide con este filtro.</p>
       ) : (
-        <ul className="history-list">
-          {rows.map((sale) => (
-            <CommissionRow key={sale.id} sale={sale} canEdit={canEdit} />
-          ))}
-        </ul>
+        <>
+          <div className="perfume-table-wrap">
+            <table className="perfume-table">
+              <thead>
+                <tr>
+                  <th scope="col">Perfume</th>
+                  <th scope="col">Total</th>
+                  <th scope="col">Comisión</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((sale) => (
+                  <CommissionRow key={sale.id} sale={sale} canEdit={canEdit} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pagination-bar">
+            <label className="pagination-size">
+              Mostrar
+              <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+              por página
+            </label>
+            <div className="pagination-controls">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+              >
+                ← Anterior
+              </button>
+              <span className="pagination-status">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
