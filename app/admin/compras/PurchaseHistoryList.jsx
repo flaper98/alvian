@@ -1,6 +1,37 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import EditPurchaseModal from './EditPurchaseModal';
+
+function PurchaseTableRow({ purchase }) {
+  const [editing, setEditing] = useState(false);
+
+  return (
+    <>
+      <tr className="perfume-table-row">
+        <td>
+          <strong>{purchase.perfume_name}</strong>
+          {purchase.note ? <p className="perfume-table-description">{purchase.note}</p> : null}
+        </td>
+        <td className="perfume-table-stock-cell">{purchase.quantity}</td>
+        <td className="perfume-table-price-cell">S/ {Number(purchase.unit_cost).toFixed(2)}</td>
+        <td className="perfume-table-price-cell">
+          {Number(purchase.freight_cost) > 0 ? `S/ ${Number(purchase.freight_cost).toFixed(2)}` : '—'}
+        </td>
+        <td className="perfume-table-price-cell">S/ {Number(purchase.landed_unit_cost).toFixed(2)}</td>
+        <td className="perfume-table-stock-cell">
+          {new Date(purchase.created_at).toLocaleDateString('es-PE')}
+        </td>
+        <td className="perfume-table-actions-cell">
+          <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
+            Editar
+          </button>
+        </td>
+      </tr>
+      {editing ? <EditPurchaseModal purchase={purchase} onClose={() => setEditing(false)} /> : null}
+    </>
+  );
+}
 
 export default function PurchaseHistoryList({ purchases }) {
   const [search, setSearch] = useState('');
@@ -44,28 +75,26 @@ export default function PurchaseHistoryList({ purchases }) {
       {rows.length === 0 ? (
         <p className="hint">Ninguna compra coincide con &quot;{search}&quot;.</p>
       ) : (
-        <ul className="history-list">
-          {rows.map((purchase) => (
-            <li key={purchase.id} className="history-row">
-              <div>
-                <strong>{purchase.perfume_name}</strong>
-                <span>
-                  {' '}
-                  · {purchase.quantity} unid. · S/ {Number(purchase.unit_cost).toFixed(2)} c/u
-                  {Number(purchase.freight_cost) > 0 ? (
-                    <>
-                      {' '}
-                      + S/ {Number(purchase.freight_cost).toFixed(2)} flete = S/{' '}
-                      {Number(purchase.landed_unit_cost).toFixed(2)} c/u real
-                    </>
-                  ) : null}
-                </span>
-                {purchase.note ? <p>{purchase.note}</p> : null}
-              </div>
-              <time>{new Date(purchase.created_at).toLocaleDateString('es-PE')}</time>
-            </li>
-          ))}
-        </ul>
+        <div className="perfume-table-wrap">
+          <table className="perfume-table">
+            <thead>
+              <tr>
+                <th scope="col">Perfume / nota</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Costo unit.</th>
+                <th scope="col">Flete</th>
+                <th scope="col">Costo real</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((purchase) => (
+                <PurchaseTableRow key={purchase.id} purchase={purchase} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

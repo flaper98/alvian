@@ -16,6 +16,7 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
 
   return (
     <form action={formAction} className="perfume-form">
+      <h2>Editar perfume</h2>
       <label>
         Nombre
         <input name="name" type="text" defaultValue={perfume.name} required />
@@ -41,9 +42,23 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
   );
 }
 
-function PerfumeRow({ perfume }) {
+function EditPerfumeModal({ perfume, onClose }) {
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
+          ×
+        </button>
+        <EditPerfumeForm perfume={perfume} onCancel={onClose} onSaved={onClose} />
+      </div>
+    </div>
+  );
+}
+
+function PerfumeTableRow({ perfume }) {
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const lowStock = Number(perfume.stock) <= 3;
 
   function handleDelete() {
     if (!confirm(`¿Eliminar "${perfume.name}"?`)) return;
@@ -56,44 +71,40 @@ function PerfumeRow({ perfume }) {
     });
   }
 
-  if (editing) {
-    return (
-      <li className="perfume-row perfume-row-editing">
-        <EditPerfumeForm
-          perfume={perfume}
-          onCancel={() => setEditing(false)}
-          onSaved={() => setEditing(false)}
-        />
-      </li>
-    );
-  }
-
   return (
-    <li className="perfume-row">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={perfume.image_url} alt={perfume.name} className="perfume-row-image" />
-      <div className="perfume-row-info">
-        <strong>{perfume.name}</strong>
-        <span>
+    <>
+      <tr className="perfume-table-row">
+        <td className="perfume-table-image-cell">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={perfume.image_url} alt={perfume.name} className="perfume-table-image" />
+        </td>
+        <td>
+          <strong>{perfume.name}</strong>
+          {perfume.description ? (
+            <p className="perfume-table-description">{perfume.description}</p>
+          ) : null}
+        </td>
+        <td className="perfume-table-price-cell">
           {Number(perfume.price) > 0 ? (
             `S/ ${Number(perfume.price).toFixed(2)}`
           ) : (
-            <span className="badge badge-pending">Pendiente de compra (sin precio aún)</span>
+            <span className="badge badge-pending">Pendiente</span>
           )}
-          {' · Stock: '}
+        </td>
+        <td className={`perfume-table-stock-cell${lowStock ? ' text-critical' : ''}`}>
           {perfume.stock}
-        </span>
-        {perfume.description ? <p>{perfume.description}</p> : null}
-      </div>
-      <div className="perfume-row-actions">
-        <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
-          Editar
-        </button>
-        <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
-          {isPending ? 'Eliminando...' : 'Eliminar'}
-        </button>
-      </div>
-    </li>
+        </td>
+        <td className="perfume-table-actions-cell">
+          <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
+            Editar
+          </button>
+          <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
+            {isPending ? 'Eliminando...' : 'Eliminar'}
+          </button>
+        </td>
+      </tr>
+      {editing ? <EditPerfumeModal perfume={perfume} onClose={() => setEditing(false)} /> : null}
+    </>
   );
 }
 
@@ -188,11 +199,24 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
                 : 'Ningún perfume coincide con este filtro.'}
             </p>
           ) : (
-            <ul className="perfume-list">
-              {rows.map((perfume) => (
-                <PerfumeRow key={perfume.id} perfume={perfume} />
-              ))}
-            </ul>
+            <div className="perfume-table-wrap">
+              <table className="perfume-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Imagen</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((perfume) => (
+                    <PerfumeTableRow key={perfume.id} perfume={perfume} />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}

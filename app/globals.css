@@ -1661,3 +1661,79 @@ select:focus {
     justify-content: flex-end;
   }
 }
+
+/* ---------- Catálogo: tabla ---------- */
+
+.perfume-table-wrap {
+  overflow-x: auto;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.perfume-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.perfume-table thead th {
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.perfume-table-row td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.perfume-table-row:last-child td {
+  border-bottom: none;
+}
+
+.perfume-table-row:hover td {
+  background: rgba(21, 57, 44, 0.03);
+}
+
+.perfume-table-image-cell {
+  width: 64px;
+}
+
+.perfume-table-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eee7d4;
+}
+
+.perfume-table-description {
+  margin: 0.2rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  max-width: 32ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfume-table-price-cell,
+.perfume-table-stock-cell {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.perfume-table-actions-cell {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
