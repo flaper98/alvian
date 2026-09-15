@@ -1,6 +1,6 @@
 import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
-import PerfumeCard from './PerfumeCard';
+import PerfumeCatalog from './PerfumeCatalog';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import WhatsAppIcon from './WhatsAppIcon';
 
@@ -12,7 +12,9 @@ export default async function HomePage() {
     const allPerfumes = await listPerfumes();
     // Un producto recién creado empieza sin precio (se define al registrar la
     // primera compra), así que no se muestra en la tienda hasta tener precio.
-    perfumes = allPerfumes.filter((perfume) => Number(perfume.price) > 0);
+    perfumes = allPerfumes
+      .filter((perfume) => Number(perfume.price) > 0)
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'));
   } catch (error) {
     perfumes = [];
   }
@@ -76,11 +78,7 @@ export default async function HomePage() {
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
         ) : (
-          <div className="catalog-grid">
-            {perfumes.map((perfume) => (
-              <PerfumeCard key={perfume.id} perfume={perfume} />
-            ))}
-          </div>
+          <PerfumeCatalog perfumes={perfumes} />
         )}
       </main>
 

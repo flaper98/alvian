@@ -157,6 +157,19 @@ button {
     0 6px 14px -6px rgba(14, 43, 33, 0.5);
 }
 
+@media (max-width: 480px) {
+  .btn-whatsapp {
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .btn-whatsapp svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
 .btn-block {
   width: 100%;
 }
@@ -227,6 +240,27 @@ button {
   text-align: center;
   color: var(--ink-soft);
   padding: 2rem 1.25rem;
+}
+
+.catalog-search {
+  max-width: 420px;
+  margin: 0 auto 2rem;
+  padding: 0 1.25rem;
+}
+
+.catalog-search input {
+  width: 100%;
+  padding: 0.75rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--cream-soft);
+  font-size: 0.95rem;
+  box-shadow: var(--shadow);
+}
+
+.catalog-search input:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
 }
 
 /* ---------- Product grid ---------- */
