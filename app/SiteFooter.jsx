@@ -21,6 +21,12 @@ export default function SiteFooter() {
             Perfumería en Pucallpa, Perú. Fragancias 100% originales, con atención personalizada
             por WhatsApp, entrega en Pucallpa y envíos a todo el Perú.
           </p>
+          <p className="site-footer-phone">
+            WhatsApp:{' '}
+            <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+              +51 994 379 917
+            </a>
+          </p>
         </div>
 
         <div className="site-footer-links">

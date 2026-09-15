@@ -780,6 +780,22 @@ button {
   text-align: center;
 }
 
+.contact-phone {
+  margin: 1rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.contact-phone a {
+  color: var(--green-800);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-phone a:hover {
+  text-decoration: underline;
+}
+
 .about-text {
   color: var(--ink-soft);
   font-size: 1.02rem;
@@ -1048,10 +1064,26 @@ button {
 }
 
 .site-footer-tagline {
-  margin: 0;
+  margin: 0 0 0.9rem;
   font-size: 0.9rem;
   line-height: 1.6;
   max-width: 320px;
+}
+
+.site-footer-phone {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.site-footer-phone a {
+  color: var(--cream-soft);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-footer-phone a:hover {
+  color: var(--gold);
+  text-decoration: underline;
 }
 
 .site-footer h3 {

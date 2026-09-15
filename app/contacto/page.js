@@ -81,6 +81,12 @@ export default function ContactoPage() {
           <WhatsAppIcon width={19} height={19} />
           Escríbenos por WhatsApp
         </a>
+        <p className="contact-phone">
+          WhatsApp:{' '}
+          <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            +51 994 379 917
+          </a>
+        </p>
       </section>
 
       <SiteFooter />
