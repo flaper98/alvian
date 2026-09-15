@@ -376,6 +376,7 @@ button {
   gap: 0.35rem;
   font-size: 0.82rem;
   padding: 0.5rem 0.9rem;
+  white-space: nowrap;
 }
 
 .perfume-card-body .btn-whatsapp svg {

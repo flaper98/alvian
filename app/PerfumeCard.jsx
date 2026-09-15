@@ -46,7 +46,7 @@ export default function PerfumeCard({ perfume }) {
           rel="noopener noreferrer"
         >
           <WhatsAppIcon width={17} height={17} />
-          Comprar por WhatsApp
+          Comprar
         </a>
       </div>
     </article>
