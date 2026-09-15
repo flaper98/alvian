@@ -133,8 +133,11 @@ function PriceRow({ price }) {
   );
 }
 
+const COLLAPSED_PREVIEW_COUNT = 5;
+
 export default function SupplierCard({ supplier, perfumes, prices }) {
   const [isPending, startTransition] = useTransition();
+  const [expanded, setExpanded] = useState(false);
 
   function handleDeleteSupplier() {
     if (!confirm(`¿Eliminar al proveedor "${supplier.name}" y todos sus precios?`)) return;
@@ -142,6 +145,9 @@ export default function SupplierCard({ supplier, perfumes, prices }) {
       await deleteSupplierAction(supplier.id);
     });
   }
+
+  const canCollapse = prices.length > COLLAPSED_PREVIEW_COUNT;
+  const visiblePrices = expanded || !canCollapse ? prices : prices.slice(0, COLLAPSED_PREVIEW_COUNT);
 
   return (
     <div className="pandero-group-card">
@@ -158,11 +164,22 @@ export default function SupplierCard({ supplier, perfumes, prices }) {
       {prices.length === 0 ? (
         <p>Todavía no tiene precios registrados.</p>
       ) : (
-        <ul className="supplier-price-list">
-          {prices.map((price) => (
-            <PriceRow key={price.id} price={price} />
-          ))}
-        </ul>
+        <>
+          <ul className="supplier-price-list">
+            {visiblePrices.map((price) => (
+              <PriceRow key={price.id} price={price} />
+            ))}
+          </ul>
+          {canCollapse ? (
+            <button
+              type="button"
+              className="btn-secondary supplier-toggle-btn"
+              onClick={() => setExpanded((value) => !value)}
+            >
+              {expanded ? 'Mostrar menos ▴' : `Ver los ${prices.length - COLLAPSED_PREVIEW_COUNT} restantes ▾`}
+            </button>
+          ) : null}
+        </>
       )}
 
       <AddPriceForm supplierId={supplier.id} perfumes={perfumes} />

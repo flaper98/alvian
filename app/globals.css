@@ -1236,6 +1236,11 @@ button {
   font-weight: 600;
 }
 
+.supplier-toggle-btn {
+  margin-top: 0.6rem;
+  width: 100%;
+}
+
 .supplier-bulk-form {
   display: flex;
   flex-direction: column;

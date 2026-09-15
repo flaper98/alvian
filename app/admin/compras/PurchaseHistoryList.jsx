@@ -1,10 +1,23 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useTransition } from 'react';
+import { deletePurchaseAction } from '@/lib/actions';
 import EditPurchaseModal from './EditPurchaseModal';
 
 function PurchaseTableRow({ purchase }) {
   const [editing, setEditing] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function handleDelete() {
+    if (!confirm(`¿Eliminar la compra de "${purchase.perfume_name}"?`)) return;
+    startTransition(async () => {
+      try {
+        await deletePurchaseAction(purchase.id);
+      } catch (err) {
+        alert(err.message || 'No se pudo eliminar la compra.');
+      }
+    });
+  }
 
   return (
     <>
@@ -25,6 +38,9 @@ function PurchaseTableRow({ purchase }) {
         <td className="perfume-table-actions-cell">
           <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
             Editar
+          </button>
+          <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
+            {isPending ? 'Eliminando...' : 'Eliminar'}
           </button>
         </td>
       </tr>
