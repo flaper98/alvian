@@ -41,7 +41,7 @@ export default async function HomePage() {
         '@type': 'Product',
         name: perfume.name,
         image: perfume.image_url,
-        description: perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa.`,
+        description: perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
         url: `${SITE_URL}/perfume/${slugify(perfume.name)}`,
         offers: {
           '@type': 'Offer',
@@ -49,7 +49,7 @@ export default async function HomePage() {
           price: Number(perfume.price).toFixed(2),
           availability:
             perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-          areaServed: 'Pucallpa',
+          areaServed: ['Pucallpa', 'PE'],
         },
       },
     })),
@@ -76,8 +76,8 @@ export default async function HomePage() {
             <p className="eyebrow">Perfumería en Pucallpa</p>
             <h1>Alvian</h1>
             <p className="hero-fallback-subtitle">
-              Fragancias originales seleccionadas para ti en Pucallpa. Escríbenos por WhatsApp y
-              te ayudamos a elegir tu perfume ideal, con entrega rápida en toda la ciudad.
+              Fragancias originales seleccionadas para ti. Escríbenos por WhatsApp y te ayudamos a
+              elegir tu perfume ideal, con entrega rápida en Pucallpa y envíos a todo el Perú.
             </p>
             <div className="hero-actions">
               <a className="btn-whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer">
@@ -96,6 +96,7 @@ export default async function HomePage() {
 
       <main className="catalog" id="catalogo">
         <h2 className="catalog-title">Perfumes originales en Pucallpa</h2>
+        <p className="catalog-subtitle">Entrega en Pucallpa y envíos a todo el Perú</p>
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
         ) : (

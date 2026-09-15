@@ -36,7 +36,7 @@ export async function generateMetadata({ params }) {
 
   const description =
     perfume.description ||
-    `Compra ${perfume.name} original en Alvian Perfumes, perfumería en Pucallpa. Entrega rápida por WhatsApp.`;
+    `Compra ${perfume.name} original en Alvian Perfumes, perfumería en Pucallpa. Entrega en Pucallpa y envíos a todo el Perú.`;
 
   return {
     title: perfume.name,
@@ -75,7 +75,8 @@ export default async function PerfumePage({ params }) {
     name: perfume.name,
     image: perfume.image_url,
     description:
-      perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa.`,
+      perfume.description ||
+      `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
     sku: String(perfume.id),
     offers: {
       '@type': 'Offer',
@@ -83,7 +84,7 @@ export default async function PerfumePage({ params }) {
       price: Number(perfume.price).toFixed(2),
       availability:
         perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      areaServed: 'Pucallpa',
+      areaServed: ['Pucallpa', 'PE'],
       url: `${SITE_URL}/perfume/${slug}`,
     },
   };
@@ -138,7 +139,7 @@ export default async function PerfumePage({ params }) {
           <ProductPurchasePanel perfumeName={perfume.name} price={Number(perfume.price)} />
 
           <p className="product-reassurance">
-            ✓ Perfume 100% original · ✓ Entrega rápida en Pucallpa
+            ✓ Perfume 100% original · ✓ Entrega en Pucallpa · ✓ Envíos a todo el Perú
           </p>
 
           <Link href="/#catalogo" className="btn-outline-pill product-detail-back">

@@ -9,11 +9,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com
 export const metadata = {
   title: 'Contacto',
   description:
-    'Contáctanos por WhatsApp para consultas sobre perfumes originales, pedidos y entregas en Pucallpa. Alvian Perfumes te responde rápido.',
+    'Contáctanos por WhatsApp para consultas sobre perfumes originales, pedidos y entregas en Pucallpa, con envíos a todo el Perú. Alvian Perfumes te responde rápido.',
   alternates: { canonical: '/contacto' },
   openGraph: {
     title: 'Contacto | Alvian Perfumes',
-    description: 'Escríbenos por WhatsApp para pedidos y consultas sobre perfumes originales en Pucallpa.',
+    description:
+      'Escríbenos por WhatsApp para pedidos y consultas. Entrega en Pucallpa y envíos a todo el Perú.',
     url: '/contacto',
     type: 'website',
   },
@@ -73,7 +74,8 @@ export default function ContactoPage() {
         <h1 className="section-title">Contacto</h1>
         <p className="about-text">
           ¿Tienes dudas sobre algún perfume o quieres hacer un pedido? Escríbenos por WhatsApp,
-          te respondemos rápido y te ayudamos a elegir. Atendemos en Pucallpa y alrededores.
+          te respondemos rápido y te ayudamos a elegir. Entregamos en Pucallpa y hacemos envíos a
+          todo el Perú.
         </p>
         <a className="btn-whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer">
           <WhatsAppIcon width={19} height={19} />

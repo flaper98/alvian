@@ -19,7 +19,7 @@ export default function SiteFooter() {
           <p className="site-footer-logo">Alvian</p>
           <p className="site-footer-tagline">
             Perfumería en Pucallpa, Perú. Fragancias 100% originales, con atención personalizada
-            por WhatsApp.
+            por WhatsApp, entrega en Pucallpa y envíos a todo el Perú.
           </p>
         </div>
 

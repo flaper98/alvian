@@ -7,12 +7,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com
 export const metadata = {
   title: 'Quiénes somos',
   description:
-    'Conoce Alvian Perfumes: perfumería en Pucallpa dedicada a fragancias 100% originales, con atención personalizada por WhatsApp y entregas rápidas en toda la ciudad.',
+    'Conoce Alvian Perfumes: perfumería en Pucallpa dedicada a fragancias 100% originales, con atención personalizada por WhatsApp, entrega en Pucallpa y envíos a todo el Perú.',
   alternates: { canonical: '/nosotros' },
   openGraph: {
     title: 'Quiénes somos | Alvian Perfumes',
     description:
-      'Perfumería en Pucallpa dedicada a fragancias 100% originales, con atención personalizada por WhatsApp.',
+      'Perfumería en Pucallpa dedicada a fragancias 100% originales, con entrega en Pucallpa y envíos a todo el Perú.',
     url: '/nosotros',
     type: 'website',
   },
@@ -64,12 +64,13 @@ export default function NosotrosPage() {
           En Alvian Perfumes creemos que un buen perfume dice mucho de ti. Somos una perfumería en
           Pucallpa dedicada a ofrecer fragancias 100% originales, cuidadosamente seleccionadas
           para dama y caballero. Te atendemos de forma personalizada por WhatsApp para ayudarte a
-          encontrar el perfume ideal, con entregas rápidas en toda la ciudad.
+          encontrar el perfume ideal, con entrega rápida en Pucallpa y envíos a todo el Perú.
         </p>
         <ul className="about-features">
           <li>Perfumes 100% originales</li>
           <li>Atención personalizada por WhatsApp</li>
           <li>Entrega rápida en Pucallpa</li>
+          <li>Envíos a todo el Perú</li>
         </ul>
       </section>
 

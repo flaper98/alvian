@@ -25,13 +25,14 @@ export const metadata = {
     template: '%s | Alvian Perfumes',
   },
   description:
-    'Perfumería Alvian en Pucallpa: fragancias originales para dama y caballero. Elige tu perfume y compra fácil por WhatsApp, con entrega en Pucallpa y alrededores.',
+    'Perfumería Alvian en Pucallpa: fragancias originales para dama y caballero. Elige tu perfume y compra fácil por WhatsApp, con entrega en Pucallpa y envíos a todo el Perú.',
   keywords: [
     'perfumes Pucallpa',
     'perfumería Pucallpa',
     'perfumes originales Pucallpa',
     'fragancias Pucallpa',
     'comprar perfumes Pucallpa',
+    'envíos de perfumes a todo el Perú',
     'Alvian Perfumes',
   ],
   alternates: { canonical: '/' },
@@ -42,13 +43,14 @@ export const metadata = {
     siteName: 'Alvian Perfumes',
     title: 'Alvian Perfumes | Perfumería original en Pucallpa',
     description:
-      'Fragancias originales para dama y caballero. Compra por WhatsApp con entrega en Pucallpa.',
+      'Fragancias originales para dama y caballero. Compra por WhatsApp, con entrega en Pucallpa y envíos a todo el Perú.',
     images: [{ url: '/logo.jpg', width: 512, height: 512, alt: 'Alvian Perfumes' }],
   },
   twitter: {
     card: 'summary',
     title: 'Alvian Perfumes | Perfumería original en Pucallpa',
-    description: 'Fragancias originales para dama y caballero en Pucallpa. Compra por WhatsApp.',
+    description:
+      'Fragancias originales para dama y caballero. Entrega en Pucallpa y envíos a todo el Perú.',
     images: ['/logo.jpg'],
   },
   icons: {
@@ -75,10 +77,16 @@ const businessJsonLd = {
     addressRegion: 'Ucayali',
     addressCountry: 'PE',
   },
-  areaServed: {
-    '@type': 'City',
-    name: 'Pucallpa',
-  },
+  areaServed: [
+    {
+      '@type': 'City',
+      name: 'Pucallpa',
+    },
+    {
+      '@type': 'Country',
+      name: 'Perú',
+    },
+  ],
   sameAs: [
     'https://www.instagram.com/alvian_fragancias/',
     'https://www.tiktok.com/@alvian_fragancias',
