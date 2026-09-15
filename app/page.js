@@ -63,7 +63,7 @@ export default async function HomePage() {
           </p>
           <a
             className="btn-whatsapp"
-            href={buildWhatsAppLink('Hola, quiero información sobre sus perfumes.')}
+            href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -5,7 +5,7 @@ export default function WhatsAppFloatingButton() {
   return (
     <a
       className="whatsapp-fab"
-      href={buildWhatsAppLink('Hola, quiero información sobre sus perfumes.')}
+      href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Escríbenos por WhatsApp"

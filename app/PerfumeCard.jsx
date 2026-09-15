@@ -2,9 +2,7 @@ import { buildWhatsAppLink } from '@/lib/whatsapp';
 import WhatsAppIcon from './WhatsAppIcon';
 
 export default function PerfumeCard({ perfume }) {
-  const message = `Hola, quiero información sobre el perfume "${perfume.name}" (S/ ${Number(
-    perfume.price,
-  ).toFixed(2)}).`;
+  const message = `Hola, vengo desde su página web. ¿Me puede dar más información del perfume "${perfume.name}", por favor?`;
 
   return (
     <article className="perfume-card">
