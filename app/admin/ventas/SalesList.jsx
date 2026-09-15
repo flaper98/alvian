@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import SaleRow from './SaleRow';
 
 const FILTERS = [
@@ -11,10 +11,14 @@ const FILTERS = [
   { value: 'pending-delivery', label: 'Pendiente de entrega' },
 ];
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export default function SalesList({ sales, canManage, users }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [filterBy, setFilterBy] = useState('all');
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
 
   const searched = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -50,6 +54,16 @@ export default function SalesList({ sales, canManage, users }) {
       return new Date(b.created_at) - new Date(a.created_at);
     });
   }, [searched, filterBy, sortBy]);
+
+  // Vuelve a la página 1 cada vez que cambia la búsqueda, el filtro, el orden
+  // o el tamaño de página — para no quedar "varado" en una página vacía.
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterBy, sortBy, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (sales.length === 0) {
     return <p>Todavía no hay ventas registradas.</p>;
@@ -90,11 +104,63 @@ export default function SalesList({ sales, canManage, users }) {
       {rows.length === 0 ? (
         <p className="hint">Ninguna venta coincide con este filtro.</p>
       ) : (
-        <ul className="history-list">
-          {rows.map((sale) => (
-            <SaleRow key={sale.id} sale={sale} canManage={canManage} users={users} />
-          ))}
-        </ul>
+        <>
+          <div className="perfume-table-wrap">
+            <table className="perfume-table">
+              <thead>
+                <tr>
+                  <th scope="col">Perfume</th>
+                  <th scope="col">Cant.</th>
+                  <th scope="col">Total</th>
+                  <th scope="col">Pago</th>
+                  <th scope="col">Entrega</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((sale) => (
+                  <SaleRow key={sale.id} sale={sale} canManage={canManage} users={users} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pagination-bar">
+            <label className="pagination-size">
+              Mostrar
+              <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+              por página
+            </label>
+            <div className="pagination-controls">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+              >
+                ← Anterior
+              </button>
+              <span className="pagination-status">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
