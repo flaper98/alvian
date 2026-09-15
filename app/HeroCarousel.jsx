@@ -42,9 +42,6 @@ export default function HeroCarousel({ slides, whatsappHref }) {
     >
       {slides.map((slide, i) => (
         <div key={slide.id} className={`hero-slide${i === index ? ' active' : ''}`} aria-hidden={i !== index}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={slide.image_url} alt="" className="hero-slide-bg" />
-          <div className="hero-slide-overlay" />
           <div className="hero-slide-content">
             <p className="eyebrow">Perfumería en Pucallpa</p>
             <h1>{slide.name}</h1>
@@ -65,6 +62,10 @@ export default function HeroCarousel({ slides, whatsappHref }) {
                 Ver catálogo
               </a>
             </div>
+          </div>
+          <div className="hero-slide-media">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={slide.image_url} alt="" className="hero-slide-image" />
           </div>
         </div>
       ))}
