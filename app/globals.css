@@ -72,13 +72,70 @@ button {
 /* ---------- Hero ---------- */
 
 .hero {
-  background:
-    radial-gradient(circle at 15% 0%, rgba(201, 153, 60, 0.16), transparent 45%),
-    radial-gradient(circle at 85% 100%, rgba(28, 72, 55, 0.9), transparent 55%),
-    radial-gradient(circle at 20% 10%, var(--green-700), var(--green-900) 70%);
+  position: relative;
+  overflow: hidden;
+  background: var(--green-900);
   color: var(--cream-soft);
   padding: 4rem 1.25rem 4.5rem;
   text-align: center;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(201, 153, 60, 0.16), transparent 45%),
+    radial-gradient(circle at 50% 45%, rgba(14, 43, 33, 0.97) 0%, rgba(14, 43, 33, 0.97) 30%, rgba(14, 43, 33, 0.55) 100%);
+}
+
+.hero-bg-images {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: none;
+}
+
+.hero-bg-image {
+  position: absolute;
+  width: clamp(140px, 12vw, 220px);
+  height: clamp(140px, 12vw, 220px);
+  object-fit: cover;
+  border-radius: 28px;
+  opacity: 0.45;
+  filter: grayscale(35%) brightness(0.85);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.hero-bg-image-0 {
+  left: clamp(0.5rem, 4vw, 3.5rem);
+  top: 8%;
+  transform: rotate(-6deg);
+}
+
+.hero-bg-image-1 {
+  left: clamp(3rem, 9vw, 8rem);
+  bottom: 6%;
+  transform: rotate(4deg);
+}
+
+.hero-bg-image-2 {
+  right: clamp(0.5rem, 4vw, 3.5rem);
+  top: 8%;
+  transform: rotate(6deg);
+}
+
+.hero-bg-image-3 {
+  right: clamp(3rem, 9vw, 8rem);
+  bottom: 6%;
+  transform: rotate(-4deg);
+}
+
+@media (min-width: 1100px) {
+  .hero-bg-images {
+    display: block;
+  }
 }
 
 .hero-logo {
@@ -91,6 +148,8 @@ button {
 }
 
 .hero-content {
+  position: relative;
+  z-index: 2;
   max-width: 640px;
   margin: 0 auto;
 }

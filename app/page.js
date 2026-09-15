@@ -20,6 +20,8 @@ export default async function HomePage() {
     perfumes = [];
   }
 
+  const heroImages = perfumes.filter((p) => p.image_url).slice(0, 4);
+
   const productsJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -53,6 +55,19 @@ export default async function HomePage() {
       ) : null}
 
       <header className="hero">
+        {heroImages.length > 0 ? (
+          <div className="hero-bg-images" aria-hidden="true">
+            {heroImages.map((perfume, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={perfume.id}
+                src={perfume.image_url}
+                alt=""
+                className={`hero-bg-image hero-bg-image-${index}`}
+              />
+            ))}
+          </div>
+        ) : null}
         <div className="hero-content">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.jpg" alt="Alvian Perfumes - Perfumería en Pucallpa" className="hero-logo" />
