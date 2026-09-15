@@ -122,70 +122,120 @@ export default function PriceComparison({ comparison }) {
             : 'Ningún perfume coincide con este filtro.'}
         </p>
       ) : (
-        <div className="comparison-table-scroll">
-          <table className="comparison-matrix">
-            <thead>
-              <tr>
-                <th className="comparison-matrix-sticky">Perfume</th>
-                {suppliers.map((supplier) => (
-                  <th key={supplier.id}>{supplier.name}</th>
-                ))}
-                <th>Mínimo</th>
-                <th>Promedio</th>
-                <th>Máximo</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => {
-                const purchaseHref = row.unlinked
-                  ? `/admin/catalogo?name=${encodeURIComponent(row.perfumeName)}`
-                  : `/admin/compras?perfumeId=${row.perfumeId}&unitCost=${row.cheapest.price}&note=${encodeURIComponent(
-                      `${row.cheapest.supplierName} · ${row.cheapest.tierLabel}`,
-                    )}`;
-                return (
-                  <tr key={row.perfumeId ?? `u-${row.perfumeName}`}>
-                    <td className="comparison-matrix-sticky">
-                      <strong>{row.perfumeName}</strong>
-                      {row.unlinked ? <span className="badge badge-pending"> Sin catálogo</span> : null}
-                    </td>
-                    {suppliers.map((supplier) => {
-                      const option = row.bySupplier.get(supplier.id);
-                      if (!option) {
+        <>
+          <div className="comparison-table-scroll">
+            <table className="comparison-matrix">
+              <thead>
+                <tr>
+                  <th className="comparison-matrix-sticky">Perfume</th>
+                  {suppliers.map((supplier) => (
+                    <th key={supplier.id}>{supplier.name}</th>
+                  ))}
+                  <th>Mínimo</th>
+                  <th>Promedio</th>
+                  <th>Máximo</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const purchaseHref = row.unlinked
+                    ? `/admin/catalogo?name=${encodeURIComponent(row.perfumeName)}`
+                    : `/admin/compras?perfumeId=${row.perfumeId}&unitCost=${row.cheapest.price}&note=${encodeURIComponent(
+                        `${row.cheapest.supplierName} · ${row.cheapest.tierLabel}`,
+                      )}`;
+                  return (
+                    <tr key={row.perfumeId ?? `u-${row.perfumeName}`}>
+                      <td className="comparison-matrix-sticky">
+                        <strong>{row.perfumeName}</strong>
+                        {row.unlinked ? <span className="badge badge-pending"> Sin catálogo</span> : null}
+                      </td>
+                      {suppliers.map((supplier) => {
+                        const option = row.bySupplier.get(supplier.id);
+                        if (!option) {
+                          return (
+                            <td key={supplier.id} className="comparison-empty-cell">
+                              —
+                            </td>
+                          );
+                        }
+                        const isCheapest = option.id === row.cheapest.id;
                         return (
-                          <td key={supplier.id} className="comparison-empty-cell">
-                            —
+                          <td key={supplier.id} className={isCheapest ? 'comparison-min-cell' : ''}>
+                            S/ {Number(option.price).toFixed(2)}
+                            <span className="hint"> ({option.tierLabel})</span>
                           </td>
                         );
-                      }
+                      })}
+                      <td className="comparison-min-cell">
+                        S/ {Number(row.cheapest.price).toFixed(2)}
+                        <span className="hint"> {row.cheapest.supplierName}</span>
+                      </td>
+                      <td>S/ {row.average.toFixed(2)}</td>
+                      <td className="comparison-max-cell">
+                        S/ {Number(row.priciest.price).toFixed(2)}
+                        <span className="hint"> {row.priciest.supplierName}</span>
+                      </td>
+                      <td>
+                        <Link href={purchaseHref} className="btn-primary comparison-buy-link">
+                          {row.unlinked ? 'Agregar a catálogo' : 'Comprar'}
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="comparison-cards">
+            {rows.map((row) => {
+              const purchaseHref = row.unlinked
+                ? `/admin/catalogo?name=${encodeURIComponent(row.perfumeName)}`
+                : `/admin/compras?perfumeId=${row.perfumeId}&unitCost=${row.cheapest.price}&note=${encodeURIComponent(
+                    `${row.cheapest.supplierName} · ${row.cheapest.tierLabel}`,
+                  )}`;
+              return (
+                <div className="comparison-card" key={row.perfumeId ?? `u-${row.perfumeName}`}>
+                  <div className="comparison-card-header">
+                    <strong>{row.perfumeName}</strong>
+                    {row.unlinked ? <span className="badge badge-pending">Sin catálogo</span> : null}
+                  </div>
+                  <ul className="comparison-card-suppliers">
+                    {suppliers.map((supplier) => {
+                      const option = row.bySupplier.get(supplier.id);
+                      if (!option) return null;
                       const isCheapest = option.id === row.cheapest.id;
                       return (
-                        <td key={supplier.id} className={isCheapest ? 'comparison-min-cell' : ''}>
-                          S/ {Number(option.price).toFixed(2)}
-                          <span className="hint"> ({option.tierLabel})</span>
-                        </td>
+                        <li key={supplier.id} className={isCheapest ? 'comparison-card-cheapest' : ''}>
+                          <span>{supplier.name}</span>
+                          <span>
+                            S/ {Number(option.price).toFixed(2)}
+                            <span className="hint"> ({option.tierLabel})</span>
+                          </span>
+                        </li>
                       );
                     })}
-                    <td className="comparison-min-cell">
-                      S/ {Number(row.cheapest.price).toFixed(2)}
-                      <span className="hint"> {row.cheapest.supplierName}</span>
-                    </td>
-                    <td>S/ {row.average.toFixed(2)}</td>
-                    <td className="comparison-max-cell">
-                      S/ {Number(row.priciest.price).toFixed(2)}
-                      <span className="hint"> {row.priciest.supplierName}</span>
-                    </td>
-                    <td>
-                      <Link href={purchaseHref} className="btn-primary comparison-buy-link">
-                        {row.unlinked ? 'Agregar a catálogo' : 'Comprar'}
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  </ul>
+                  <div className="comparison-card-stats">
+                    <span>
+                      Mínimo <strong className="comparison-min-text">S/ {Number(row.cheapest.price).toFixed(2)}</strong>
+                    </span>
+                    <span>
+                      Promedio <strong>S/ {row.average.toFixed(2)}</strong>
+                    </span>
+                    <span>
+                      Máximo <strong className="comparison-max-text">S/ {Number(row.priciest.price).toFixed(2)}</strong>
+                    </span>
+                  </div>
+                  <Link href={purchaseHref} className="btn-primary comparison-buy-link">
+                    {row.unlinked ? 'Agregar a catálogo' : 'Comprar'}
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

@@ -1542,6 +1542,85 @@ td.comparison-matrix-sticky {
   white-space: nowrap;
 }
 
+.comparison-cards {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .comparison-table-scroll {
+    display: none;
+  }
+
+  .comparison-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .comparison-card {
+    background: var(--cream-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem 1.1rem;
+  }
+
+  .comparison-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+    font-size: 1.02rem;
+  }
+
+  .comparison-card-suppliers {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.6rem 0;
+    margin: 0 0 0.7rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .comparison-card-suppliers li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .comparison-card-cheapest {
+    color: var(--status-good);
+    font-weight: 700;
+  }
+
+  .comparison-card-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-bottom: 0.8rem;
+  }
+
+  .comparison-min-text {
+    color: var(--status-good);
+  }
+
+  .comparison-max-text {
+    color: var(--status-critical);
+  }
+
+  .comparison-card .comparison-buy-link {
+    display: block;
+    text-align: center;
+  }
+}
+
 .credit-actions {
   display: flex;
   flex-direction: column;
