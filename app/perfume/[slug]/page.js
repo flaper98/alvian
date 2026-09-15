@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { listPerfumes } from '@/lib/db';
-import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { slugify } from '@/lib/slug';
 import PerfumeCard from '../../PerfumeCard';
 import SiteNav from '../../SiteNav';
 import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
-import WhatsAppIcon from '../../WhatsAppIcon';
+import ProductGallery from './ProductGallery';
+import ProductPurchasePanel from './ProductPurchasePanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,9 +59,14 @@ export default async function PerfumePage({ params }) {
     notFound();
   }
 
-  const whatsappHref = buildWhatsAppLink(
-    `Hola, vengo desde su página web. ¿Me puede dar más información del perfume "${perfume.name}" (S/ ${Number(perfume.price).toFixed(2)}), por favor?`,
-  );
+  const media = [];
+  if (perfume.image_url) media.push({ type: 'image', src: perfume.image_url });
+  if (perfume.video_url) media.push({ type: 'video', src: perfume.video_url, poster: perfume.image_url });
+
+  const isNew =
+    perfume.created_at &&
+    Date.now() - new Date(perfume.created_at).getTime() < 30 * 24 * 60 * 60 * 1000;
+  const inStock = Number(perfume.stock) > 0;
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -111,41 +116,30 @@ export default async function PerfumePage({ params }) {
       </nav>
 
       <section className="product-detail">
-        <div className="product-detail-media">
-          {perfume.video_url ? (
-            <video
-              src={perfume.video_url}
-              poster={perfume.image_url}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="product-detail-image"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={perfume.image_url}
-              alt={`Perfume ${perfume.name} - Alvian Perfumes Pucallpa`}
-              className="product-detail-image"
-            />
-          )}
-        </div>
+        <ProductGallery media={media} alt={`Perfume ${perfume.name} - Alvian Perfumes Pucallpa`} />
+
         <div className="product-detail-info">
+          <div className="product-badges">
+            <span className="badge badge-gold">Original</span>
+            {isNew ? <span className="badge badge-gold">Nuevo</span> : null}
+            <span className={`badge ${inStock ? 'badge-paid' : 'badge-pending'}`}>
+              {inStock ? 'Disponible' : 'Agotado'}
+            </span>
+          </div>
+
           <h1>{perfume.name}</h1>
           <p className="product-detail-price">S/ {Number(perfume.price).toFixed(2)}</p>
+
           {perfume.description ? (
             <p className="product-detail-description">{perfume.description}</p>
           ) : null}
-          <a
-            className="btn-whatsapp btn-block"
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon width={19} height={19} />
-            Comprar por WhatsApp
-          </a>
+
+          <ProductPurchasePanel perfumeName={perfume.name} price={Number(perfume.price)} />
+
+          <p className="product-reassurance">
+            ✓ Perfume 100% original · ✓ Entrega rápida en Pucallpa
+          </p>
+
           <Link href="/#catalogo" className="btn-secondary product-detail-back">
             ← Ver más perfumes
           </Link>

@@ -823,7 +823,55 @@ button {
   align-items: start;
 }
 
-.product-detail-media {
+.product-gallery {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.product-thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.product-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: var(--cream-soft);
+}
+
+.product-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-thumb.active {
+  border-color: var(--green-800);
+}
+
+.product-thumb-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.product-main-media {
+  flex: 1;
+  min-width: 0;
   background: var(--cream-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -842,6 +890,18 @@ button {
   margin: 0 0 0.5rem;
 }
 
+.product-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.badge-gold {
+  background: rgba(201, 153, 60, 0.16);
+  color: var(--gold-dark);
+}
+
 .product-detail-price {
   font-size: 1.5rem;
   font-weight: 700;
@@ -852,11 +912,43 @@ button {
 .product-detail-description {
   color: var(--ink-soft);
   line-height: 1.7;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
-.product-detail-info .btn-whatsapp {
-  margin-bottom: 1rem;
+.product-purchase {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.product-qty-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.product-qty-select {
+  min-width: 72px;
+  text-align: center;
+}
+
+.product-purchase .btn-whatsapp {
+  flex: 1;
+  align-self: flex-end;
+}
+
+.btn-lg {
+  font-size: 1.02rem;
+  padding: 0.9rem 1.4rem;
+}
+
+.product-reassurance {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
 }
 
 .product-detail-back {
@@ -866,6 +958,21 @@ button {
 @media (max-width: 720px) {
   .product-detail {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .product-purchase {
+    flex-direction: column;
+  }
+
+  .product-purchase .btn-whatsapp {
+    align-self: stretch;
+  }
+
+  .product-thumb {
+    width: 52px;
+    height: 52px;
   }
 }
 
