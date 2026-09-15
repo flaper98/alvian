@@ -140,7 +140,7 @@ export default async function PerfumePage({ params }) {
             ✓ Perfume 100% original · ✓ Entrega rápida en Pucallpa
           </p>
 
-          <Link href="/#catalogo" className="btn-secondary product-detail-back">
+          <Link href="/#catalogo" className="btn-outline-pill product-detail-back">
             ← Ver más perfumes
           </Link>
         </div>
