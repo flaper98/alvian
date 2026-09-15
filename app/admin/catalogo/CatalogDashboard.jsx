@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { deletePerfumeAction, editPerfumeAction } from '@/lib/actions';
 import { SubmitButton, ImageField, VideoField } from './AddPerfumeForm';
+import BulkDescriptionModal from './BulkDescriptionModal';
 import PerfumeFormModal from './PerfumeFormModal';
 
 function EditPerfumeForm({ perfume, onCancel, onSaved }) {
@@ -155,7 +156,10 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
     <div className="admin-dashboard">
       <div className="admin-header">
         <h2>Perfumes registrados ({perfumes.length})</h2>
-        <PerfumeFormModal prefillName={prefillName} />
+        <div className="admin-header-actions">
+          <BulkDescriptionModal />
+          <PerfumeFormModal prefillName={prefillName} />
+        </div>
       </div>
 
       {perfumes.length === 0 ? (
