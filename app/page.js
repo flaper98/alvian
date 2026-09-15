@@ -1,6 +1,7 @@
 import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import BrandMarquee from './BrandMarquee';
+import HeroCarousel from './HeroCarousel';
 import PerfumeCatalog from './PerfumeCatalog';
 import SiteNav from './SiteNav';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
@@ -21,7 +22,10 @@ export default async function HomePage() {
     perfumes = [];
   }
 
-  const heroImages = perfumes.filter((p) => p.image_url).slice(0, 4);
+  const heroSlides = perfumes.filter((p) => p.image_url).slice(0, 5);
+  const whatsappHref = buildWhatsAppLink(
+    'Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?',
+  );
 
   const productsJsonLd = {
     '@context': 'https://schema.org',
@@ -57,44 +61,30 @@ export default async function HomePage() {
 
       <SiteNav />
 
-      <header className="hero" id="inicio">
-        {heroImages.length > 0 ? (
-          <div className="hero-bg-images" aria-hidden="true">
-            {heroImages.map((perfume, index) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={perfume.id}
-                src={perfume.image_url}
-                alt=""
-                className={`hero-bg-image hero-bg-image-${index}`}
-              />
-            ))}
+      <header id="inicio">
+        {heroSlides.length > 0 ? (
+          <HeroCarousel slides={heroSlides} whatsappHref={whatsappHref} />
+        ) : (
+          <div className="hero-fallback">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.jpg" alt="Alvian Perfumes - Perfumería en Pucallpa" className="hero-logo" />
+            <p className="eyebrow">Perfumería en Pucallpa</p>
+            <h1>Alvian</h1>
+            <p className="hero-fallback-subtitle">
+              Fragancias originales seleccionadas para ti en Pucallpa. Escríbenos por WhatsApp y
+              te ayudamos a elegir tu perfume ideal, con entrega rápida en toda la ciudad.
+            </p>
+            <div className="hero-actions">
+              <a className="btn-whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer">
+                <WhatsAppIcon width={19} height={19} />
+                Escríbenos por WhatsApp
+              </a>
+              <a href="#catalogo" className="btn-hero-outline">
+                Ver catálogo
+              </a>
+            </div>
           </div>
-        ) : null}
-        <div className="hero-content">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Alvian Perfumes - Perfumería en Pucallpa" className="hero-logo" />
-          <p className="eyebrow">Perfumería en Pucallpa</p>
-          <h1>Alvian</h1>
-          <p className="hero-subtitle">
-            Fragancias originales seleccionadas para ti en Pucallpa. Escríbenos por WhatsApp y te
-            ayudamos a elegir tu perfume ideal, con entrega rápida en toda la ciudad.
-          </p>
-          <div className="hero-actions">
-            <a
-              className="btn-whatsapp"
-              href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <WhatsAppIcon width={19} height={19} />
-              Escríbenos por WhatsApp
-            </a>
-            <a href="#catalogo" className="btn-hero-outline">
-              Ver catálogo
-            </a>
-          </div>
-        </div>
+        )}
       </header>
 
       <BrandMarquee />
@@ -124,12 +114,7 @@ export default async function HomePage() {
           ¿Tienes dudas sobre algún perfume o quieres hacer un pedido? Escríbenos por WhatsApp,
           te respondemos rápido y te ayudamos a elegir.
         </p>
-        <a
-          className="btn-whatsapp"
-          href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a className="btn-whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer">
           <WhatsAppIcon width={19} height={19} />
           Escríbenos por WhatsApp
         </a>

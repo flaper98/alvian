@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const LINKS = [
   { href: '#inicio', label: 'Inicio' },
-  { href: '#catalogo', label: 'Catálogo' },
+  { href: '#catalogo', label: 'Fragancias' },
   { href: '#nosotros', label: 'Quiénes somos' },
   { href: '#contacto', label: 'Contacto' },
 ];
@@ -18,6 +18,15 @@ export default function SiteNav() {
         <a href="#inicio" className="site-nav-brand" onClick={() => setOpen(false)}>
           Alvian
         </a>
+
+        <ul className="site-nav-links">
+          {LINKS.map((link) => (
+            <li key={link.href}>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+
         <button
           type="button"
           className={`site-nav-toggle${open ? ' open' : ''}`}
@@ -29,13 +38,6 @@ export default function SiteNav() {
           <span />
           <span />
         </button>
-        <ul className="site-nav-links">
-          {LINKS.map((link) => (
-            <li key={link.href}>
-              <a href={link.href}>{link.label}</a>
-            </li>
-          ))}
-        </ul>
       </div>
 
       {open ? (
