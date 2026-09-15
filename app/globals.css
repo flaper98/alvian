@@ -1079,9 +1079,8 @@ button {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
-  align-items: start;
+  display: flex;
+  flex-direction: column;
   gap: 1.25rem;
 }
 
@@ -1107,15 +1106,6 @@ button {
 .customer-credit-header strong {
   font-size: 1.05rem;
   color: var(--green-900);
-}
-
-.customer-credit-card .history-list {
-  gap: 0.6rem;
-}
-
-.customer-credit-card .history-row {
-  background: var(--cream);
-  box-shadow: none;
 }
 
 /* ---------- Panderos ---------- */

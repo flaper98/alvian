@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CreditSaleRow from './CreditSaleRow';
 
 const FILTERS = [
@@ -9,10 +9,14 @@ const FILTERS = [
   { value: 'paid', label: 'Pagado completo' },
 ];
 
+const PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export default function CreditosDashboard({ customerGroups }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('debt');
   const [filterBy, setFilterBy] = useState('all');
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
 
   const searched = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -41,6 +45,14 @@ export default function CreditosDashboard({ customerGroups }) {
       return b.totalDebt - a.totalDebt;
     });
   }, [searched, filterBy, sortBy]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterBy, sortBy, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(groups.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pageGroups = groups.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (customerGroups.length === 0) {
     return <p>No hay ventas a crédito o pandero registradas.</p>;
@@ -80,23 +92,74 @@ export default function CreditosDashboard({ customerGroups }) {
       {groups.length === 0 ? (
         <p className="hint">Ningún cliente coincide con este filtro.</p>
       ) : (
-        <ul className="customer-credit-list">
-          {groups.map((group) => (
-            <li key={group.customerName} className="customer-credit-card">
-              <div className="customer-credit-header">
-                <strong>{group.customerName}</strong>
-                <span className={`badge ${group.totalDebt > 0 ? 'badge-pending' : 'badge-paid'}`}>
-                  Deuda total: S/ {group.totalDebt.toFixed(2)}
-                </span>
-              </div>
-              <ul className="history-list">
-                {group.sales.map((sale) => (
-                  <CreditSaleRow key={sale.id} sale={sale} />
+        <>
+          <ul className="customer-credit-list">
+            {pageGroups.map((group) => (
+              <li key={group.customerName} className="customer-credit-card">
+                <div className="customer-credit-header">
+                  <strong>{group.customerName}</strong>
+                  <span className={`badge ${group.totalDebt > 0 ? 'badge-pending' : 'badge-paid'}`}>
+                    Deuda total: S/ {group.totalDebt.toFixed(2)}
+                  </span>
+                </div>
+                <div className="perfume-table-wrap">
+                  <table className="perfume-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Perfume</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Pagado</th>
+                        <th scope="col">Saldo</th>
+                        <th scope="col">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.sales.map((sale) => (
+                        <CreditSaleRow key={sale.id} sale={sale} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="pagination-bar">
+            <label className="pagination-size">
+              Mostrar
+              <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
                 ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
+              </select>
+              clientes por página
+            </label>
+            <div className="pagination-controls">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+              >
+                ← Anterior
+              </button>
+              <span className="pagination-status">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

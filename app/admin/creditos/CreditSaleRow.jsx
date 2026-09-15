@@ -27,27 +27,39 @@ export default function CreditSaleRow({ sale }) {
   }, [state]);
 
   return (
-    <li className="history-row credit-row">
-      <div>
-        <strong>{sale.perfume_name}</strong>{' '}
-        <span className={`badge badge-${sale.payment_type}`}>
-          {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
-        </span>
-        <p>
-          Total S/ {Number(sale.total).toFixed(2)} · Pagado S/ {Number(sale.paid_amount).toFixed(2)}{' '}
-          · <strong>Saldo S/ {balance.toFixed(2)}</strong>
-        </p>
-      </div>
-      {balance > 0 ? (
-        <div className="credit-actions">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setOpen((value) => !value)}
-          >
-            {open ? 'Cancelar' : 'Registrar abono'}
-          </button>
-          {open ? (
+    <>
+      <tr className="perfume-table-row">
+        <td>
+          <strong>{sale.perfume_name}</strong>
+        </td>
+        <td>
+          <span className={`badge badge-${sale.payment_type}`}>
+            {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
+          </span>
+        </td>
+        <td className="perfume-table-price-cell">S/ {Number(sale.total).toFixed(2)}</td>
+        <td className="perfume-table-price-cell">S/ {Number(sale.paid_amount).toFixed(2)}</td>
+        <td className="perfume-table-price-cell">
+          <strong>S/ {balance.toFixed(2)}</strong>
+        </td>
+        <td className="perfume-table-actions-cell">
+          {balance > 0 ? (
+            <button type="button" className="btn-secondary" onClick={() => setOpen((value) => !value)}>
+              {open ? 'Cancelar' : 'Registrar abono'}
+            </button>
+          ) : (
+            <span className="badge badge-paid">
+              <span className="badge-icon">
+                <IconCheck size={12} />
+              </span>
+              Pagado
+            </span>
+          )}
+        </td>
+      </tr>
+      {open ? (
+        <tr className="perfume-table-row">
+          <td colSpan={6}>
             <form action={formAction} className="credit-payment-form">
               <input type="hidden" name="saleId" value={sale.id} />
               <label>
@@ -61,16 +73,9 @@ export default function CreditSaleRow({ sale }) {
               {state?.error ? <p className="form-error">{state.error}</p> : null}
               <SubmitButton />
             </form>
-          ) : null}
-        </div>
-      ) : (
-        <span className="badge badge-paid">
-          <span className="badge-icon">
-            <IconCheck size={12} />
-          </span>
-          Pagado
-        </span>
-      )}
-    </li>
+          </td>
+        </tr>
+      ) : null}
+    </>
   );
 }
