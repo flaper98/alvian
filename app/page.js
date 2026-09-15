@@ -1,5 +1,6 @@
 import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import BrandMarquee from './BrandMarquee';
 import PerfumeCatalog from './PerfumeCatalog';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import WhatsAppIcon from './WhatsAppIcon';
@@ -61,19 +62,26 @@ export default async function HomePage() {
             Fragancias originales seleccionadas para ti en Pucallpa. Escríbenos por WhatsApp y te
             ayudamos a elegir tu perfume ideal, con entrega rápida en toda la ciudad.
           </p>
-          <a
-            className="btn-whatsapp"
-            href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon width={19} height={19} />
-            Escríbenos por WhatsApp
-          </a>
+          <div className="hero-actions">
+            <a
+              className="btn-whatsapp"
+              href={buildWhatsAppLink('Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?')}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <WhatsAppIcon width={19} height={19} />
+              Escríbenos por WhatsApp
+            </a>
+            <a href="#catalogo" className="btn-hero-outline">
+              Ver catálogo
+            </a>
+          </div>
         </div>
       </header>
 
-      <main className="catalog">
+      <BrandMarquee />
+
+      <main className="catalog" id="catalogo">
         <h2 className="catalog-title">Perfumes originales en Pucallpa</h2>
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
