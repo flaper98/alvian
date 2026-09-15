@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { listPerfumes } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import PerfumeCard from '../../PerfumeCard';
+import SiteFooter from '../../SiteFooter';
 import SiteNav from '../../SiteNav';
 import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
 import ProductGallery from './ProductGallery';
@@ -110,7 +111,7 @@ export default async function PerfumePage({ params }) {
 
       <SiteNav />
 
-      <nav aria-label="Ruta de navegación" className="breadcrumb">
+      <nav aria-label="Ruta de navegación" className="breadcrumb breadcrumb-wide">
         <a href="/">Inicio</a> <span>/</span> <a href="/#catalogo">Fragancias</a> <span>/</span>{' '}
         <span aria-current="page">{perfume.name}</span>
       </nav>
@@ -157,9 +158,7 @@ export default async function PerfumePage({ params }) {
         </section>
       ) : null}
 
-      <footer className="site-footer">
-        <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
-      </footer>
+      <SiteFooter />
 
       <WhatsAppFloatingButton />
     </>

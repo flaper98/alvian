@@ -1,3 +1,4 @@
+import SiteFooter from '../SiteFooter';
 import SiteNav from '../SiteNav';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 
@@ -72,9 +73,7 @@ export default function NosotrosPage() {
         </ul>
       </section>
 
-      <footer className="site-footer">
-        <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
-      </footer>
+      <SiteFooter />
 
       <WhatsAppFloatingButton />
     </>

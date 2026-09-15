@@ -1,4 +1,5 @@
 import { buildWhatsAppLink, WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import SiteFooter from '../SiteFooter';
 import SiteNav from '../SiteNav';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 import WhatsAppIcon from '../WhatsAppIcon';
@@ -80,9 +81,7 @@ export default function ContactoPage() {
         </a>
       </section>
 
-      <footer className="site-footer">
-        <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
-      </footer>
+      <SiteFooter />
 
       <WhatsAppFloatingButton />
     </>

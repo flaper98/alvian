@@ -4,6 +4,7 @@ import { slugify } from '@/lib/slug';
 import BrandMarquee from './BrandMarquee';
 import HeroCarousel from './HeroCarousel';
 import PerfumeCatalog from './PerfumeCatalog';
+import SiteFooter from './SiteFooter';
 import SiteNav from './SiteNav';
 import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import WhatsAppIcon from './WhatsAppIcon';
@@ -102,9 +103,7 @@ export default async function HomePage() {
         )}
       </main>
 
-      <footer className="site-footer">
-        <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
-      </footer>
+      <SiteFooter />
 
       <WhatsAppFloatingButton />
     </>

@@ -79,6 +79,10 @@ const businessJsonLd = {
     '@type': 'City',
     name: 'Pucallpa',
   },
+  sameAs: [
+    'https://www.instagram.com/alvian_fragancias/',
+    'https://www.tiktok.com/@alvian_fragancias',
+  ],
 };
 
 export default function RootLayout({ children }) {
