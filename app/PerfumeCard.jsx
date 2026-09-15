@@ -1,12 +1,15 @@
+import Link from 'next/link';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { slugify } from '@/lib/slug';
 import WhatsAppIcon from './WhatsAppIcon';
 
 export default function PerfumeCard({ perfume }) {
   const message = `Hola, vengo desde su página web. ¿Me puede dar más información del perfume "${perfume.name}", por favor?`;
+  const href = `/perfume/${slugify(perfume.name)}`;
 
   return (
     <article className="perfume-card">
-      <div className="perfume-card-image-wrap">
+      <Link href={href} className="perfume-card-image-wrap">
         {perfume.video_url ? (
           <video
             className="perfume-card-image"
@@ -27,9 +30,11 @@ export default function PerfumeCard({ perfume }) {
             className="perfume-card-image"
           />
         )}
-      </div>
+      </Link>
       <div className="perfume-card-body">
-        <h3>{perfume.name}</h3>
+        <h3>
+          <Link href={href}>{perfume.name}</Link>
+        </h3>
         <p className="perfume-price">S/ {Number(perfume.price).toFixed(2)}</p>
         {perfume.description ? (
           <p className="perfume-description">{perfume.description}</p>

@@ -3,10 +3,10 @@
 import { useState } from 'react';
 
 const LINKS = [
-  { href: '#inicio', label: 'Inicio' },
-  { href: '#catalogo', label: 'Fragancias' },
-  { href: '#nosotros', label: 'Quiénes somos' },
-  { href: '#contacto', label: 'Contacto' },
+  { href: '/#inicio', label: 'Inicio' },
+  { href: '/#catalogo', label: 'Fragancias' },
+  { href: '/nosotros', label: 'Quiénes somos' },
+  { href: '/contacto', label: 'Contacto' },
 ];
 
 export default function SiteNav() {
@@ -15,7 +15,7 @@ export default function SiteNav() {
   return (
     <nav className="site-nav">
       <div className="site-nav-row">
-        <a href="#inicio" className="site-nav-brand" onClick={() => setOpen(false)}>
+        <a href="/#inicio" className="site-nav-brand" onClick={() => setOpen(false)}>
           Alvian
         </a>
 

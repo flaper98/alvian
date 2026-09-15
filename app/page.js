@@ -1,5 +1,6 @@
 import { listPerfumes } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
+import { slugify } from '@/lib/slug';
 import BrandMarquee from './BrandMarquee';
 import HeroCarousel from './HeroCarousel';
 import PerfumeCatalog from './PerfumeCatalog';
@@ -8,6 +9,8 @@ import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import WhatsAppIcon from './WhatsAppIcon';
 
 export const dynamic = 'force-dynamic';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
 
 export default async function HomePage() {
   let perfumes = [];
@@ -38,6 +41,7 @@ export default async function HomePage() {
         name: perfume.name,
         image: perfume.image_url,
         description: perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa.`,
+        url: `${SITE_URL}/perfume/${slugify(perfume.name)}`,
         offers: {
           '@type': 'Offer',
           priceCurrency: 'PEN',
@@ -97,28 +101,6 @@ export default async function HomePage() {
           <PerfumeCatalog perfumes={perfumes} />
         )}
       </main>
-
-      <section className="about-section" id="nosotros">
-        <h2 className="section-title">Quiénes somos</h2>
-        <p className="about-text">
-          En Alvian Perfumes creemos que un buen perfume dice mucho de ti. Somos una perfumería en
-          Pucallpa dedicada a ofrecer fragancias 100% originales, cuidadosamente seleccionadas
-          para dama y caballero. Te atendemos de forma personalizada por WhatsApp para ayudarte a
-          encontrar el perfume ideal, con entregas rápidas en toda la ciudad.
-        </p>
-      </section>
-
-      <section className="contact-section" id="contacto">
-        <h2 className="section-title">Contacto</h2>
-        <p className="about-text">
-          ¿Tienes dudas sobre algún perfume o quieres hacer un pedido? Escríbenos por WhatsApp,
-          te respondemos rápido y te ayudamos a elegir.
-        </p>
-        <a className="btn-whatsapp" href={whatsappHref} target="_blank" rel="noopener noreferrer">
-          <WhatsAppIcon width={19} height={19} />
-          Escríbenos por WhatsApp
-        </a>
-      </section>
 
       <footer className="site-footer">
         <p>© {new Date().getFullYear()} Alvian Perfumes · Perfumería en Pucallpa, Perú</p>
