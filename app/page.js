@@ -11,7 +11,7 @@ import WhatsAppIcon from './WhatsAppIcon';
 
 export const dynamic = 'force-dynamic';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 export default async function HomePage() {
   let perfumes = [];

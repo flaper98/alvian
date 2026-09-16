@@ -2,7 +2,7 @@ import SiteFooter from '../SiteFooter';
 import SiteNav from '../SiteNav';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 export const metadata = {
   title: 'Quiénes somos',

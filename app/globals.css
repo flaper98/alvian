@@ -548,14 +548,15 @@ button {
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   padding: 0 clamp(1.25rem, 6vw, 3rem);
 }
 
 @media (min-width: 640px) {
   .catalog-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
   }
 }
 
@@ -633,6 +634,37 @@ button {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+}
+
+/* En móvil, cada tarjeta pasa a ser una fila horizontal (foto a la
+   izquierda, info a la derecha) en vez de la tarjeta vertical de escritorio —
+   se ve más como una lista de catálogo, con más productos visibles por scroll. */
+@media (max-width: 639px) {
+  .perfume-card {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .perfume-card-image-wrap {
+    width: 120px;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    align-self: flex-start;
+  }
+
+  .perfume-card-body {
+    padding: 0.85rem 1rem;
+    gap: 0.35rem;
+  }
+
+  .perfume-card-body h3 {
+    font-size: 1.05rem;
+  }
+
+  .perfume-description {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 2;
+  }
 }
 
 /* ---------- Site nav ---------- */

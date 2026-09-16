@@ -2,7 +2,7 @@ import { Playfair_Display, Inter } from 'next/font/google';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import './globals.css';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 const display = Playfair_Display({
   subsets: ['latin'],

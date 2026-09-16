@@ -1,7 +1,7 @@
 import { listPerfumes } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianperfumes.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 export default async function sitemap() {
   const staticRoutes = [
