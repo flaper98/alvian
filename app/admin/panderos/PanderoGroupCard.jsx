@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 import {
   addPanderoEntryAction,
   setPanderoEntryFulfilledAction,
+  setPanderoEntryPayingAction,
   deletePanderoEntryAction,
   deletePanderoGroupAction,
 } from '@/lib/actions';
@@ -67,6 +68,12 @@ function EntryRow({ entry }) {
     });
   }
 
+  function togglePaying() {
+    startTransition(async () => {
+      await setPanderoEntryPayingAction(entry.id, !entry.paying);
+    });
+  }
+
   function handleDelete() {
     if (!confirm(`¿Quitar a "${entry.customer_name}" del pandero?`)) return;
     startTransition(async () => {
@@ -82,6 +89,12 @@ function EntryRow({ entry }) {
         <span> ({entry.perfume_name})</span>
         <p className="hint">Le toca: {formatDateOnly(entry.turn_date)}</p>
       </div>
+      <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
+        <span className="badge-icon">
+          {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
+        </span>
+        {entry.paying ? 'Pagando' : 'Sin pagar'}
+      </span>
       <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
         <span className="badge-icon">
           {entry.fulfilled ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -89,6 +102,9 @@ function EntryRow({ entry }) {
         {entry.fulfilled ? 'Entregado' : 'Pendiente'}
       </span>
       <div className="pandero-entry-actions">
+        <button type="button" className="btn-secondary" onClick={togglePaying} disabled={isPending}>
+          {entry.paying ? 'Marcar sin pagar' : 'Marcar pagando'}
+        </button>
         <button type="button" className="btn-secondary" onClick={toggleFulfilled} disabled={isPending}>
           {entry.fulfilled ? 'Marcar pendiente' : 'Marcar entregado'}
         </button>
