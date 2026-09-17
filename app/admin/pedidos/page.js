@@ -141,7 +141,7 @@ export default async function PedidosPage() {
 
       <div>
         <h2>Pedidos registrados ({orders.length})</h2>
-        <OrdersList orders={orders} />
+        <OrdersList orders={orders} perfumes={perfumes} />
       </div>
     </section>
   );

@@ -10,7 +10,7 @@ const FILTERS = [
   { value: 'fulfilled', label: 'Cumplidos' },
 ];
 
-export default function OrdersList({ orders }) {
+export default function OrdersList({ orders, perfumes }) {
   const [search, setSearch] = useState('');
   const [filterBy, setFilterBy] = useState('all');
 
@@ -95,7 +95,7 @@ export default function OrdersList({ orders }) {
             </thead>
             <tbody>
               {rows.map((order) => (
-                <OrderRow key={order.id} order={order} />
+                <OrderRow key={order.id} order={order} perfumes={perfumes} />
               ))}
             </tbody>
           </table>
