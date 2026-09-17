@@ -12,6 +12,7 @@ import {
 } from '@/lib/actions';
 import { PANDERO_CUOTA_AMOUNT } from '@/lib/pandero';
 import { IconCheck, IconClock } from '../icons';
+import EditPanderoEntryModal from './EditPanderoEntryModal';
 
 // start_date y turn_date son fechas puras (sin hora) que vienen de Postgres
 // como medianoche UTC. Si se formatean con la zona horaria local del
@@ -62,6 +63,7 @@ function AddEntryForm({ groupId, perfumes }) {
 
 function EntryRow({ entry }) {
   const [isPending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
 
   function toggleFulfilled() {
     startTransition(async () => {
@@ -90,6 +92,7 @@ function EntryRow({ entry }) {
         <span> ({entry.perfume_name})</span>
         <p className="hint">Le toca: {formatDateOnly(entry.turn_date)}</p>
       </div>
+      {editing ? <EditPanderoEntryModal entry={entry} onClose={() => setEditing(false)} /> : null}
       <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
         <span className="badge-icon">
           {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -103,6 +106,9 @@ function EntryRow({ entry }) {
         {entry.fulfilled ? 'Entregado' : 'Pendiente'}
       </span>
       <div className="pandero-entry-actions">
+        <button type="button" className="btn-secondary" onClick={() => setEditing(true)} disabled={isPending}>
+          Editar
+        </button>
         <button type="button" className="btn-secondary" onClick={togglePaying} disabled={isPending}>
           {entry.paying ? 'Marcar sin pagar' : 'Marcar pagando'}
         </button>

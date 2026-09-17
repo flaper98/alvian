@@ -1,7 +1,7 @@
 import { Playfair_Display, Inter } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import AnalyticsWithFilter from './AnalyticsWithFilter';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
@@ -104,7 +104,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
         {children}
-        <Analytics />
+        <AnalyticsWithFilter />
         <SpeedInsights />
       </body>
     </html>
