@@ -49,6 +49,14 @@ export default async function PedidosPage() {
                   <p>
                     Pedido: {row.ordered_quantity} unid. · Stock actual: {row.perfume_stock} unid.
                   </p>
+                  {row.best_supplier_name ? (
+                    <p className="hint">
+                      Más barato en <strong>{row.best_supplier_name}</strong> ({row.best_tier_label}): S/{' '}
+                      {Number(row.best_price).toFixed(2)}
+                    </p>
+                  ) : (
+                    <p className="hint">Todavía no tienes precios de proveedores para este perfume.</p>
+                  )}
                 </div>
                 <span className="badge badge-pending">Faltan {row.shortfall} unid.</span>
               </li>

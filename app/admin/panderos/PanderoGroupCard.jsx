@@ -61,7 +61,7 @@ function AddEntryForm({ groupId, perfumes }) {
   );
 }
 
-function EntryRow({ entry }) {
+function EntryRow({ entry, perfumes }) {
   const [isPending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
 
@@ -92,7 +92,9 @@ function EntryRow({ entry }) {
         <span> ({entry.perfume_name})</span>
         <p className="hint">Le toca: {formatDateOnly(entry.turn_date)}</p>
       </div>
-      {editing ? <EditPanderoEntryModal entry={entry} onClose={() => setEditing(false)} /> : null}
+      {editing ? (
+        <EditPanderoEntryModal entry={entry} perfumes={perfumes} onClose={() => setEditing(false)} />
+      ) : null}
       <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
         <span className="badge-icon">
           {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -153,7 +155,7 @@ export default function PanderoGroupCard({ group, perfumes }) {
       ) : (
         <ol className="pandero-entry-list">
           {group.entries.map((entry) => (
-            <EntryRow key={entry.id} entry={entry} />
+            <EntryRow key={entry.id} entry={entry} perfumes={perfumes} />
           ))}
         </ol>
       )}
