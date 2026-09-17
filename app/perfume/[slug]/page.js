@@ -12,6 +12,8 @@ import ProductPurchasePanel from './ProductPurchasePanel';
 export const dynamic = 'force-dynamic';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
+const CATEGORY_LABELS = { hombre: 'Perfumes para hombre', mujer: 'Perfumes para mujer', unisex: 'Perfumes unisex' };
+const CATEGORY_SHORT_LABELS = { hombre: 'Hombre', mujer: 'Mujer', unisex: 'Unisex' };
 
 async function getPerfume(slug) {
   let perfumes = [];
@@ -78,6 +80,7 @@ export default async function PerfumePage({ params }) {
       perfume.description ||
       `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
     sku: String(perfume.id),
+    ...(perfume.category ? { category: CATEGORY_LABELS[perfume.category] } : {}),
     offers: {
       '@type': 'Offer',
       priceCurrency: 'PEN',
@@ -124,6 +127,9 @@ export default async function PerfumePage({ params }) {
           <div className="product-badges">
             <span className="badge badge-gold">Original</span>
             {isNew ? <span className="badge badge-gold">Nuevo</span> : null}
+            {perfume.category ? (
+              <span className="badge badge-gold">{CATEGORY_SHORT_LABELS[perfume.category]}</span>
+            ) : null}
             <span className={`badge ${inStock ? 'badge-paid' : 'badge-pending'}`}>
               {inStock ? 'Disponible' : 'Agotado'}
             </span>

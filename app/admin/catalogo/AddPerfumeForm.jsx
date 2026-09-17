@@ -168,6 +168,15 @@ function AddPerfumeFormFields({ prefillName, onSaved }) {
         Precio de venta (S/) — opcional
         <input name="price" type="number" step="0.01" min="0" placeholder="0.00" />
       </label>
+      <label>
+        Categoría
+        <select name="category" defaultValue="">
+          <option value="">Sin especificar</option>
+          <option value="hombre">Hombre</option>
+          <option value="mujer">Mujer</option>
+          <option value="unisex">Unisex</option>
+        </select>
+      </label>
       <ImageField />
       <VideoField />
       <label>

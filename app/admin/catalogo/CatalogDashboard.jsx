@@ -26,6 +26,15 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         Precio de venta (S/)
         <input name="price" type="number" step="0.01" min="0" defaultValue={perfume.price} />
       </label>
+      <label>
+        Categoría
+        <select name="category" defaultValue={perfume.category || ''}>
+          <option value="">Sin especificar</option>
+          <option value="hombre">Hombre</option>
+          <option value="mujer">Mujer</option>
+          <option value="unisex">Unisex</option>
+        </select>
+      </label>
       <ImageField defaultValue={perfume.image_url} />
       <VideoField defaultValue={perfume.video_url} />
       <label>
@@ -80,7 +89,12 @@ function PerfumeTableRow({ perfume }) {
           <img src={perfume.image_url} alt={perfume.name} className="perfume-table-image" />
         </td>
         <td>
-          <strong>{perfume.name}</strong>
+          <strong>{perfume.name}</strong>{' '}
+          {perfume.category ? (
+            <span className="badge badge-gold">{CATEGORY_LABELS[perfume.category]}</span>
+          ) : (
+            <span className="badge badge-pending">Sin categoría</span>
+          )}
           {perfume.description ? (
             <p className="perfume-table-description">{perfume.description}</p>
           ) : null}
@@ -109,11 +123,14 @@ function PerfumeTableRow({ perfume }) {
   );
 }
 
+const CATEGORY_LABELS = { hombre: 'Hombre', mujer: 'Mujer', unisex: 'Unisex' };
+
 const FILTERS = [
   { value: 'all', label: 'Todos' },
   { value: 'in-stock', label: 'Con stock' },
   { value: 'out-of-stock', label: 'Sin stock' },
   { value: 'pending-price', label: 'Pendiente de compra' },
+  { value: 'no-category', label: 'Sin categoría' },
 ];
 
 export default function CatalogDashboard({ perfumes, prefillName }) {
@@ -133,6 +150,7 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
       'in-stock': searched.filter((p) => Number(p.stock) > 0).length,
       'out-of-stock': searched.filter((p) => Number(p.stock) === 0).length,
       'pending-price': searched.filter((p) => Number(p.price) === 0).length,
+      'no-category': searched.filter((p) => !p.category).length,
     }),
     [searched],
   );
@@ -142,6 +160,7 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
       if (filterBy === 'in-stock') return Number(perfume.stock) > 0;
       if (filterBy === 'out-of-stock') return Number(perfume.stock) === 0;
       if (filterBy === 'pending-price') return Number(perfume.price) === 0;
+      if (filterBy === 'no-category') return !perfume.category;
       return true;
     });
 

@@ -12,6 +12,7 @@ import WhatsAppIcon from './WhatsAppIcon';
 export const dynamic = 'force-dynamic';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
+const CATEGORY_LABELS = { hombre: 'Perfumes para hombre', mujer: 'Perfumes para mujer', unisex: 'Perfumes unisex' };
 
 export default async function HomePage() {
   let perfumes = [];
@@ -43,6 +44,7 @@ export default async function HomePage() {
         image: perfume.image_url,
         description: perfume.description || `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
         url: `${SITE_URL}/perfume/${slugify(perfume.name)}`,
+        ...(perfume.category ? { category: CATEGORY_LABELS[perfume.category] } : {}),
         offers: {
           '@type': 'Offer',
           priceCurrency: 'PEN',
