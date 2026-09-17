@@ -1,19 +1,32 @@
 'use client';
 
 import { useTransition } from 'react';
-import { setCommissionPaidAction } from '@/lib/actions';
+import { payAvailableCommissionAction, resetCommissionPaymentAction } from '@/lib/actions';
 import { IconCheck, IconClock } from '../icons';
 
 export default function CommissionRow({ sale, canEdit }) {
   const [isPending, startTransition] = useTransition();
-  const fullyCollected = sale.payment_type === 'contado' || Number(sale.balance) <= 0;
+  const payoutDue = Number(sale.commissionPayoutDue || 0);
+  const paidSoFar = Number(sale.commission_paid_amount || 0);
+  const isCredit = sale.payment_type !== 'contado';
 
-  function togglePaid() {
+  function handlePay() {
     startTransition(async () => {
       try {
-        await setCommissionPaidAction(sale.id, !sale.commission_paid);
+        await payAvailableCommissionAction(sale.id);
       } catch (error) {
-        alert(error?.message || 'No se pudo actualizar la comisión.');
+        alert(error?.message || 'No se pudo pagar la comisión.');
+      }
+    });
+  }
+
+  function handleReset() {
+    if (!confirm('¿Deshacer los pagos de comisión registrados para esta venta?')) return;
+    startTransition(async () => {
+      try {
+        await resetCommissionPaymentAction(sale.id);
+      } catch (error) {
+        alert(error?.message || 'No se pudo deshacer el pago.');
       }
     });
   }
@@ -25,16 +38,17 @@ export default function CommissionRow({ sale, canEdit }) {
         {sale.customer_name ? (
           <p className="perfume-table-description">Cliente: {sale.customer_name}</p>
         ) : null}
-        {!fullyCollected ? (
+        {isCredit ? (
           <p className="perfume-table-description">
-            El cliente todavía debe S/ {Number(sale.balance).toFixed(2)} de esta venta.
+            Cobrado S/ {(Number(sale.total) - Number(sale.balance)).toFixed(2)} de S/{' '}
+            {Number(sale.total).toFixed(2)}
           </p>
         ) : null}
       </td>
-      <td className="perfume-table-price-cell">S/ {Number(sale.total).toFixed(2)}</td>
       <td className="perfume-table-price-cell">
         S/ {sale.commission_amount ? Number(sale.commission_amount).toFixed(2) : '0.00'}
       </td>
+      <td className="perfume-table-price-cell">S/ {paidSoFar.toFixed(2)}</td>
       <td>
         {sale.commission_paid ? (
           <span className="badge badge-paid">
@@ -43,8 +57,8 @@ export default function CommissionRow({ sale, canEdit }) {
             </span>
             Pagada
           </span>
-        ) : fullyCollected ? (
-          <span className="badge badge-credito">Lista para pagar</span>
+        ) : payoutDue > 0 ? (
+          <span className="badge badge-credito">Disponible: S/ {payoutDue.toFixed(2)}</span>
         ) : (
           <span className="badge badge-pending">
             <span className="badge-icon">
@@ -59,19 +73,22 @@ export default function CommissionRow({ sale, canEdit }) {
       </td>
       <td className="perfume-table-actions-cell">
         {canEdit ? (
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={togglePaid}
-            disabled={isPending || (!sale.commission_paid && !fullyCollected)}
-            title={
-              !sale.commission_paid && !fullyCollected
-                ? 'El cliente aún no termina de pagar esta venta.'
-                : undefined
-            }
-          >
-            {sale.commission_paid ? 'Marcar como pendiente' : 'Marcar como pagada'}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={handlePay}
+              disabled={isPending || payoutDue <= 0}
+              title={payoutDue <= 0 ? 'Todavía no hay comisión nueva disponible.' : undefined}
+            >
+              Pagar S/ {payoutDue.toFixed(2)}
+            </button>
+            {paidSoFar > 0 ? (
+              <button type="button" className="btn-danger" onClick={handleReset} disabled={isPending}>
+                Deshacer
+              </button>
+            ) : null}
+          </>
         ) : null}
       </td>
     </tr>

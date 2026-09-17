@@ -5,15 +5,15 @@ import CommissionRow from './CommissionRow';
 
 const FILTERS = [
   { value: 'all', label: 'Todas' },
-  { value: 'ready', label: 'Listas para pagar' },
-  { value: 'waiting', label: 'Esperando cobro' },
-  { value: 'paid', label: 'Pagadas' },
+  { value: 'ready', label: 'Con monto disponible' },
+  { value: 'waiting', label: 'Esperando más cobro' },
+  { value: 'paid', label: 'Pagadas por completo' },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
-function isFullyCollected(sale) {
-  return sale.payment_type === 'contado' || Number(sale.balance) <= 0;
+function hasPayoutDue(sale) {
+  return Number(sale.commissionPayoutDue || 0) > 0;
 }
 
 export default function CommissionsList({ sales, canEdit }) {
@@ -35,8 +35,8 @@ export default function CommissionsList({ sales, canEdit }) {
   const filterCounts = useMemo(
     () => ({
       all: searched.length,
-      ready: searched.filter((s) => !s.commission_paid && isFullyCollected(s)).length,
-      waiting: searched.filter((s) => !s.commission_paid && !isFullyCollected(s)).length,
+      ready: searched.filter((s) => hasPayoutDue(s)).length,
+      waiting: searched.filter((s) => !s.commission_paid && !hasPayoutDue(s)).length,
       paid: searched.filter((s) => s.commission_paid).length,
     }),
     [searched],
@@ -44,8 +44,8 @@ export default function CommissionsList({ sales, canEdit }) {
 
   const rows = useMemo(() => {
     return searched.filter((sale) => {
-      if (filterBy === 'ready') return !sale.commission_paid && isFullyCollected(sale);
-      if (filterBy === 'waiting') return !sale.commission_paid && !isFullyCollected(sale);
+      if (filterBy === 'ready') return hasPayoutDue(sale);
+      if (filterBy === 'waiting') return !sale.commission_paid && !hasPayoutDue(sale);
       if (filterBy === 'paid') return sale.commission_paid;
       return true;
     });
@@ -99,8 +99,8 @@ export default function CommissionsList({ sales, canEdit }) {
               <thead>
                 <tr>
                   <th scope="col">Perfume</th>
-                  <th scope="col">Total</th>
-                  <th scope="col">Comisión</th>
+                  <th scope="col">Comisión total</th>
+                  <th scope="col">Pagado</th>
                   <th scope="col">Estado</th>
                   <th scope="col">Fecha</th>
                   <th scope="col">Acciones</th>

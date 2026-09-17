@@ -1,6 +1,14 @@
 import { getCurrentRole } from '@/lib/session';
 import { getSummary, listPendingDeliveries } from '@/lib/db';
-import { IconBottle, IconLayers, IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
+import {
+  IconBottle,
+  IconLayers,
+  IconReceipt,
+  IconCoin,
+  IconClock,
+  IconWallet,
+  IconExpense,
+} from './icons';
 import StockBarChart from './StockBarChart';
 import PaymentSplitBar from './PaymentSplitBar';
 import PendingDeliveryRow from './PendingDeliveryRow';
@@ -123,6 +131,12 @@ export default async function ResumenPage() {
           value={`S/ ${Number(summary.totalInvested).toFixed(2)}`}
         />
         <StatTile
+          icon={<IconExpense size={22} />}
+          label="Gastos extras (histórico)"
+          tone="attention"
+          value={`S/ ${Number(summary.expensesTotal).toFixed(2)}`}
+        />
+        <StatTile
           icon={<IconWallet size={22} />}
           label={`Cuotas de pandero (${summary.panderoCuotasCount} pagando)`}
           tone="good"
@@ -151,9 +165,17 @@ export default async function ResumenPage() {
               <span>Costo estimado</span>
               <strong>S/ {Number(summary.estimatedCost).toFixed(2)}</strong>
             </li>
-            <li className="profit-highlight">
+            <li>
               <span>Ganancia bruta</span>
               <strong>S/ {Number(summary.grossProfit).toFixed(2)}</strong>
+            </li>
+            <li>
+              <span>Gastos extras</span>
+              <strong>− S/ {Number(summary.expensesTotal).toFixed(2)}</strong>
+            </li>
+            <li className="profit-highlight">
+              <span>Ganancia neta</span>
+              <strong>S/ {Number(summary.netProfit).toFixed(2)}</strong>
             </li>
             <li>
               <span>Margen</span>
@@ -163,7 +185,8 @@ export default async function ResumenPage() {
           <p className="hint">
             El costo se calcula con el costo promedio de compra de cada perfume (incluye flete). Si
             un perfume se vendió sin tener ninguna compra registrada, su costo cuenta como S/ 0.00
-            y la ganancia se ve inflada hasta que registres esa compra.
+            y la ganancia se ve inflada hasta que registres esa compra. La ganancia neta ya resta
+            los gastos extras que registres en la sección Gastos.
           </p>
         </div>
 
