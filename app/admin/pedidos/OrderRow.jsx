@@ -22,13 +22,14 @@ export default function OrderRow({ order }) {
   }
 
   return (
-    <li className="history-row">
-      <div>
+    <tr className="perfume-table-row">
+      <td>
         <strong>{order.customer_name}</strong>
-        <span>
-          {' '}
-          · {order.perfume_name} · {order.quantity} unid.
-        </span>{' '}
+        {order.note ? <p className="perfume-table-description">Nota: {order.note}</p> : null}
+      </td>
+      <td>{order.perfume_name}</td>
+      <td className="perfume-table-stock-cell">{order.quantity}</td>
+      <td>
         {order.fulfilled ? (
           <span className="badge badge-paid">
             <span className="badge-icon">
@@ -41,21 +42,22 @@ export default function OrderRow({ order }) {
             <span className="badge-icon">
               <IconClock size={12} />
             </span>
-            {shortOnStock ? 'Falta comprar' : 'Hay stock, listo para entregar'}
+            {shortOnStock ? 'Falta comprar' : 'Hay stock, listo'}
           </span>
         )}
-        <p className="hint">Stock actual del perfume: {order.perfume_stock}</p>
-        {order.note ? <p>Nota: {order.note}</p> : null}
-      </div>
-      <div className="perfume-row-actions">
-        <time>{new Date(order.created_at).toLocaleDateString('es-PE')}</time>
+      </td>
+      <td className={`perfume-table-stock-cell${shortOnStock ? ' text-critical' : ''}`}>
+        {order.perfume_stock}
+      </td>
+      <td>{new Date(order.created_at).toLocaleDateString('es-PE')}</td>
+      <td className="perfume-table-actions-cell">
         <button type="button" className="btn-secondary" onClick={toggleFulfilled} disabled={isPending}>
           {order.fulfilled ? 'Marcar pendiente' : 'Marcar cumplido'}
         </button>
         <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
           Eliminar
         </button>
-      </div>
-    </li>
+      </td>
+    </tr>
   );
 }

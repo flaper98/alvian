@@ -80,11 +80,26 @@ export default function OrdersList({ orders }) {
       {rows.length === 0 ? (
         <p className="hint">Ningún pedido coincide con este filtro.</p>
       ) : (
-        <ul className="history-list">
-          {rows.map((order) => (
-            <OrderRow key={order.id} order={order} />
-          ))}
-        </ul>
+        <div className="perfume-table-wrap">
+          <table className="perfume-table">
+            <thead>
+              <tr>
+                <th scope="col">Cliente</th>
+                <th scope="col">Perfume</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Stock actual</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((order) => (
+                <OrderRow key={order.id} order={order} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
