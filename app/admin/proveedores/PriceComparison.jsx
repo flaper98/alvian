@@ -14,6 +14,7 @@ export default function PriceComparison({ comparison }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterBy, setFilterBy] = useState('all');
+  const [supplierFilter, setSupplierFilter] = useState('all');
 
   const suppliers = useMemo(() => {
     const seen = new Map();
@@ -74,11 +75,18 @@ export default function PriceComparison({ comparison }) {
       return true;
     });
 
-    return [...filtered].sort((a, b) => {
+    const bySupplierFilter =
+      supplierFilter === 'all'
+        ? filtered
+        : filtered.filter((row) => row.cheapest.supplierId === Number(supplierFilter));
+
+    return [...bySupplierFilter].sort((a, b) => {
       if (sortBy === 'savings') return b.savings - a.savings;
       return a.perfumeName.localeCompare(b.perfumeName);
     });
-  }, [searched, filterBy, sortBy]);
+  }, [searched, filterBy, sortBy, supplierFilter]);
+
+  const selectedSupplierName = suppliers.find((s) => s.id === Number(supplierFilter))?.name;
 
   if (comparison.length === 0) {
     return <p>Todavía no hay precios registrados para comparar.</p>;
@@ -97,10 +105,25 @@ export default function PriceComparison({ comparison }) {
           <option value="name">Ordenar: nombre (A-Z)</option>
           <option value="savings">Ordenar: mayor ahorro primero</option>
         </select>
+        <select value={supplierFilter} onChange={(event) => setSupplierFilter(event.target.value)}>
+          <option value="all">Todos los proveedores</option>
+          {suppliers.map((supplier) => (
+            <option key={supplier.id} value={supplier.id}>
+              {supplier.name}
+            </option>
+          ))}
+        </select>
         <span className="list-count">
           {rows.length} de {comparison.length} perfume{comparison.length === 1 ? '' : 's'}
         </span>
       </div>
+
+      {selectedSupplierName ? (
+        <p className="hint">
+          Mostrando los perfumes donde <strong>{selectedSupplierName}</strong> tiene el precio más bajo
+          (su mínimo).
+        </p>
+      ) : null}
 
       <div className="filter-chips">
         {FILTERS.map((filter) => (
