@@ -122,6 +122,12 @@ export default async function ResumenPage() {
           label="Invertido en compras (histórico)"
           value={`S/ ${Number(summary.totalInvested).toFixed(2)}`}
         />
+        <StatTile
+          icon={<IconWallet size={22} />}
+          label={`Cuotas de pandero (${summary.panderoCuotasCount} pagando)`}
+          tone="good"
+          value={`S/ ${Number(summary.panderoCuotasTotal).toFixed(2)}`}
+        />
       </div>
 
       <div className="chart-grid">

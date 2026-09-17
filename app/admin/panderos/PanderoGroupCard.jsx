@@ -10,6 +10,7 @@ import {
   deletePanderoEntryAction,
   deletePanderoGroupAction,
 } from '@/lib/actions';
+import { PANDERO_CUOTA_AMOUNT } from '@/lib/pandero';
 import { IconCheck, IconClock } from '../icons';
 
 // start_date y turn_date son fechas puras (sin hora) que vienen de Postgres
@@ -93,7 +94,7 @@ function EntryRow({ entry }) {
         <span className="badge-icon">
           {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
         </span>
-        {entry.paying ? 'Pagando' : 'Sin pagar'}
+        {entry.paying ? `Pagando (S/ ${PANDERO_CUOTA_AMOUNT.toFixed(2)})` : 'Sin pagar'}
       </span>
       <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
         <span className="badge-icon">
