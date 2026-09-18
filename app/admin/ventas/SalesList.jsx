@@ -61,6 +61,8 @@ export default function SalesList({ sales, canManage, users }) {
     setPage(1);
   }, [search, filterBy, sortBy, pageSize]);
 
+  const totalAmount = rows.reduce((sum, sale) => sum + Number(sale.total), 0);
+
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -84,7 +86,7 @@ export default function SalesList({ sales, canManage, users }) {
           <option value="amount">Ordenar: mayor monto</option>
         </select>
         <span className="list-count">
-          {rows.length} de {sales.length} venta{sales.length === 1 ? '' : 's'}
+          {rows.length} de {sales.length} venta{sales.length === 1 ? '' : 's'} · S/ {totalAmount.toFixed(2)}
         </span>
       </div>
 
