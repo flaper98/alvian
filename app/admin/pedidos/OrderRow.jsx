@@ -26,6 +26,7 @@ export default function OrderRow({ order, perfumes }) {
   return (
     <>
       <tr className="perfume-table-row">
+        <td className="perfume-table-stock-cell">{order.order_code || '—'}</td>
         <td>
           <strong>{order.customer_name}</strong>
           {order.note ? <p className="perfume-table-description">Nota: {order.note}</p> : null}

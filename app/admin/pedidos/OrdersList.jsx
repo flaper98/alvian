@@ -23,7 +23,10 @@ export default function OrdersList({ orders, perfumes }) {
     const term = search.trim().toLowerCase();
     if (!term) return withStatus;
     return withStatus.filter(
-      (o) => o.customer_name.toLowerCase().includes(term) || o.perfume_name.toLowerCase().includes(term),
+      (o) =>
+        o.customer_name.toLowerCase().includes(term) ||
+        o.perfume_name.toLowerCase().includes(term) ||
+        (o.order_code || '').toLowerCase().includes(term),
     );
   }, [withStatus, search]);
 
@@ -55,7 +58,7 @@ export default function OrdersList({ orders, perfumes }) {
       <div className="list-toolbar">
         <input
           type="search"
-          placeholder="Buscar cliente o perfume..."
+          placeholder="Buscar cliente, perfume o código..."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
@@ -84,6 +87,7 @@ export default function OrdersList({ orders, perfumes }) {
           <table className="perfume-table">
             <thead>
               <tr>
+                <th scope="col">Código</th>
                 <th scope="col">Cliente</th>
                 <th scope="col">Perfume</th>
                 <th scope="col">Cantidad</th>

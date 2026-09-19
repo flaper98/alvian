@@ -2440,6 +2440,27 @@ select:focus {
   flex-wrap: wrap;
 }
 
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.order-item-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.order-item-row select {
+  flex: 2;
+  min-width: 0;
+}
+
+.order-item-row input {
+  flex: 1;
+  min-width: 70px;
+}
+
 .image-field {
   display: flex;
   flex-direction: column;
