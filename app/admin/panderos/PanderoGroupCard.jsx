@@ -85,43 +85,49 @@ function EntryRow({ entry, perfumes }) {
   }
 
   return (
-    <li className={`pandero-entry${entry.fulfilled ? ' pandero-entry-done' : ''}`}>
-      <span className="pandero-entry-position">{entry.position}</span>
-      <div className="pandero-entry-body">
-        <strong>{entry.customer_name}</strong>
-        <span> ({entry.perfume_name})</span>
-        <p className="hint">Le toca: {formatDateOnly(entry.turn_date)}</p>
-      </div>
+    <>
+      <tr className={`perfume-table-row${entry.fulfilled ? ' pandero-row-done' : ''}`}>
+        <td className="perfume-table-stock-cell">{entry.position}</td>
+        <td>
+          <strong>{entry.customer_name}</strong>
+        </td>
+        <td>
+          <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
+            <span className="badge-icon">
+              {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
+            </span>
+            {entry.paying ? `Pagando (S/ ${PANDERO_CUOTA_AMOUNT.toFixed(2)})` : 'Sin pagar'}
+          </span>
+        </td>
+        <td>{entry.perfume_name}</td>
+        <td>
+          <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
+            <span className="badge-icon">
+              {entry.fulfilled ? <IconCheck size={12} /> : <IconClock size={12} />}
+            </span>
+            {entry.fulfilled ? 'Entregado' : 'Pendiente'}
+          </span>
+        </td>
+        <td className="perfume-table-stock-cell">{formatDateOnly(entry.turn_date)}</td>
+        <td className="perfume-table-actions-cell">
+          <button type="button" className="btn-secondary" onClick={() => setEditing(true)} disabled={isPending}>
+            Editar
+          </button>
+          <button type="button" className="btn-secondary" onClick={togglePaying} disabled={isPending}>
+            {entry.paying ? 'Marcar sin pagar' : 'Marcar pagando'}
+          </button>
+          <button type="button" className="btn-secondary" onClick={toggleFulfilled} disabled={isPending}>
+            {entry.fulfilled ? 'Marcar pendiente' : 'Marcar entregado'}
+          </button>
+          <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
+            Quitar
+          </button>
+        </td>
+      </tr>
       {editing ? (
         <EditPanderoEntryModal entry={entry} perfumes={perfumes} onClose={() => setEditing(false)} />
       ) : null}
-      <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
-        <span className="badge-icon">
-          {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
-        </span>
-        {entry.paying ? `Pagando (S/ ${PANDERO_CUOTA_AMOUNT.toFixed(2)})` : 'Sin pagar'}
-      </span>
-      <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
-        <span className="badge-icon">
-          {entry.fulfilled ? <IconCheck size={12} /> : <IconClock size={12} />}
-        </span>
-        {entry.fulfilled ? 'Entregado' : 'Pendiente'}
-      </span>
-      <div className="pandero-entry-actions">
-        <button type="button" className="btn-secondary" onClick={() => setEditing(true)} disabled={isPending}>
-          Editar
-        </button>
-        <button type="button" className="btn-secondary" onClick={togglePaying} disabled={isPending}>
-          {entry.paying ? 'Marcar sin pagar' : 'Marcar pagando'}
-        </button>
-        <button type="button" className="btn-secondary" onClick={toggleFulfilled} disabled={isPending}>
-          {entry.fulfilled ? 'Marcar pendiente' : 'Marcar entregado'}
-        </button>
-        <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
-          Quitar
-        </button>
-      </div>
-    </li>
+    </>
   );
 }
 
@@ -153,11 +159,26 @@ export default function PanderoGroupCard({ group, perfumes }) {
       {group.entries.length === 0 ? (
         <p>Todavía no hay participantes.</p>
       ) : (
-        <ol className="pandero-entry-list">
-          {group.entries.map((entry) => (
-            <EntryRow key={entry.id} entry={entry} perfumes={perfumes} />
-          ))}
-        </ol>
+        <div className="perfume-table-wrap">
+          <table className="perfume-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Participante</th>
+                <th scope="col">Pagando</th>
+                <th scope="col">Perfume</th>
+                <th scope="col">Entregado</th>
+                <th scope="col">Le toca</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.entries.map((entry) => (
+                <EntryRow key={entry.id} entry={entry} perfumes={perfumes} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <AddEntryForm groupId={group.id} perfumes={perfumes} />
