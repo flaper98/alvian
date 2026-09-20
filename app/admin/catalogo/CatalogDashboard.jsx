@@ -27,6 +27,14 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         <input name="price" type="number" step="0.01" min="0" defaultValue={perfume.price} />
       </label>
       <label>
+        Stock
+        <input name="stock" type="number" min="0" step="1" defaultValue={perfume.stock} required />
+        <span className="hint">
+          Úsalo solo para corregir el stock si no coincide con lo que tienes. Un ajuste manual no
+          registra compra ni costo.
+        </span>
+      </label>
+      <label>
         Categoría
         <select name="category" defaultValue={perfume.category || ''}>
           <option value="">Sin especificar</option>

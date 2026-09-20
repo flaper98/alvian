@@ -103,7 +103,14 @@ function EntryRow({ entry, perfumes, groupEntries }) {
             {entry.paying ? `Pagando (S/ ${PANDERO_CUOTA_AMOUNT.toFixed(2)})` : 'Sin pagar'}
           </span>
         </td>
-        <td>{entry.perfume_name}</td>
+        <td>
+          {entry.perfume_name}
+          {!entry.fulfilled ? (
+            <p className={`perfume-table-description${entry.perfume_stock < 1 ? ' text-critical' : ''}`}>
+              {entry.perfume_stock < 1 ? 'Sin stock' : `Stock: ${entry.perfume_stock}`}
+            </p>
+          ) : null}
+        </td>
         <td>
           <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
             <span className="badge-icon">
