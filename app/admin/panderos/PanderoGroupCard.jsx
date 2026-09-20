@@ -13,6 +13,7 @@ import {
 import { PANDERO_CUOTA_AMOUNT } from '@/lib/pandero';
 import { IconCheck, IconClock } from '../icons';
 import EditPanderoEntryModal from './EditPanderoEntryModal';
+import PanderoRoundPaymentsModal from './PanderoRoundPaymentsModal';
 
 // start_date y turn_date son fechas puras (sin hora) que vienen de Postgres
 // como medianoche UTC. Si se formatean con la zona horaria local del
@@ -61,9 +62,11 @@ function AddEntryForm({ groupId, perfumes }) {
   );
 }
 
-function EntryRow({ entry, perfumes }) {
+function EntryRow({ entry, perfumes, groupEntries }) {
   const [isPending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
+  const [showPayments, setShowPayments] = useState(false);
+  const paymentsCount = (entry.round_payments || []).length;
 
   function toggleFulfilled() {
     startTransition(async () => {
@@ -110,6 +113,11 @@ function EntryRow({ entry, perfumes }) {
         </td>
         <td className="perfume-table-stock-cell">{formatDateOnly(entry.turn_date)}</td>
         <td className="perfume-table-actions-cell">
+          {entry.fulfilled ? (
+            <button type="button" className="btn-secondary" onClick={() => setShowPayments(true)}>
+              {entry.round_recorded ? `Ver pagos (${paymentsCount})` : 'Ver pagos'}
+            </button>
+          ) : null}
           <button type="button" className="btn-secondary" onClick={() => setEditing(true)} disabled={isPending}>
             Editar
           </button>
@@ -126,6 +134,13 @@ function EntryRow({ entry, perfumes }) {
       </tr>
       {editing ? (
         <EditPanderoEntryModal entry={entry} perfumes={perfumes} onClose={() => setEditing(false)} />
+      ) : null}
+      {showPayments ? (
+        <PanderoRoundPaymentsModal
+          entry={entry}
+          groupEntries={groupEntries}
+          onClose={() => setShowPayments(false)}
+        />
       ) : null}
     </>
   );
@@ -174,7 +189,7 @@ export default function PanderoGroupCard({ group, perfumes }) {
             </thead>
             <tbody>
               {group.entries.map((entry) => (
-                <EntryRow key={entry.id} entry={entry} perfumes={perfumes} />
+                <EntryRow key={entry.id} entry={entry} perfumes={perfumes} groupEntries={group.entries} />
               ))}
             </tbody>
           </table>
