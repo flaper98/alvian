@@ -49,6 +49,7 @@ export default function OrderRow({ order, perfumes }) {
               {shortOnStock ? 'Falta comprar' : 'Hay stock, listo'}
             </span>
           )}
+          {order.stocked ? <span className="badge badge-gold"> En stock</span> : null}
         </td>
         <td className={`perfume-table-stock-cell${shortOnStock ? ' text-critical' : ''}`}>
           {order.perfume_stock}

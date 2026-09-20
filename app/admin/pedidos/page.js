@@ -141,7 +141,7 @@ export default async function PedidosPage() {
 
       <div>
         <h2>Pedidos registrados ({orders.length})</h2>
-        <OrdersList orders={orders} perfumes={perfumes} />
+        <OrdersList orders={orders} perfumes={perfumes} canReceive={role === 'admin'} />
       </div>
     </section>
   );

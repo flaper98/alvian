@@ -2015,6 +2015,40 @@ button {
   opacity: 0.65;
 }
 
+.modal-dialog-wide {
+  max-width: 720px;
+}
+
+.stock-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.stock-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.stock-line-name {
+  flex: 1;
+  min-width: 200px;
+}
+
+.stock-line-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 150px;
+}
+
 .round-payers-list {
   display: flex;
   flex-direction: column;

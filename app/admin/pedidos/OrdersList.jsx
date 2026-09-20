@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import OrderRow from './OrderRow';
+import ReceiveStockModal from './ReceiveStockModal';
 
 const FILTERS = [
   { value: 'all', label: 'Todos' },
@@ -10,9 +11,12 @@ const FILTERS = [
   { value: 'fulfilled', label: 'Cumplidos' },
 ];
 
-export default function OrdersList({ orders, perfumes }) {
+export default function OrdersList({ orders, perfumes, canReceive }) {
   const [search, setSearch] = useState('');
   const [filterBy, setFilterBy] = useState('all');
+  const [receiving, setReceiving] = useState(false);
+
+  const notStocked = useMemo(() => orders.filter((order) => !order.stocked), [orders]);
 
   const withStatus = useMemo(
     () => orders.map((order) => ({ ...order, shortOnStock: order.perfume_stock < order.quantity })),
@@ -62,10 +66,16 @@ export default function OrdersList({ orders, perfumes }) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+        {canReceive && notStocked.length > 0 ? (
+          <button type="button" className="btn-primary" onClick={() => setReceiving(true)}>
+            Ingresar a stock ({notStocked.length})
+          </button>
+        ) : null}
         <span className="list-count">
           {rows.length} de {orders.length} pedido{orders.length === 1 ? '' : 's'}
         </span>
       </div>
+      {receiving ? <ReceiveStockModal orders={notStocked} onClose={() => setReceiving(false)} /> : null}
 
       <div className="filter-chips">
         {FILTERS.map((filter) => (
