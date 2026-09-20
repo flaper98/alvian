@@ -13,7 +13,8 @@ export default function PendingDeliveryRow({ sale }) {
   function markDelivered() {
     startTransition(async () => {
       try {
-        await setSaleDeliveredAction(sale.id, true);
+        const result = await setSaleDeliveredAction(sale.id, true);
+        if (result?.error) alert(result.error);
       } catch (error) {
         alert(error?.message || 'No se pudo actualizar la entrega.');
       }

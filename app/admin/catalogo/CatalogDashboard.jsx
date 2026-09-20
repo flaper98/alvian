@@ -74,7 +74,8 @@ function PerfumeTableRow({ perfume }) {
     if (!confirm(`¿Eliminar "${perfume.name}"?`)) return;
     startTransition(async () => {
       try {
-        await deletePerfumeAction(perfume.id);
+        const result = await deletePerfumeAction(perfume.id);
+        if (result?.error) alert(result.error);
       } catch (err) {
         alert('No se pudo eliminar. Vuelve a iniciar sesión e inténtalo de nuevo.');
       }

@@ -12,7 +12,8 @@ function PurchaseTableRow({ purchase }) {
     if (!confirm(`¿Eliminar la compra de "${purchase.perfume_name}"?`)) return;
     startTransition(async () => {
       try {
-        await deletePurchaseAction(purchase.id);
+        const result = await deletePurchaseAction(purchase.id);
+        if (result?.error) alert(result.error);
       } catch (err) {
         alert(err.message || 'No se pudo eliminar la compra.');
       }

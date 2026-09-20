@@ -13,7 +13,8 @@ export default function CommissionRow({ sale, canEdit }) {
   function handlePay() {
     startTransition(async () => {
       try {
-        await payAvailableCommissionAction(sale.id);
+        const result = await payAvailableCommissionAction(sale.id);
+        if (result?.error) alert(result.error);
       } catch (error) {
         alert(error?.message || 'No se pudo pagar la comisión.');
       }
@@ -24,7 +25,8 @@ export default function CommissionRow({ sale, canEdit }) {
     if (!confirm('¿Deshacer los pagos de comisión registrados para esta venta?')) return;
     startTransition(async () => {
       try {
-        await resetCommissionPaymentAction(sale.id);
+        const result = await resetCommissionPaymentAction(sale.id);
+        if (result?.error) alert(result.error);
       } catch (error) {
         alert(error?.message || 'No se pudo deshacer el pago.');
       }

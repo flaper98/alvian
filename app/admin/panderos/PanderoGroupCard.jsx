@@ -70,7 +70,8 @@ function EntryRow({ entry, perfumes, groupEntries }) {
 
   function toggleFulfilled() {
     startTransition(async () => {
-      await setPanderoEntryFulfilledAction(entry.id, !entry.fulfilled);
+      const result = await setPanderoEntryFulfilledAction(entry.id, !entry.fulfilled);
+      if (result?.error) alert(result.error);
     });
   }
 

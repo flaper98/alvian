@@ -15,7 +15,8 @@ export default function SaleRow({ sale, canManage, users = [] }) {
     if (!confirm(`¿Eliminar esta venta de "${sale.perfume_name}"?`)) return;
     startTransition(async () => {
       try {
-        await deleteSaleAction(sale.id);
+        const result = await deleteSaleAction(sale.id);
+        if (result?.error) alert(result.error);
       } catch (error) {
         alert(error?.message || 'No se pudo eliminar la venta.');
       }
@@ -25,7 +26,8 @@ export default function SaleRow({ sale, canManage, users = [] }) {
   function toggleDelivered() {
     startTransition(async () => {
       try {
-        await setSaleDeliveredAction(sale.id, !sale.delivered);
+        const result = await setSaleDeliveredAction(sale.id, !sale.delivered);
+        if (result?.error) alert(result.error);
       } catch (error) {
         alert(error?.message || 'No se pudo actualizar la entrega.');
       }

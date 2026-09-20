@@ -14,7 +14,8 @@ function ExpenseTableRow({ expense }) {
     if (!confirm(`¿Eliminar el gasto "${expense.description}"?`)) return;
     startTransition(async () => {
       try {
-        await deleteExpenseAction(expense.id);
+        const result = await deleteExpenseAction(expense.id);
+        if (result?.error) alert(result.error);
       } catch (err) {
         alert(err.message || 'No se pudo eliminar el gasto.');
       }
