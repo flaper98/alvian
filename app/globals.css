@@ -101,8 +101,7 @@ button {
   font-weight: 600;
 }
 
-.hero-fallback h1,
-.hero-slide-content h1 {
+.hero-fallback h1 {
   color: var(--cream-soft);
   font-size: clamp(2.6rem, 6vw, 4.5rem);
   letter-spacing: 0.03em;
@@ -177,18 +176,13 @@ button {
 .hero-slide {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: stretch;
   opacity: 0;
   visibility: hidden;
   transform: translateX(18px);
   /* Aproxima el "power1.inOut" de GSAP con una curva estándar de CSS, sin
      agregar esa librería solo para esta transición. */
   transition: opacity 400ms cubic-bezier(0.45, 0, 0.55, 1), transform 400ms cubic-bezier(0.45, 0, 0.55, 1);
-  background:
-    radial-gradient(circle at 15% 20%, rgba(201, 153, 60, 0.16), transparent 45%),
-    linear-gradient(120deg, var(--green-800) 0%, var(--green-900) 68%);
+  background: var(--green-900);
 }
 
 .hero-slide.active {
@@ -205,54 +199,21 @@ button {
   }
 }
 
-.hero-slide-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
-  padding: 2rem clamp(1.25rem, 6vw, 4.5rem);
+.hero-banner-link {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.hero-slide-subtitle {
-  font-style: italic;
-  color: rgba(247, 243, 230, 0.85);
-  font-size: 1.1rem;
-  margin: 0 0 1.75rem;
-  max-width: 420px;
-}
-
-.hero-slide-media {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem clamp(1.5rem, 5vw, 4rem);
-  overflow: hidden;
-  background: linear-gradient(135deg, #fdfbf5 0%, var(--cream) 55%, var(--cream-soft) 100%);
-  clip-path: polygon(6% 0, 100% 0, 100% 100%, 0% 100%);
-}
-
-.hero-slide-media::before {
-  content: '';
-  position: absolute;
-  inset: 6%;
-  background: radial-gradient(circle, rgba(201, 153, 60, 0.14), transparent 70%);
-  border-radius: 50%;
-}
-
-.hero-slide-image {
-  position: relative;
-  z-index: 1;
-  max-width: 100%;
-  max-height: 82%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  mix-blend-mode: multiply;
-  filter: drop-shadow(0 25px 30px rgba(20, 20, 15, 0.22));
+.hero-banner-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Los banners vienen ya diseñados a este ancho/alto (ver /admin/banners),
+     así que se recortan para llenar el carrusel de lado a lado en vez de
+     dejarlos chicos y centrados como una foto de producto suelta. */
+  object-fit: cover;
+  object-position: center;
 }
 
 .hero-carousel-arrow {
@@ -328,36 +289,7 @@ button {
 
 @media (max-width: 860px) {
   .hero-carousel {
-    height: clamp(560px, 95vh, 720px);
-  }
-
-  .hero-slide {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
-
-  .hero-slide-media {
-    order: -1;
-    padding: 1.5rem 1.5rem 0.5rem;
-    clip-path: none;
-  }
-
-  .hero-slide-image {
-    max-height: 100%;
-  }
-
-  .hero-slide-content {
-    text-align: center;
-    align-items: center;
-    padding: 0.5rem 1.5rem 2rem;
-  }
-
-  .hero-slide-subtitle {
-    max-width: none;
-  }
-
-  .hero-slide-content .hero-actions {
-    justify-content: center;
+    height: clamp(360px, 60vh, 560px);
   }
 
   .hero-carousel-arrow {

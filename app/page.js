@@ -1,4 +1,4 @@
-import { listPerfumes } from '@/lib/db';
+import { listPerfumes, listHeroBanners } from '@/lib/db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { slugify } from '@/lib/slug';
 import BrandMarquee from './BrandMarquee';
@@ -27,7 +27,13 @@ export default async function HomePage() {
     perfumes = [];
   }
 
-  const heroSlides = perfumes.filter((p) => p.image_url).slice(0, 5);
+  let heroBanners = [];
+  try {
+    heroBanners = await listHeroBanners({ onlyActive: true });
+  } catch (error) {
+    heroBanners = [];
+  }
+
   const whatsappHref = buildWhatsAppLink(
     'Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?',
   );
@@ -69,8 +75,8 @@ export default async function HomePage() {
       <SiteNav />
 
       <header id="inicio">
-        {heroSlides.length > 0 ? (
-          <HeroCarousel slides={heroSlides} whatsappHref={whatsappHref} />
+        {heroBanners.length > 0 ? (
+          <HeroCarousel slides={heroBanners} />
         ) : (
           <div className="hero-fallback">
             {/* eslint-disable-next-line @next/next/no-img-element */}

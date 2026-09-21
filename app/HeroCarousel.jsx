@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import WhatsAppIcon from './WhatsAppIcon';
 
 const AUTOPLAY_MS = 5000;
 const SWIPE_THRESHOLD_PX = 30;
 const AXIS_LOCK_PX = 8;
 
-export default function HeroCarousel({ slides, whatsappHref }) {
+export default function HeroCarousel({ slides }) {
   const [index, setIndex] = useState(0);
   const timerRef = useRef(null);
   const hoveredRef = useRef(false);
@@ -112,7 +111,7 @@ export default function HeroCarousel({ slides, whatsappHref }) {
       className="hero-carousel"
       role="region"
       aria-roledescription="carousel"
-      aria-label="Perfumes destacados"
+      aria-label="Promociones destacadas"
       onMouseEnter={() => {
         hoveredRef.current = true;
       }}
@@ -132,45 +131,33 @@ export default function HeroCarousel({ slides, whatsappHref }) {
       onTouchEnd={handleTouchEnd}
     >
       <p className="sr-only" aria-live="polite">
-        Diapositiva {index + 1} de {slides.length}: {currentSlide?.name}
+        Diapositiva {index + 1} de {slides.length}: {currentSlide?.alt_text}
       </p>
 
-      {slides.map((slide, i) => (
-        <div
-          key={slide.id}
-          ref={(el) => {
-            slideRefs.current[i] = el;
-          }}
-          className={`hero-slide${i === index ? ' active' : ''}`}
-          aria-hidden={i !== index}
-        >
-          <div className="hero-slide-content">
-            <p className="eyebrow">Perfumería en Pucallpa</p>
-            <h1>{slide.name}</h1>
-            <p className="hero-slide-subtitle">
-              {slide.description || 'Fragancia original disponible ahora'}
-            </p>
-            <div className="hero-actions">
-              <a
-                className="btn-whatsapp"
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <WhatsAppIcon width={19} height={19} />
-                Escríbenos por WhatsApp
+      {slides.map((slide, i) => {
+        const image = (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={slide.image_url} alt={slide.alt_text} className="hero-banner-image" />
+        );
+        return (
+          <div
+            key={slide.id}
+            ref={(el) => {
+              slideRefs.current[i] = el;
+            }}
+            className={`hero-slide${i === index ? ' active' : ''}`}
+            aria-hidden={i !== index}
+          >
+            {slide.link_url ? (
+              <a href={slide.link_url} className="hero-banner-link" tabIndex={i === index ? 0 : -1}>
+                {image}
               </a>
-              <a href="#catalogo" className="btn-hero-outline">
-                Ver catálogo
-              </a>
-            </div>
+            ) : (
+              image
+            )}
           </div>
-          <div className="hero-slide-media">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={slide.image_url} alt={slide.name} className="hero-slide-image" />
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {slides.length > 1 ? (
         <>
@@ -196,7 +183,7 @@ export default function HeroCarousel({ slides, whatsappHref }) {
                 key={slide.id}
                 type="button"
                 className={`hero-carousel-dot${i === index ? ' active' : ''}`}
-                aria-label={`Ir a la diapositiva ${i + 1} de ${slides.length}: ${slide.name}`}
+                aria-label={`Ir a la diapositiva ${i + 1} de ${slides.length}: ${slide.alt_text}`}
                 aria-current={i === index ? 'true' : undefined}
                 onClick={() => goTo(i)}
               />

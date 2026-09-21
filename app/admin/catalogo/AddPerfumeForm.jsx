@@ -15,7 +15,7 @@ export function SubmitButton({ label, pendingLabel }) {
   );
 }
 
-export function ImageField({ defaultValue }) {
+export function ImageField({ defaultValue, label = 'Imagen del perfume' }) {
   const [imageUrl, setImageUrl] = useState(defaultValue || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -48,7 +48,7 @@ export function ImageField({ defaultValue }) {
 
   return (
     <div className="image-field">
-      <label>Imagen del perfume</label>
+      <label>{label}</label>
       <div className="image-field-row">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
