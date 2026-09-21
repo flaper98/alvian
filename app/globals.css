@@ -33,6 +33,18 @@
   box-sizing: border-box;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html,
 body {
   padding: 0;
@@ -156,6 +168,10 @@ button {
   height: clamp(500px, 82vh, 720px);
   background: var(--green-900);
   color: var(--cream-soft);
+  /* Deja el scroll vertical nativo del navegador y solo toma el gesto
+     horizontal (ver HeroCarousel.jsx) para que el swipe no interfiera con
+     el scroll de la página. */
+  touch-action: pan-y;
 }
 
 .hero-slide {
@@ -166,7 +182,10 @@ button {
   align-items: stretch;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 1s ease;
+  transform: translateX(18px);
+  /* Aproxima el "power1.inOut" de GSAP con una curva estándar de CSS, sin
+     agregar esa librería solo para esta transición. */
+  transition: opacity 400ms cubic-bezier(0.45, 0, 0.55, 1), transform 400ms cubic-bezier(0.45, 0, 0.55, 1);
   background:
     radial-gradient(circle at 15% 20%, rgba(201, 153, 60, 0.16), transparent 45%),
     linear-gradient(120deg, var(--green-800) 0%, var(--green-900) 68%);
@@ -175,7 +194,15 @@ button {
 .hero-slide.active {
   opacity: 1;
   visibility: visible;
+  transform: translateX(0);
   z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide {
+    transform: none;
+    transition: opacity 400ms ease;
+  }
 }
 
 .hero-slide-content {
@@ -231,7 +258,7 @@ button {
 .hero-carousel-arrow {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(1);
   z-index: 3;
   width: 44px;
   height: 44px;
@@ -245,12 +272,20 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease-out, border-color 0.2s ease-out, transform 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .hero-carousel-arrow:hover {
   background: rgba(14, 43, 33, 0.6);
   border-color: var(--gold);
+  opacity: 0.9;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.hero-carousel-arrow:focus-visible,
+.hero-carousel-dot:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .hero-carousel-arrow-prev {
@@ -268,21 +303,26 @@ button {
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
-  gap: 0.55rem;
+  gap: 0.6rem;
 }
 
 .hero-carousel-dot {
   width: 9px;
   height: 9px;
+  padding: 0;
   border-radius: 50%;
   border: 1px solid rgba(247, 243, 230, 0.5);
-  background: transparent;
-  padding: 0;
+  background-color: transparent;
   cursor: pointer;
+  transition: background-color 300ms ease-in-out, border-color 300ms ease-in-out, opacity 200ms ease-out;
+}
+
+.hero-carousel-dot:hover {
+  opacity: 0.8;
 }
 
 .hero-carousel-dot.active {
-  background: var(--gold);
+  background-color: var(--gold);
   border-color: var(--gold);
 }
 
@@ -321,8 +361,8 @@ button {
   }
 
   .hero-carousel-arrow {
-    width: 36px;
-    height: 36px;
+    /* Se mantiene en 44x44 (mínimo recomendado para objetivos táctiles) aunque
+       el resto del carrusel se achique en móvil. */
     font-size: 1.3rem;
   }
 }
