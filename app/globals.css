@@ -164,7 +164,10 @@ button {
 .hero-carousel {
   position: relative;
   overflow: hidden;
-  height: clamp(500px, 82vh, 720px);
+  /* Franja tipo banner (como Ripley), no un hero gigante: así una misma
+     imagen ancha se ve bien sin necesitar una versión distinta por tamaño
+     de pantalla. */
+  height: clamp(220px, 34vw, 480px);
   background: var(--green-900);
   color: var(--cream-soft);
   /* Deja el scroll vertical nativo del navegador y solo toma el gesto
@@ -209,10 +212,11 @@ button {
   display: block;
   width: 100%;
   height: 100%;
-  /* Los banners vienen ya diseñados a este ancho/alto (ver /admin/banners),
-     así que se recortan para llenar el carrusel de lado a lado en vez de
-     dejarlos chicos y centrados como una foto de producto suelta. */
-  object-fit: cover;
+  /* "contain" para que el banner NUNCA se recorte ni se le haga zoom, pase
+     lo que pase con su tamaño real. Si el banner se exporta más o menos del
+     ancho recomendado (ver /admin/banners), se ven franjas del verde de
+     fondo a los lados/arriba-abajo en vez de perder texto o precios. */
+  object-fit: contain;
   object-position: center;
 }
 
@@ -288,10 +292,6 @@ button {
 }
 
 @media (max-width: 860px) {
-  .hero-carousel {
-    height: clamp(360px, 60vh, 560px);
-  }
-
   .hero-carousel-arrow {
     /* Se mantiene en 44x44 (mínimo recomendado para objetivos táctiles) aunque
        el resto del carrusel se achique en móvil. */
