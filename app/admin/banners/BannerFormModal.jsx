@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import BannerForm from './BannerForm';
 
-export default function BannerFormModal() {
+export default function BannerFormModal({ perfumes }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,7 +23,7 @@ export default function BannerFormModal() {
             >
               ×
             </button>
-            <BannerForm onSaved={() => setOpen(false)} />
+            <BannerForm perfumes={perfumes} onSaved={() => setOpen(false)} />
           </div>
         </div>
       ) : null}

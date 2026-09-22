@@ -5,6 +5,8 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { ImageField } from '../catalogo/AddPerfumeForm';
 import { updateHeroBannerAction } from '@/lib/actions';
+import { slugify } from '@/lib/slug';
+import PerfumeLinkField, { CATALOG_LINK_VALUE } from './PerfumeLinkField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -15,13 +17,26 @@ function SubmitButton() {
   );
 }
 
-function EditBannerForm({ banner, onClose }) {
+function EditBannerForm({ banner, perfumes, onClose }) {
   const boundAction = updateHeroBannerAction.bind(null, banner.id);
   const [state, formAction] = useActionState(boundAction, { error: null });
 
   useEffect(() => {
     if (state?.success) onClose();
   }, [state, onClose]);
+
+  // Si el enlace guardado ya corresponde a un perfume (o al catálogo),
+  // preseleccionamos ese mismo perfume en vez de mostrarlo como "personalizado".
+  const matchedPerfume = perfumes.find(
+    (perfume) => banner.link_url === `/perfume/${slugify(perfume.name)}`,
+  );
+  const isCatalogLink = banner.link_url === '#catalogo';
+  const initialSelection = matchedPerfume
+    ? matchedPerfume.name
+    : isCatalogLink
+      ? CATALOG_LINK_VALUE
+      : '';
+  const initialCustomLink = matchedPerfume || isCatalogLink ? '' : banner.link_url || '';
 
   return (
     <form action={formAction} className="perfume-form">
@@ -31,10 +46,11 @@ function EditBannerForm({ banner, onClose }) {
         Texto alternativo
         <input name="altText" type="text" defaultValue={banner.alt_text} required />
       </label>
-      <label>
-        Enlace al hacer clic (opcional)
-        <input name="linkUrl" type="text" defaultValue={banner.link_url || ''} />
-      </label>
+      <PerfumeLinkField
+        perfumes={perfumes}
+        initialSelection={initialSelection}
+        initialCustomLink={initialCustomLink}
+      />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />
@@ -46,14 +62,14 @@ function EditBannerForm({ banner, onClose }) {
   );
 }
 
-export default function EditBannerModal({ banner, onClose }) {
+export default function EditBannerModal({ banner, perfumes, onClose }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
           ×
         </button>
-        <EditBannerForm banner={banner} onClose={onClose} />
+        <EditBannerForm banner={banner} perfumes={perfumes} onClose={onClose} />
       </div>
     </div>
   );

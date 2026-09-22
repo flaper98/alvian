@@ -8,7 +8,7 @@ import {
 } from '@/lib/actions';
 import EditBannerModal from './EditBannerModal';
 
-function BannerRow({ banner, isFirst, isLast }) {
+function BannerRow({ banner, perfumes, isFirst, isLast }) {
   const [isPending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
 
@@ -70,12 +70,14 @@ function BannerRow({ banner, isFirst, isLast }) {
           </button>
         </td>
       </tr>
-      {editing ? <EditBannerModal banner={banner} onClose={() => setEditing(false)} /> : null}
+      {editing ? (
+        <EditBannerModal banner={banner} perfumes={perfumes} onClose={() => setEditing(false)} />
+      ) : null}
     </>
   );
 }
 
-export default function BannersList({ banners }) {
+export default function BannersList({ banners, perfumes }) {
   if (banners.length === 0) {
     return <p>Todavía no hay banners. Agrega el primero arriba.</p>;
   }
@@ -97,6 +99,7 @@ export default function BannersList({ banners }) {
             <BannerRow
               key={banner.id}
               banner={banner}
+              perfumes={perfumes}
               isFirst={index === 0}
               isLast={index === banners.length - 1}
             />

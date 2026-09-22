@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { SubmitButton, ImageField } from '../catalogo/AddPerfumeForm';
 import { createHeroBannerAction } from '@/lib/actions';
+import PerfumeLinkField from './PerfumeLinkField';
 
-function BannerFormFields({ onSaved }) {
+function BannerFormFields({ perfumes, onSaved }) {
   const [state, formAction] = useActionState(createHeroBannerAction, { error: null });
 
   useEffect(() => {
@@ -24,22 +25,19 @@ function BannerFormFields({ onSaved }) {
           el sitio).
         </span>
       </label>
-      <label>
-        Enlace al hacer clic (opcional)
-        <input name="linkUrl" type="text" placeholder="Ej: /perfume/club-de-nuit-sillage o #catalogo" />
-        <span className="hint">Si lo dejas vacío, el banner no será clicable.</span>
-      </label>
+      <PerfumeLinkField perfumes={perfumes} />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton label="Agregar banner" pendingLabel="Guardando..." />
     </form>
   );
 }
 
-export default function BannerForm({ onSaved }) {
+export default function BannerForm({ perfumes, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <BannerFormFields
       key={formKey}
+      perfumes={perfumes}
       onSaved={() => {
         setFormKey((key) => key + 1);
         onSaved?.();
