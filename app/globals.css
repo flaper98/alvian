@@ -202,20 +202,38 @@ button {
   }
 }
 
+/* Relleno de las franjas que deja el "contain": una versión de la misma
+   imagen, ampliada y difuminada, a todo el ancho del slide, detrás del
+   banner nítido. Así las franjas dejan de verse vacías/verdes sin arriesgar
+   recortar el banner. */
+.hero-banner-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(32px) brightness(0.6) saturate(1.15);
+  transform: scale(1.15);
+}
+
 .hero-banner-link {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
 }
 
 .hero-banner-image {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   /* "contain" para que el banner NUNCA se recorte ni se le haga zoom, pase
      lo que pase con su tamaño real. Si el banner se exporta más o menos del
-     ancho recomendado (ver /admin/banners), se ven franjas del verde de
-     fondo a los lados/arriba-abajo en vez de perder texto o precios. */
+     ancho recomendado (ver /admin/banners), el fondo difuminado de arriba
+     rellena esas franjas en vez de perder texto o precios. */
   object-fit: contain;
   object-position: center;
 }

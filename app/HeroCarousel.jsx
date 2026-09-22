@@ -148,6 +148,11 @@ export default function HeroCarousel({ slides }) {
             className={`hero-slide${i === index ? ' active' : ''}`}
             aria-hidden={i !== index}
           >
+            <div
+              className="hero-banner-backdrop"
+              style={{ backgroundImage: `url(${slide.image_url})` }}
+              aria-hidden="true"
+            />
             {slide.link_url ? (
               <a href={slide.link_url} className="hero-banner-link" tabIndex={i === index ? 0 : -1}>
                 {image}
