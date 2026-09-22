@@ -103,8 +103,11 @@ export default async function HomePage() {
       <BrandMarquee />
 
       <main className="catalog" id="catalogo">
-        <h2 className="catalog-title">Perfumes originales en Pucallpa</h2>
-        <p className="catalog-subtitle">Entrega en Pucallpa y envíos a todo el Perú</p>
+        <div className="catalog-header">
+          <p className="eyebrow">Nuestra colección</p>
+          <h2 className="catalog-title">Perfumes originales en Pucallpa</h2>
+          <p className="catalog-subtitle">Entrega en Pucallpa y envíos a todo el Perú</p>
+        </div>
         {perfumes.length === 0 ? (
           <p className="empty-state">Muy pronto nuevos perfumes. ¡Vuelve pronto!</p>
         ) : (

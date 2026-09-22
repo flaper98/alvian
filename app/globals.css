@@ -428,18 +428,38 @@ button {
   padding: 2.25rem 0 4rem;
 }
 
-.catalog-title {
+.catalog-header {
   text-align: center;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  margin-bottom: 0.4rem;
+  margin-bottom: 1.75rem;
+}
+
+/* El eyebrow dorado del hero está pensado para el fondo oscuro; aquí el
+   fondo es claro, así que usamos la variante más oscura para que siga
+   siendo legible (el dorado claro casi no contrasta sobre crema). */
+.catalog-header .eyebrow {
+  color: var(--gold-dark);
+}
+
+.catalog-title {
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
   padding: 0 1.25rem;
 }
 
+.catalog-title::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  background: var(--gold);
+  margin: 0.9rem auto 0;
+}
+
 .catalog-subtitle {
-  text-align: center;
   color: var(--ink-soft);
-  font-size: 0.92rem;
-  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+  margin: 0.75rem 0 0;
   padding: 0 1.25rem;
 }
 
