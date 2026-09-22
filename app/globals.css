@@ -425,13 +425,13 @@ button {
 /* ---------- Catalog ---------- */
 
 .catalog {
-  padding: 3rem 0 4rem;
+  padding: 2.25rem 0 4rem;
 }
 
 .catalog-title {
   text-align: center;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   padding: 0 1.25rem;
 }
 
@@ -439,7 +439,7 @@ button {
   text-align: center;
   color: var(--ink-soft);
   font-size: 0.92rem;
-  margin: 0 0 2rem;
+  margin: 0 0 1.25rem;
   padding: 0 1.25rem;
 }
 
@@ -449,9 +449,31 @@ button {
   padding: 2rem 1.25rem;
 }
 
-.catalog-toolbar {
-  margin-left: clamp(1.25rem, 6vw, 3rem);
-  margin-right: clamp(1.25rem, 6vw, 3rem);
+/* Un solo panel visible (fondo blanco sólido, no el crema casi-invisible de
+   .list-toolbar) que agrupa buscador + orden + filtros, en vez de piezas
+   sueltas flotando con aire de sobra entre ellas. */
+.catalog-controls {
+  margin: 0 clamp(1.25rem, 6vw, 3rem) 1.75rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.catalog-controls .list-toolbar,
+.catalog-controls .filter-chips {
+  margin: 0;
+}
+
+.catalog-controls .list-toolbar {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
 
 /* ---------- Brand marquee ---------- */

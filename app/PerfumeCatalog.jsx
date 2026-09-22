@@ -45,37 +45,39 @@ export default function PerfumeCatalog({ perfumes }) {
 
   return (
     <>
-      <div className="list-toolbar catalog-toolbar">
-        <input
-          type="search"
-          placeholder="Buscar perfume..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          aria-label="Buscar perfume"
-        />
-        <select
-          value={sortBy}
-          onChange={(event) => setSortBy(event.target.value)}
-          aria-label="Ordenar por"
-        >
-          <option value="relevancia">Ordenar: relevancia</option>
-          <option value="price-asc">Ordenar: menor precio</option>
-          <option value="price-desc">Ordenar: mayor precio</option>
-          <option value="newest">Ordenar: más nuevos</option>
-        </select>
-      </div>
-
-      <div className="filter-chips catalog-toolbar">
-        {CATEGORY_FILTERS.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            className={`filter-chip${category === filter.value ? ' active' : ''}`}
-            onClick={() => setCategory(filter.value)}
+      <div className="catalog-controls">
+        <div className="list-toolbar">
+          <input
+            type="search"
+            placeholder="Buscar perfume..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            aria-label="Buscar perfume"
+          />
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value)}
+            aria-label="Ordenar por"
           >
-            {filter.label} <span className="filter-chip-count">{categoryCounts[filter.value]}</span>
-          </button>
-        ))}
+            <option value="relevancia">Ordenar: relevancia</option>
+            <option value="price-asc">Ordenar: menor precio</option>
+            <option value="price-desc">Ordenar: mayor precio</option>
+            <option value="newest">Ordenar: más nuevos</option>
+          </select>
+        </div>
+
+        <div className="filter-chips">
+          {CATEGORY_FILTERS.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              className={`filter-chip${category === filter.value ? ' active' : ''}`}
+              onClick={() => setCategory(filter.value)}
+            >
+              {filter.label} <span className="filter-chip-count">{categoryCounts[filter.value]}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (
