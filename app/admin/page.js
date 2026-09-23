@@ -1,5 +1,7 @@
 import { getCurrentRole } from '@/lib/session';
+import Link from 'next/link';
 import { getSummary, listPendingDeliveries } from '@/lib/db';
+import { countWebOrdersByStatus } from '@/lib/store-db';
 import {
   IconBottle,
   IconLayers,
@@ -27,6 +29,22 @@ function StatTile({ icon, label, value, tone }) {
   );
 }
 
+function WebOrdersBanner({ counts }) {
+  const toAttend = ['pendiente', 'pagado', 'preparando'].reduce((n, s) => n + (counts[s] || 0), 0);
+  if (!toAttend) return null;
+  return (
+    <Link href="/admin/pedidos-web" className="web-orders-banner">
+      <strong>
+        {toAttend} pedido{toAttend === 1 ? '' : 's'} web por atender
+      </strong>
+      <span>
+        {counts.pendiente || 0} por confirmar pago · {counts.pagado || 0} pagados ·{' '}
+        {counts.preparando || 0} en preparación →
+      </span>
+    </Link>
+  );
+}
+
 function PendingDeliveriesSection({ pendingDeliveries }) {
   if (pendingDeliveries.length === 0) return null;
 
@@ -47,6 +65,7 @@ export default async function ResumenPage() {
 
   let summary = null;
   let pendingDeliveries = [];
+  const webCounts = await countWebOrdersByStatus();
   try {
     summary = await getSummary(role);
     pendingDeliveries = await listPendingDeliveries();
@@ -63,6 +82,7 @@ export default async function ResumenPage() {
     return (
       <section className="admin-section">
         <h1>Resumen</h1>
+        <WebOrdersBanner counts={webCounts} />
         <div className="stat-grid">
           <StatTile icon={<IconReceipt size={22} />} label="Tus ventas" value={summary.salesCount} />
           <StatTile
@@ -92,6 +112,7 @@ export default async function ResumenPage() {
   return (
     <section className="admin-section">
       <h1>Resumen</h1>
+      <WebOrdersBanner counts={webCounts} />
       <div className="stat-grid">
         <StatTile icon={<IconBottle size={22} />} label="Perfumes en catálogo" value={summary.perfumesCount} />
         <StatTile icon={<IconLayers size={22} />} label="Stock total" value={summary.stockTotal} />

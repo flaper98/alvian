@@ -156,3 +156,33 @@ export function IconImage(props) {
     </Base>
   );
 }
+
+export function IconGlobe(props) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z" />
+    </Base>
+  );
+}
+
+export function IconStore(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 9l1.5-5h13L20 9" />
+      <path d="M4 9a2.7 2.7 0 0 0 5.3 0a2.7 2.7 0 0 0 5.4 0a2.7 2.7 0 0 0 5.3 0" />
+      <path d="M5.5 11v9h13v-9" />
+      <path d="M10 20v-5h4v5" />
+    </Base>
+  );
+}
+
+export function IconBook(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" />
+      <path d="M4 19V5" />
+    </Base>
+  );
+}

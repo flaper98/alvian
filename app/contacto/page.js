@@ -1,6 +1,6 @@
 import { buildWhatsAppLink, WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import SiteFooter from '../SiteFooter';
-import SiteNav from '../SiteNav';
+import SiteHeader from '../_store/SiteHeader';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 import WhatsAppIcon from '../WhatsAppIcon';
 
@@ -64,7 +64,7 @@ export default function ContactoPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <SiteNav />
+      <SiteHeader />
 
       <nav aria-label="Ruta de navegación" className="breadcrumb">
         <a href="/">Inicio</a> <span>/</span> <span aria-current="page">Contacto</span>

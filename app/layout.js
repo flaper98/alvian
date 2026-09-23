@@ -1,22 +1,38 @@
-import { Playfair_Display, Inter } from 'next/font/google';
+import { Playfair_Display, Inter, Poppins } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import AnalyticsWithFilter from './AnalyticsWithFilter';
+import { CartProvider } from './_store/CartProvider';
+import CartDrawer from './_store/CartDrawer';
+import { getStoreConfig } from '@/lib/store-db';
 import './globals.css';
+import './store.css';
+import './storefront.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 const display = Playfair_Display({
   subsets: ['latin'],
-  weight: ['600', '700'],
+  weight: ['500', '600', '700'],
+  style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 });
 
+// Inter: solo lo usa el panel de administración (tablas, formularios).
 const body = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-body',
+  display: 'swap',
+  preload: false,
+});
+
+// Poppins: tipografía principal de la tienda (títulos gruesos + texto).
+const sans = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-sans',
   display: 'swap',
 });
 
@@ -63,6 +79,7 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  themeColor: '#0e2b21',
 };
 
 const businessJsonLd = {
@@ -95,15 +112,19 @@ const businessJsonLd = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const config = await getStoreConfig();
   return (
-    <html lang="es" className={`${display.variable} ${body.variable}`}>
+    <html lang="es" className={`${display.variable} ${body.variable} ${sans.variable}`}>
       <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
-        {children}
+        <CartProvider>
+          {children}
+          <CartDrawer freeFrom={Number(config.shipping.freeFrom) || 0} />
+        </CartProvider>
         <AnalyticsWithFilter />
         <SpeedInsights />
       </body>

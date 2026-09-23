@@ -1,6 +1,9 @@
 import { listPerfumes } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 
+// Se regenera cada hora para incluir perfumes nuevos.
+export const revalidate = 3600;
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
 export default async function sitemap() {
@@ -23,6 +26,12 @@ export default async function sitemap() {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
+    ...['seguimiento', 'reclamaciones', 'terminos', 'privacidad'].map((path) => ({
+      url: `${SITE_URL}/${path}`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    })),
   ];
 
   let perfumeRoutes = [];

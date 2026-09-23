@@ -22,6 +22,50 @@ Next.js, pensado para desplegarse en Vercel.
   Todo se guarda en una base de datos Postgres, así que los cambios se ven al
   instante para todos, desde cualquier dispositivo.
 
+## Tienda online (carrito + checkout) — novedades
+
+Inspirado en la web del dispensador (Exótico), pero sobre Next.js + Postgres para
+que funcione en Vercel:
+
+- **Carrito** lateral con contador en el menú, cantidades y barra de "envío gratis".
+- **Checkout** en `/checkout`: datos, envío (Delivery Pucallpa / provincia / recojo),
+  pago con **Yape/Plin** (número, QR y botón copiar), **transferencia** o
+  **contra entrega** (solo envíos locales), subida opcional del comprobante.
+  El servidor recalcula precios, stock y envío: nunca confía en el navegador.
+- **Confirmación** `/pedido/ALV-xxxxx` con botón "Enviar mi pedido por WhatsApp"
+  (mensaje con el detalle ya redactado) y **seguimiento** en `/seguimiento`
+  (código + celular) con línea de tiempo del estado.
+- **Portada premium**: barra de anuncio, hero, "Los más pedidos" (perfumes marcados
+  como destacados), cómo comprar, beneficios, opiniones, garantías, FAQ y CTA final.
+- **Ficha de producto**: precio tachado/ahorro, notas olfativas, cantidad, "Agregar"
+  y "Comprar ahora", barra fija de compra en móvil, acordeones de envíos y pagos.
+- **Libro de Reclamaciones** virtual (`/reclamaciones`), **Términos** y **Privacidad**.
+
+### En el panel
+
+- **Pedidos web** (`/admin/pedidos-web`): filtros por estado, comprobante, datos
+  del cliente, WhatsApp con mensaje según el estado, código de seguimiento y
+  **Registrar como venta** (descuenta stock y entra al Resumen). El menú muestra
+  cuántos pedidos nuevos hay.
+- **Tienda online** (`/admin/tienda`): barra de anuncio, Yape/Plin (número, titular,
+  QR), transferencia, contra entrega, exigir comprobante, opciones y precios de
+  envío, envío gratis desde S/ X, datos del negocio (RUC), FAQ y opiniones.
+- **Reclamos** (`/admin/reclamos`): hojas recibidas y registro de la respuesta.
+- En **Catálogo** cada perfume tiene ahora: precio anterior (tachado), notas
+  olfativas y "Destacar en la portada".
+
+Las tablas nuevas (`web_orders`, `web_order_items`, `faqs`, `testimonials`,
+`complaints`) y columnas nuevas se crean solas la primera vez que el sitio se
+conecta a la base: no hay que correr migraciones.
+
+### Después de desplegar
+
+1. Verifica que el Blob esté conectado (lo usan el comprobante de pago y el QR).
+2. Opcional: agrega `NEXT_PUBLIC_SITE_URL` (ej. `https://alvianfragancias.com`).
+3. Entra a `/admin/tienda`, revisa número Yape, titular, sube tu QR y completa
+   razón social / RUC y correo para el Libro de Reclamaciones.
+4. En Catálogo marca 3–4 perfumes como "Destacar en la portada".
+
 ## Antes de desplegar: crea el proyecto en Vercel
 
 1. Sube esta carpeta a un repositorio de GitHub (o usa `vercel` CLI para

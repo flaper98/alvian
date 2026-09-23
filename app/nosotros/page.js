@@ -1,5 +1,5 @@
 import SiteFooter from '../SiteFooter';
-import SiteNav from '../SiteNav';
+import SiteHeader from '../_store/SiteHeader';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
@@ -52,7 +52,7 @@ export default function NosotrosPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      <SiteNav />
+      <SiteHeader />
 
       <nav aria-label="Ruta de navegación" className="breadcrumb">
         <a href="/">Inicio</a> <span>/</span> <span aria-current="page">Quiénes somos</span>

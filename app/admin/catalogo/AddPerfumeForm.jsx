@@ -15,7 +15,12 @@ export function SubmitButton({ label, pendingLabel }) {
   );
 }
 
-export function ImageField({ defaultValue, label = 'Imagen del perfume' }) {
+export function ImageField({
+  defaultValue,
+  label = 'Imagen del perfume',
+  name = 'imageUrl',
+  required = true,
+}) {
   const [imageUrl, setImageUrl] = useState(defaultValue || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -66,17 +71,50 @@ export function ImageField({ defaultValue, label = 'Imagen del perfume' }) {
           />
           <input
             type="text"
-            name="imageUrl"
+            name={name}
             placeholder="o pega la URL de una imagen"
             value={imageUrl}
             onChange={(event) => setImageUrl(event.target.value)}
-            required
+            required={required}
           />
           {uploading ? <span className="hint">Subiendo imagen...</span> : null}
           {error ? <span className="form-error">{error}</span> : null}
         </div>
       </div>
     </div>
+  );
+}
+
+/** Campos que solo afectan la tienda online (precio tachado, destacado, notas). */
+export function StoreFields({ perfume }) {
+  return (
+    <fieldset className="store-fields">
+      <legend>Tienda online</legend>
+      <label>
+        Precio anterior (S/) — opcional, se muestra tachado
+        <input
+          name="comparePrice"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Ej: 199.00"
+          defaultValue={perfume?.compare_price ?? ''}
+        />
+      </label>
+      <label>
+        Notas olfativas — opcional
+        <input
+          name="notes"
+          type="text"
+          placeholder="Ej: Vainilla, ámbar, canela"
+          defaultValue={perfume?.notes || ''}
+        />
+      </label>
+      <label className="checkbox-row">
+        <input name="featured" type="checkbox" defaultChecked={Boolean(perfume?.featured)} />
+        Destacar en la portada (“Los más pedidos”)
+      </label>
+    </fieldset>
   );
 }
 
@@ -183,6 +221,7 @@ function AddPerfumeFormFields({ prefillName, onSaved }) {
         Detalle
         <textarea name="description" rows={3} />
       </label>
+      <StoreFields />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton label="Agregar perfume" pendingLabel="Guardando..." />
       <p className="hint">

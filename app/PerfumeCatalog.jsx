@@ -1,19 +1,39 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PerfumeCard from './PerfumeCard';
 
 const CATEGORY_FILTERS = [
   { value: 'all', label: 'Todos' },
-  { value: 'hombre', label: 'Hombre' },
-  { value: 'mujer', label: 'Mujer' },
+  { value: 'hombre', label: 'Para él' },
+  { value: 'mujer', label: 'Para ella' },
   { value: 'unisex', label: 'Unisex' },
 ];
+
+const VALID = new Set(CATEGORY_FILTERS.map((f) => f.value));
+
+/** Evento que disparan las tarjetas de categoría de la portada. */
+export const CATEGORY_EVENT = 'alvian:categoria';
 
 export default function PerfumeCatalog({ perfumes }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('relevancia');
+
+  // Permite enlazar directo a una categoría (/?categoria=mujer#catalogo) y
+  // escuchar las tarjetas "Para él / Para ella / Unisex" de la portada.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('categoria');
+    if (fromUrl && VALID.has(fromUrl)) setCategory(fromUrl);
+    const onPick = (event) => {
+      if (VALID.has(event.detail)) {
+        setCategory(event.detail);
+        setSearch('');
+      }
+    };
+    window.addEventListener(CATEGORY_EVENT, onPick);
+    return () => window.removeEventListener(CATEGORY_EVENT, onPick);
+  }, []);
 
   const searched = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -45,8 +65,8 @@ export default function PerfumeCatalog({ perfumes }) {
 
   return (
     <>
-      <div className="catalog-controls">
-        <div className="list-toolbar">
+      <div className="sf-catalog-controls">
+        <div className="sf-catalog-search">
           <input
             type="search"
             placeholder="Buscar perfume..."
@@ -66,28 +86,29 @@ export default function PerfumeCatalog({ perfumes }) {
           </select>
         </div>
 
-        <div className="filter-chips">
+        <div className="sf-chips" role="group" aria-label="Filtrar por categoría">
           {CATEGORY_FILTERS.map((filter) => (
             <button
               key={filter.value}
               type="button"
-              className={`filter-chip${category === filter.value ? ' active' : ''}`}
+              className={`sf-chip${category === filter.value ? ' active' : ''}`}
+              aria-pressed={category === filter.value}
               onClick={() => setCategory(filter.value)}
             >
-              {filter.label} <span className="filter-chip-count">{categoryCounts[filter.value]}</span>
+              {filter.label} <span className="sf-chip-count">{categoryCounts[filter.value]}</span>
             </button>
           ))}
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="empty-state">
+        <p className="sf-empty">
           {search.trim()
             ? <>Ningún perfume coincide con &quot;{search}&quot;.</>
             : 'Ningún perfume coincide con este filtro.'}
         </p>
       ) : (
-        <div className="catalog-grid">
+        <div className="sf-grid">
           {filtered.map((perfume) => (
             <PerfumeCard key={perfume.id} perfume={perfume} />
           ))}

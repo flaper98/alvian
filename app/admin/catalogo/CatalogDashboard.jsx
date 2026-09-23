@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { deletePerfumeAction, editPerfumeAction } from '@/lib/actions';
-import { SubmitButton, ImageField, VideoField } from './AddPerfumeForm';
+import { SubmitButton, ImageField, VideoField, StoreFields } from './AddPerfumeForm';
 import BulkDescriptionModal from './BulkDescriptionModal';
 import PerfumeFormModal from './PerfumeFormModal';
 
@@ -49,6 +49,7 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         Detalle
         <textarea name="description" rows={3} defaultValue={perfume.description || ''} />
       </label>
+      <StoreFields perfume={perfume} />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton label="Guardar cambios" pendingLabel="Guardando..." />

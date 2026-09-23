@@ -137,7 +137,14 @@ export default function HeroCarousel({ slides }) {
       {slides.map((slide, i) => {
         const image = (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={slide.image_url} alt={slide.alt_text} className="hero-banner-image" />
+          <img
+            src={slide.image_url}
+            alt={slide.alt_text}
+            className="hero-banner-image"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchPriority={i === 0 ? 'high' : 'low'}
+            decoding="async"
+          />
         );
         return (
           <div

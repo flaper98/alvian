@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { COOKIE_NAME, getSessionUser } from '@/lib/auth';
 import LoginForm from './LoginForm';
 import AdminNav from './AdminNav';
+import { countWebOrdersByStatus } from '@/lib/store-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,9 +41,11 @@ export default async function AdminLayout({ children }) {
     );
   }
 
+  const counts = await countWebOrdersByStatus();
+
   return (
     <div className="admin-shell admin-shell-dashboard">
-      <AdminNav role={user.role} name={user.name} />
+      <AdminNav role={user.role} name={user.name} pendingWebOrders={counts.pendiente || 0} />
       <main className="admin-content">{children}</main>
     </div>
   );
