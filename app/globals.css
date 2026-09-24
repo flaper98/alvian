@@ -2735,35 +2735,35 @@ select:focus {
 /* ---------- Catálogo: tabla ---------- */
 
 .perfume-table-wrap {
-  overflow-x: auto;
   background: var(--cream-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .perfume-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 640px;
 }
 
 .perfume-table thead th {
   text-align: left;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--ink-soft);
   font-weight: 700;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.8rem;
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .perfume-table-row td {
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 0.8rem;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+  font-size: 0.9rem;
 }
 
 .perfume-table-row:last-child td {
@@ -2807,6 +2807,36 @@ select:focus {
   gap: 0.5rem;
   white-space: nowrap;
   flex-wrap: wrap;
+}
+
+/* Responsive: ocultar columnas en mobile */
+@media (max-width: 768px) {
+  /* Ocultar "Costo unit." (th:nth-child(3)) */
+  .perfume-table thead th:nth-child(3),
+  .perfume-table tbody td:nth-child(3) {
+    display: none;
+  }
+
+  /* Ocultar "Flete" (th:nth-child(4)) */
+  .perfume-table thead th:nth-child(4),
+  .perfume-table tbody td:nth-child(4) {
+    display: none;
+  }
+
+  /* Ocultar "Fecha" (th:nth-child(6)) */
+  .perfume-table thead th:nth-child(6),
+  .perfume-table tbody td:nth-child(6) {
+    display: none;
+  }
+
+  .perfume-table-actions-cell {
+    gap: 0.35rem;
+  }
+
+  .perfume-table-actions-cell button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
 }
 
 /* ---------- Paginación ---------- */
