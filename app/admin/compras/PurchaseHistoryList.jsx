@@ -6,6 +6,7 @@ import EditPurchaseModal from './EditPurchaseModal';
 
 function PurchaseTableRow({ purchase }) {
   const [editing, setEditing] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
@@ -37,12 +38,29 @@ function PurchaseTableRow({ purchase }) {
           {new Date(purchase.created_at).toLocaleDateString('es-PE')}
         </td>
         <td className="perfume-table-actions-cell">
-          <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
-            Editar
-          </button>
-          <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
-            {isPending ? 'Eliminando...' : 'Eliminar'}
-          </button>
+          <div className="table-actions-wrapper">
+            <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
+              Editar
+            </button>
+            <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
+              {isPending ? 'Eliminando...' : 'Eliminar'}
+            </button>
+          </div>
+          <div className="table-actions-menu">
+            <button type="button" className="btn-menu" onClick={() => setShowMenu(!showMenu)}>
+              ⋮
+            </button>
+            {showMenu && (
+              <div className="menu-dropdown">
+                <button type="button" onClick={() => { setEditing(true); setShowMenu(false); }}>
+                  Editar
+                </button>
+                <button type="button" onClick={() => { handleDelete(); setShowMenu(false); }} disabled={isPending}>
+                  Eliminar
+                </button>
+              </div>
+            )}
+          </div>
         </td>
       </tr>
       {editing ? <EditPurchaseModal purchase={purchase} onClose={() => setEditing(false)} /> : null}
