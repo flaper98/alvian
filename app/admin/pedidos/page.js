@@ -63,7 +63,7 @@ export default async function PedidosPage() {
         ) : (
           <>
             <div className="perfume-table-wrap">
-              <table className="perfume-table">
+              <table className="perfume-table table-cards">
                 <thead>
                   <tr>
                     <th scope="col">Perfume</th>
@@ -81,13 +81,19 @@ export default async function PedidosPage() {
                       row.best_price != null ? row.shortfall * Number(row.best_price) : null;
                     return (
                       <tr key={row.perfume_id} className="perfume-table-row">
-                        <td>
+                        <td className="table-cards-title">
                           <strong>{row.perfume_name}</strong>
                         </td>
-                        <td className="perfume-table-stock-cell">{row.ordered_quantity}</td>
-                        <td className="perfume-table-stock-cell">{row.perfume_stock}</td>
-                        <td className="perfume-table-stock-cell text-critical">{row.shortfall}</td>
-                        <td>
+                        <td className="perfume-table-stock-cell" data-label="Pedido">
+                          {row.ordered_quantity}
+                        </td>
+                        <td className="perfume-table-stock-cell" data-label="Stock actual">
+                          {row.perfume_stock}
+                        </td>
+                        <td className="perfume-table-stock-cell text-critical" data-label="Faltan">
+                          {row.shortfall}
+                        </td>
+                        <td className="table-cards-full" data-label="Proveedor más barato">
                           {row.best_supplier_name ? (
                             <>
                               {row.best_supplier_name}{' '}
@@ -97,10 +103,10 @@ export default async function PedidosPage() {
                             <span className="badge badge-pending">Sin proveedor</span>
                           )}
                         </td>
-                        <td className="perfume-table-price-cell">
+                        <td className="perfume-table-price-cell" data-label="Precio">
                           {row.best_price != null ? `S/ ${Number(row.best_price).toFixed(2)}` : '—'}
                         </td>
-                        <td className="perfume-table-price-cell">
+                        <td className="perfume-table-price-cell" data-label="Subtotal">
                           {subtotal != null ? `S/ ${subtotal.toFixed(2)}` : '—'}
                         </td>
                       </tr>

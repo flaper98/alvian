@@ -29,17 +29,21 @@ export default function CreditSaleRow({ sale }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td>
+        <td className="table-cards-title">
           <strong>{sale.perfume_name}</strong>
         </td>
-        <td>
+        <td data-label="Tipo">
           <span className={`badge badge-${sale.payment_type}`}>
             {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
           </span>
         </td>
-        <td className="perfume-table-price-cell">S/ {Number(sale.total).toFixed(2)}</td>
-        <td className="perfume-table-price-cell">S/ {Number(sale.paid_amount).toFixed(2)}</td>
-        <td className="perfume-table-price-cell">
+        <td className="perfume-table-price-cell" data-label="Total">
+          S/ {Number(sale.total).toFixed(2)}
+        </td>
+        <td className="perfume-table-price-cell" data-label="Pagado">
+          S/ {Number(sale.paid_amount).toFixed(2)}
+        </td>
+        <td className="perfume-table-price-cell" data-label="Saldo">
           <strong>S/ {balance.toFixed(2)}</strong>
         </td>
         <td className="perfume-table-actions-cell">

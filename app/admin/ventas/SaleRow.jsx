@@ -37,7 +37,7 @@ export default function SaleRow({ sale, canManage, users = [] }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td>
+        <td className="table-cards-title">
           <strong>{sale.perfume_name}</strong>
           {sale.customer_name ? (
             <p className="perfume-table-description">Cliente: {sale.customer_name}</p>
@@ -46,14 +46,14 @@ export default function SaleRow({ sale, canManage, users = [] }) {
             Vendido por: {sale.sold_by_name || (sale.sold_by_role === 'admin' ? 'Admin' : 'Vendedora')}
           </p>
         </td>
-        <td className="perfume-table-stock-cell">{sale.quantity}</td>
-        <td className="perfume-table-price-cell">S/ {Number(sale.total).toFixed(2)}</td>
-        <td>
+        <td className="perfume-table-stock-cell" data-label="Cantidad">{sale.quantity}</td>
+        <td className="perfume-table-price-cell" data-label="Total">S/ {Number(sale.total).toFixed(2)}</td>
+        <td data-label="Pago">
           <span className={`badge badge-${sale.payment_type}`}>
             {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
           </span>
         </td>
-        <td>
+        <td data-label="Entrega">
           <span className={`badge ${sale.delivered ? 'badge-paid' : 'badge-pending'}`}>
             <span className="badge-icon">
               {sale.delivered ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -61,7 +61,7 @@ export default function SaleRow({ sale, canManage, users = [] }) {
             {sale.delivered ? 'Entregado' : 'Pendiente'}
           </span>
         </td>
-        <td className="perfume-table-stock-cell">
+        <td className="perfume-table-stock-cell" data-label="Fecha">
           {new Date(sale.created_at).toLocaleDateString('es-PE')}
         </td>
         <td className="perfume-table-actions-cell">

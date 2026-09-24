@@ -2872,7 +2872,12 @@ select:focus {
     margin-bottom: 0.15rem;
   }
 
+  .table-cards .perfume-table-row td:empty {
+    display: none;
+  }
+
   .table-cards .table-cards-title {
+    order: -1;
     grid-column: 1 / -1;
     padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--border);
@@ -2884,16 +2889,41 @@ select:focus {
     white-space: normal;
   }
 
+  /* Con miniatura: imagen a la izquierda del título */
+  .table-cards .perfume-table-row:has(.table-cards-thumb) {
+    grid-template-columns: auto 1fr;
+  }
+
+  .table-cards .table-cards-thumb {
+    order: -2;
+    width: auto;
+    padding-bottom: 0.6rem !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .table-cards .table-cards-thumb + .table-cards-title {
+    grid-column: auto;
+  }
+
+  .table-cards .table-cards-full,
+  .table-cards td[colspan] {
+    grid-column: 1 / -1;
+  }
+
   .table-cards .perfume-table-actions-cell {
+    order: 99;
     grid-column: 1 / -1;
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     padding-top: 0.6rem;
     border-top: 1px solid var(--border);
   }
 
-  .table-cards .perfume-table-actions-cell button {
-    flex: 1;
+  .table-cards .perfume-table-actions-cell > button,
+  .table-cards .perfume-table-actions-cell > a {
+    flex: 1 1 calc(50% - 0.25rem);
+    text-align: center;
   }
 }
 

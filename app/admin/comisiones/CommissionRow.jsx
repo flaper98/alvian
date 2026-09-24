@@ -35,7 +35,7 @@ export default function CommissionRow({ sale, canEdit }) {
 
   return (
     <tr className="perfume-table-row">
-      <td>
+      <td className="table-cards-title">
         <strong>{sale.perfume_name}</strong>
         {sale.customer_name ? (
           <p className="perfume-table-description">Cliente: {sale.customer_name}</p>
@@ -47,11 +47,13 @@ export default function CommissionRow({ sale, canEdit }) {
           </p>
         ) : null}
       </td>
-      <td className="perfume-table-price-cell">
+      <td className="perfume-table-price-cell" data-label="Comisión total">
         S/ {sale.commission_amount ? Number(sale.commission_amount).toFixed(2) : '0.00'}
       </td>
-      <td className="perfume-table-price-cell">S/ {paidSoFar.toFixed(2)}</td>
-      <td>
+      <td className="perfume-table-price-cell" data-label="Pagado">
+        S/ {paidSoFar.toFixed(2)}
+      </td>
+      <td className="table-cards-full" data-label="Estado">
         {sale.commission_paid ? (
           <span className="badge badge-paid">
             <span className="badge-icon">
@@ -70,7 +72,7 @@ export default function CommissionRow({ sale, canEdit }) {
           </span>
         )}
       </td>
-      <td className="perfume-table-stock-cell">
+      <td className="perfume-table-stock-cell" data-label="Fecha">
         {new Date(sale.created_at).toLocaleDateString('es-PE')}
       </td>
       <td className="perfume-table-actions-cell">

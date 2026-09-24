@@ -25,12 +25,14 @@ function ExpenseTableRow({ expense }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td>
+        <td className="table-cards-title">
           <strong>{expense.description}</strong>
           {expense.note ? <p className="perfume-table-description">{expense.note}</p> : null}
         </td>
-        <td className="perfume-table-price-cell">S/ {Number(expense.amount).toFixed(2)}</td>
-        <td className="perfume-table-stock-cell">
+        <td className="perfume-table-price-cell" data-label="Monto">
+          S/ {Number(expense.amount).toFixed(2)}
+        </td>
+        <td className="perfume-table-stock-cell" data-label="Fecha">
           {new Date(expense.created_at).toLocaleDateString('es-PE')}
         </td>
         <td className="perfume-table-actions-cell">
@@ -105,7 +107,7 @@ export default function ExpensesList({ expenses }) {
       ) : (
         <>
           <div className="perfume-table-wrap">
-            <table className="perfume-table">
+            <table className="perfume-table table-cards">
               <thead>
                 <tr>
                   <th scope="col">Descripción</th>

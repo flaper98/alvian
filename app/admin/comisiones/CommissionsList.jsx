@@ -127,7 +127,7 @@ export default function CommissionsList({ sales, canEdit }) {
       ) : (
         <>
           <div className="perfume-table-wrap">
-            <table className="perfume-table">
+            <table className="perfume-table table-cards">
               <thead>
                 <tr>
                   <th scope="col">Perfume</th>

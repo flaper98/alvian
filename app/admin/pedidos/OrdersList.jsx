@@ -94,7 +94,7 @@ export default function OrdersList({ orders, perfumes, canReceive }) {
         <p className="hint">Ningún pedido coincide con este filtro.</p>
       ) : (
         <div className="perfume-table-wrap">
-          <table className="perfume-table">
+          <table className="perfume-table table-cards">
             <thead>
               <tr>
                 <th scope="col">Código</th>

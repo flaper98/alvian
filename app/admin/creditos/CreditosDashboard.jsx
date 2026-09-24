@@ -103,7 +103,7 @@ export default function CreditosDashboard({ customerGroups }) {
                   </span>
                 </div>
                 <div className="perfume-table-wrap">
-                  <table className="perfume-table">
+                  <table className="perfume-table table-cards">
                     <thead>
                       <tr>
                         <th scope="col">Perfume</th>

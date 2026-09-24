@@ -91,11 +91,11 @@ function EntryRow({ entry, perfumes, groupEntries }) {
   return (
     <>
       <tr className={`perfume-table-row${entry.fulfilled ? ' pandero-row-done' : ''}`}>
-        <td className="perfume-table-stock-cell">{entry.position}</td>
-        <td>
+        <td className="perfume-table-stock-cell" data-label="Turno #">{entry.position}</td>
+        <td className="table-cards-title">
           <strong>{entry.customer_name}</strong>
         </td>
-        <td>
+        <td data-label="Pagando">
           <span className={`badge ${entry.paying ? 'badge-paid' : 'badge-pending'}`}>
             <span className="badge-icon">
               {entry.paying ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -103,7 +103,7 @@ function EntryRow({ entry, perfumes, groupEntries }) {
             {entry.paying ? `Pagando (S/ ${PANDERO_CUOTA_AMOUNT.toFixed(2)})` : 'Sin pagar'}
           </span>
         </td>
-        <td>
+        <td data-label="Perfume">
           {entry.perfume_name}
           {!entry.fulfilled ? (
             <p className={`perfume-table-description${entry.perfume_stock < 1 ? ' text-critical' : ''}`}>
@@ -111,7 +111,7 @@ function EntryRow({ entry, perfumes, groupEntries }) {
             </p>
           ) : null}
         </td>
-        <td>
+        <td data-label="Entregado">
           <span className={`badge ${entry.fulfilled ? 'badge-paid' : 'badge-pending'}`}>
             <span className="badge-icon">
               {entry.fulfilled ? <IconCheck size={12} /> : <IconClock size={12} />}
@@ -119,7 +119,9 @@ function EntryRow({ entry, perfumes, groupEntries }) {
             {entry.fulfilled ? 'Entregado' : 'Pendiente'}
           </span>
         </td>
-        <td className="perfume-table-stock-cell">{formatDateOnly(entry.turn_date)}</td>
+        <td className="perfume-table-stock-cell" data-label="Le toca">
+          {formatDateOnly(entry.turn_date)}
+        </td>
         <td className="perfume-table-actions-cell">
           {entry.fulfilled ? (
             <button type="button" className="btn-secondary" onClick={() => setShowPayments(true)}>
@@ -183,7 +185,7 @@ export default function PanderoGroupCard({ group, perfumes }) {
         <p>Todavía no hay participantes.</p>
       ) : (
         <div className="perfume-table-wrap">
-          <table className="perfume-table">
+          <table className="perfume-table table-cards">
             <thead>
               <tr>
                 <th scope="col">#</th>

@@ -26,14 +26,14 @@ export default function OrderRow({ order, perfumes }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td className="perfume-table-stock-cell">{order.order_code || '—'}</td>
-        <td>
+        <td className="perfume-table-stock-cell" data-label="Código">{order.order_code || '—'}</td>
+        <td className="table-cards-title">
           <strong>{order.customer_name}</strong>
           {order.note ? <p className="perfume-table-description">Nota: {order.note}</p> : null}
         </td>
-        <td>{order.perfume_name}</td>
-        <td className="perfume-table-stock-cell">{order.quantity}</td>
-        <td>
+        <td data-label="Perfume">{order.perfume_name}</td>
+        <td className="perfume-table-stock-cell" data-label="Cantidad">{order.quantity}</td>
+        <td className="table-cards-full" data-label="Estado">
           {order.fulfilled ? (
             <span className="badge badge-paid">
               <span className="badge-icon">
@@ -51,10 +51,10 @@ export default function OrderRow({ order, perfumes }) {
           )}
           {order.stocked ? <span className="badge badge-gold"> En stock</span> : null}
         </td>
-        <td className={`perfume-table-stock-cell${shortOnStock ? ' text-critical' : ''}`}>
+        <td className={`perfume-table-stock-cell${shortOnStock ? ' text-critical' : ''}`} data-label="Stock actual">
           {order.perfume_stock}
         </td>
-        <td>{new Date(order.created_at).toLocaleDateString('es-PE')}</td>
+        <td data-label="Fecha">{new Date(order.created_at).toLocaleDateString('es-PE')}</td>
         <td className="perfume-table-actions-cell">
           <button type="button" className="btn-secondary" onClick={() => setEditing(true)} disabled={isPending}>
             Editar

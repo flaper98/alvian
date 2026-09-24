@@ -94,11 +94,11 @@ function PerfumeTableRow({ perfume }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td className="perfume-table-image-cell">
+        <td className="perfume-table-image-cell table-cards-thumb">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={perfume.image_url} alt={perfume.name} className="perfume-table-image" />
         </td>
-        <td>
+        <td className="table-cards-title">
           <strong>{perfume.name}</strong>{' '}
           {perfume.category ? (
             <span className="badge badge-gold">{CATEGORY_LABELS[perfume.category]}</span>
@@ -109,14 +109,14 @@ function PerfumeTableRow({ perfume }) {
             <p className="perfume-table-description">{perfume.description}</p>
           ) : null}
         </td>
-        <td className="perfume-table-price-cell">
+        <td className="perfume-table-price-cell" data-label="Precio">
           {Number(perfume.price) > 0 ? (
             `S/ ${Number(perfume.price).toFixed(2)}`
           ) : (
             <span className="badge badge-pending">Pendiente</span>
           )}
         </td>
-        <td className={`perfume-table-stock-cell${lowStock ? ' text-critical' : ''}`}>
+        <td className={`perfume-table-stock-cell${lowStock ? ' text-critical' : ''}`} data-label="Stock">
           {perfume.stock}
         </td>
         <td className="perfume-table-actions-cell">
@@ -233,7 +233,7 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
             </p>
           ) : (
             <div className="perfume-table-wrap">
-              <table className="perfume-table">
+              <table className="perfume-table table-cards">
                 <thead>
                   <tr>
                     <th scope="col">Imagen</th>
