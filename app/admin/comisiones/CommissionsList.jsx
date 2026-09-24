@@ -3,11 +3,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import CommissionRow from './CommissionRow';
 
-const FILTERS = [
+const STATUS_FILTERS = [
   { value: 'all', label: 'Todas' },
   { value: 'ready', label: 'Con monto disponible' },
   { value: 'waiting', label: 'Esperando más cobro' },
   { value: 'paid', label: 'Pagadas por completo' },
+];
+
+const PAYMENT_TYPE_FILTERS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'contado', label: 'Contado' },
+  { value: 'credito', label: 'Crédito' },
+  { value: 'pandero', label: 'Pandero' },
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -18,7 +25,9 @@ function hasPayoutDue(sale) {
 
 export default function CommissionsList({ sales, canEdit }) {
   const [search, setSearch] = useState('');
-  const [filterBy, setFilterBy] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
 
@@ -43,21 +52,32 @@ export default function CommissionsList({ sales, canEdit }) {
   );
 
   const rows = useMemo(() => {
-    return searched.filter((sale) => {
-      if (filterBy === 'ready') return hasPayoutDue(sale);
-      if (filterBy === 'waiting') return !sale.commission_paid && !hasPayoutDue(sale);
-      if (filterBy === 'paid') return sale.commission_paid;
+    let filtered = searched.filter((sale) => {
+      if (statusFilter === 'ready') return hasPayoutDue(sale);
+      if (statusFilter === 'waiting') return !sale.commission_paid && !hasPayoutDue(sale);
+      if (statusFilter === 'paid') return sale.commission_paid;
       return true;
     });
-  }, [searched, filterBy]);
+
+    if (paymentTypeFilter !== 'all') {
+      filtered = filtered.filter((sale) => sale.payment_type === paymentTypeFilter);
+    }
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
+      if (sortBy === 'amount') return Number(b.commissionPayoutDue || 0) - Number(a.commissionPayoutDue || 0);
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+  }, [searched, statusFilter, paymentTypeFilter, sortBy]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterBy, pageSize]);
+  }, [search, statusFilter, paymentTypeFilter, sortBy, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pageRows = rows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const subtotal = rows.reduce((sum, sale) => sum + Number(sale.commissionPayoutDue || 0), 0);
 
   if (sales.length === 0) {
     return <p>Todavía no hay ventas de la vendedora.</p>;
@@ -72,18 +92,30 @@ export default function CommissionsList({ sales, canEdit }) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+        <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+          <option value="recent">Ordenar: más reciente</option>
+          <option value="oldest">Ordenar: más antigua</option>
+          <option value="amount">Ordenar: mayor comisión disponible</option>
+        </select>
+        <select value={paymentTypeFilter} onChange={(event) => setPaymentTypeFilter(event.target.value)}>
+          {PAYMENT_TYPE_FILTERS.map((filter) => (
+            <option key={filter.value} value={filter.value}>
+              Tipo de pago: {filter.label}
+            </option>
+          ))}
+        </select>
         <span className="list-count">
-          {rows.length} de {sales.length} venta{sales.length === 1 ? '' : 's'}
+          {rows.length} de {sales.length} venta{sales.length === 1 ? '' : 's'} · S/ {subtotal.toFixed(2)}
         </span>
       </div>
 
       <div className="filter-chips">
-        {FILTERS.map((filter) => (
+        {STATUS_FILTERS.map((filter) => (
           <button
             key={filter.value}
             type="button"
-            className={`filter-chip${filterBy === filter.value ? ' active' : ''}`}
-            onClick={() => setFilterBy(filter.value)}
+            className={`filter-chip${statusFilter === filter.value ? ' active' : ''}`}
+            onClick={() => setStatusFilter(filter.value)}
           >
             {filter.label} <span className="filter-chip-count">{filterCounts[filter.value]}</span>
           </button>

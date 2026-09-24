@@ -2,8 +2,25 @@ import { getCurrentRole } from '@/lib/session';
 import { listSalesBySeller, getCommissionPercent } from '@/lib/db';
 import CommissionsList from './CommissionsList';
 import CommissionPercentForm from './CommissionPercentForm';
+import {
+  IconWallet,
+  IconClock,
+  IconCheck,
+} from '../icons';
 
 export const dynamic = 'force-dynamic';
+
+function StatTile({ icon, label, value, tone }) {
+  return (
+    <div className={`stat-tile${tone ? ` stat-tile-${tone}` : ''}`}>
+      <span className="stat-tile-icon">{icon}</span>
+      <div className="stat-tile-body">
+        <span className="stat-tile-label">{label}</span>
+        <strong className="stat-tile-value">{value}</strong>
+      </div>
+    </div>
+  );
+}
 
 export default async function ComisionesPage() {
   const role = await getCurrentRole();
@@ -25,20 +42,15 @@ export default async function ComisionesPage() {
     );
   }
 
-  function isFullyCollected(sale) {
-    return sale.payment_type === 'contado' || Number(sale.balance) <= 0;
-  }
-
   const unpaid = sales.filter((sale) => !sale.commission_paid);
-  const readyTotal = unpaid
-    .filter(isFullyCollected)
-    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
-  const waitingTotal = unpaid
-    .filter((sale) => !isFullyCollected(sale))
-    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
+  const readyTotal = unpaid.reduce((sum, sale) => sum + Number(sale.commissionPayoutDue || 0), 0);
+  const waitingTotal = unpaid.reduce(
+    (sum, sale) => sum + Math.max(Number(sale.commission_amount || 0) - Number(sale.commissionAvailable || 0), 0),
+    0
+  );
   const paidTotal = sales
     .filter((sale) => sale.commission_paid)
-    .reduce((sum, sale) => sum + Number(sale.commission_amount || 0), 0);
+    .reduce((sum, sale) => sum + Number(sale.commission_paid_amount || sale.commission_amount || 0), 0);
 
   return (
     <section className="admin-section">
@@ -49,17 +61,28 @@ export default async function ComisionesPage() {
       <p>
         Comisión actual: <strong>{Number(percent).toFixed(1)}%</strong> por venta.
       </p>
-      <p>
-        Lista para pagar (fin de mes): <strong>S/ {readyTotal.toFixed(2)}</strong>
+
+      <div className="stat-grid">
+        <StatTile
+          icon={<IconWallet size={22} />}
+          label="Lista para pagar (fin de mes)"
+          tone="attention"
+          value={`S/ ${readyTotal.toFixed(2)}`}
+        />
         {waitingTotal > 0 ? (
-          <>
-            {' '}
-            · Depende de que el cliente termine de pagar:{' '}
-            <strong>S/ {waitingTotal.toFixed(2)}</strong>
-          </>
-        ) : null}{' '}
-        · Ya pagada: <strong>S/ {paidTotal.toFixed(2)}</strong>
-      </p>
+          <StatTile
+            icon={<IconClock size={22} />}
+            label="Depende de que el cliente termine de pagar"
+            value={`S/ ${waitingTotal.toFixed(2)}`}
+          />
+        ) : null}
+        <StatTile
+          icon={<IconCheck size={22} />}
+          label="Ya pagada"
+          tone="good"
+          value={`S/ ${paidTotal.toFixed(2)}`}
+        />
+      </div>
 
       <CommissionsList sales={sales} canEdit={role === 'admin'} />
     </section>
