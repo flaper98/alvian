@@ -2739,12 +2739,13 @@ select:focus {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .perfume-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 640px;
 }
 
 .perfume-table thead th {
@@ -2809,33 +2810,90 @@ select:focus {
   flex-wrap: wrap;
 }
 
-/* Responsive: ocultar columnas en mobile */
+/* Modo tarjetas: en móvil cada fila se muestra como tarjeta (td necesita data-label) */
 @media (max-width: 768px) {
-  /* Ocultar "Costo unit." (th:nth-child(3)) */
-  .perfume-table thead th:nth-child(3),
-  .perfume-table tbody td:nth-child(3) {
+  .perfume-table-wrap:has(.table-cards) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .table-cards {
+    min-width: 0;
+  }
+
+  .table-cards thead {
     display: none;
   }
 
-  /* Ocultar "Flete" (th:nth-child(4)) */
-  .perfume-table thead th:nth-child(4),
-  .perfume-table tbody td:nth-child(4) {
-    display: none;
+  .table-cards,
+  .table-cards tbody {
+    display: block;
   }
 
-  /* Ocultar "Fecha" (th:nth-child(6)) */
-  .perfume-table thead th:nth-child(6),
-  .perfume-table tbody td:nth-child(6) {
-    display: none;
+  .table-cards tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .perfume-table-actions-cell {
-    gap: 0.35rem;
+  .table-cards .perfume-table-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 1rem;
+    background: var(--cream-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
   }
 
-  .perfume-table-actions-cell button {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
+  .table-cards .perfume-table-row td {
+    display: block;
+    padding: 0;
+    border: none;
+    background: transparent;
+    white-space: normal;
+  }
+
+  .table-cards .perfume-table-row:hover td {
+    background: transparent;
+  }
+
+  .table-cards td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 0.15rem;
+  }
+
+  .table-cards .table-cards-title {
+    grid-column: 1 / -1;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+  }
+
+  .table-cards .table-cards-title .perfume-table-description {
+    max-width: none;
+    white-space: normal;
+  }
+
+  .table-cards .perfume-table-actions-cell {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.5rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .table-cards .perfume-table-actions-cell button {
+    flex: 1;
   }
 }
 

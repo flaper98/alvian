@@ -23,17 +23,21 @@ function PurchaseTableRow({ purchase }) {
   return (
     <>
       <tr className="perfume-table-row">
-        <td>
+        <td className="table-cards-title">
           <strong>{purchase.perfume_name}</strong>
           {purchase.note ? <p className="perfume-table-description">{purchase.note}</p> : null}
         </td>
-        <td className="perfume-table-stock-cell">{purchase.quantity}</td>
-        <td className="perfume-table-price-cell">S/ {Number(purchase.unit_cost).toFixed(2)}</td>
-        <td className="perfume-table-price-cell">
+        <td className="perfume-table-stock-cell" data-label="Cantidad">{purchase.quantity}</td>
+        <td className="perfume-table-price-cell" data-label="Costo unit.">
+          S/ {Number(purchase.unit_cost).toFixed(2)}
+        </td>
+        <td className="perfume-table-price-cell" data-label="Flete">
           {Number(purchase.freight_cost) > 0 ? `S/ ${Number(purchase.freight_cost).toFixed(2)}` : '—'}
         </td>
-        <td className="perfume-table-price-cell">S/ {Number(purchase.landed_unit_cost).toFixed(2)}</td>
-        <td className="perfume-table-stock-cell">
+        <td className="perfume-table-price-cell" data-label="Costo real">
+          S/ {Number(purchase.landed_unit_cost).toFixed(2)}
+        </td>
+        <td className="perfume-table-stock-cell" data-label="Fecha">
           {new Date(purchase.created_at).toLocaleDateString('es-PE')}
         </td>
         <td className="perfume-table-actions-cell">
@@ -93,7 +97,7 @@ export default function PurchaseHistoryList({ purchases }) {
         <p className="hint">Ninguna compra coincide con &quot;{search}&quot;.</p>
       ) : (
         <div className="perfume-table-wrap">
-          <table className="perfume-table">
+          <table className="perfume-table table-cards">
             <thead>
               <tr>
                 <th scope="col">Perfume / nota</th>
