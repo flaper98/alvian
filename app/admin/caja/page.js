@@ -32,27 +32,27 @@ export default async function CajaPage() {
         <CashMovementFormModal />
       </div>
       <p className="hint">
-        Anota aquí el dinero que <strong>pones de tu bolsillo</strong> (aportes) y el que{' '}
-        <strong>sacas para ti</strong> (retiros). Las ventas, compras, gastos y comisiones ya se
-        cuentan solas desde sus secciones.
+        Anota aquí el dinero que <strong>sacas para ti</strong> (retiros) y, si alguna vez dejas
+        efectivo tuyo en el negocio sin usarlo en una compra o gasto, regístralo como aporte. Las
+        compras y gastos pagados con tu capital se marcan en su propia sección, no aquí.
       </p>
 
       <div className="money-hero">
         <div className="money-hero-main">
-          <span className="money-hero-label">Dinero en caja hoy</span>
+          <span className="money-hero-label">Ganancias disponibles hoy</span>
           <strong className={`money-hero-value${flow.net < 0 ? ' text-critical' : ''}`}>
             S/ {flow.net.toFixed(2)}
           </strong>
           <span className="hint">
-            Aportes S/ {flow.capitalIn.toFixed(2)} · Retiros S/ {flow.withdrawals.toFixed(2)} ·{' '}
-            <Link href="/admin?periodo=todo">ver flujo completo →</Link>
+            Lo que entró, menos lo reinvertido, gastos con ganancias, comisiones y retiros ·{' '}
+            <Link href="/admin?periodo=todo">ver detalle →</Link>
           </span>
         </div>
       </div>
       {flow.net < 0 ? (
         <p className="form-error">
-          La caja sale negativa: salió más dinero del que se registró como entrada. Probablemente falta
-          anotar un aporte (por ejemplo, el capital con el que compraste el primer stock).
+          Sale negativo: se registró más reinversión de la que entró. Revisa en Compras y Gastos si
+          algo marcado como &quot;Reinversión&quot; en realidad lo pagaste con tu capital.
         </p>
       ) : null}
 

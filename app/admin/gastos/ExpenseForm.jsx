@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerExpenseAction } from '@/lib/actions';
+import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -49,6 +50,7 @@ function ExpenseFormFields({ onSaved }) {
         Nota (opcional)
         <input name="note" type="text" />
       </label>
+      <PaidWithField />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />
     </form>

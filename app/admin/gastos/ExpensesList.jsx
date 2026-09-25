@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { deleteExpenseAction } from '@/lib/actions';
+import { PaidWithBadge } from '../PaidWithField';
 import EditExpenseModal from './EditExpenseModal';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
@@ -26,7 +27,8 @@ function ExpenseTableRow({ expense }) {
     <>
       <tr className="perfume-table-row">
         <td className="table-cards-title">
-          <strong>{expense.description}</strong>
+          <strong>{expense.description}</strong>{' '}
+          <PaidWithBadge value={expense.paid_with} />
           {expense.note ? <p className="perfume-table-description">{expense.note}</p> : null}
         </td>
         <td className="perfume-table-price-cell" data-label="Monto">

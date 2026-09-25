@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { editPurchaseAction } from '@/lib/actions';
+import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -113,6 +114,7 @@ function EditPurchaseForm({ purchase, onClose }) {
         Nota (opcional)
         <input name="note" type="text" defaultValue={purchase.note || ''} />
       </label>
+      <PaidWithField defaultValue={purchase.paid_with} />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />

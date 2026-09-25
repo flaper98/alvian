@@ -3187,3 +3187,8 @@ select:focus {
   color: var(--ink-soft);
   white-space: nowrap;
 }
+
+.flow-list-neutral .flow-line strong,
+.flow-list-neutral .flow-total strong {
+  color: var(--green-900);
+}

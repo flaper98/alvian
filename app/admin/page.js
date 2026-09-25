@@ -197,7 +197,8 @@ export default async function ResumenPage({ searchParams }) {
 
   const { flow } = summary;
   const periodLabel = PERIODS[period].toLowerCase();
-  const reinvestPct = flow.incomeTotal > 0 ? (flow.purchases / flow.incomeTotal) * 100 : null;
+  const reinvestPct =
+    flow.incomeTotal > 0 ? (flow.purchasesReinvested / flow.incomeTotal) * 100 : null;
 
   return (
     <section className="admin-section">
@@ -214,8 +215,16 @@ export default async function ResumenPage({ searchParams }) {
           sub="Dinero cobrado (no incluye lo que te deben)"
           tone="good"
         />
-        <KpiTile label="Compra de perfumes" value={money(flow.purchases)} sub="Stock que compraste" />
-        <KpiTile label="Gastos extras" value={money(flow.expenses)} sub="Envíos, empaque, publicidad…" />
+        <KpiTile
+          label="Compra de perfumes"
+          value={money(flow.purchases)}
+          sub={`Reinvertido ${money(flow.purchasesReinvested)} · tu capital ${money(flow.purchasesCapital)}`}
+        />
+        <KpiTile
+          label="Gastos extras"
+          value={money(flow.expenses)}
+          sub={`De ganancias ${money(flow.expensesFromEarnings)} · tu capital ${money(flow.expensesCapital)}`}
+        />
         <KpiTile
           label="Ganancia de lo vendido"
           value={money(summary.salesProfit)}
@@ -226,7 +235,7 @@ export default async function ResumenPage({ searchParams }) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">Dinero · {periodLabel}</h3>
+          <h3 className="chart-title">Ganancias · {periodLabel}</h3>
           <ul className="profit-list flow-list">
             <MoneyLine
               label={`Ventas al contado (${flow.contadoCount})`}
@@ -253,14 +262,18 @@ export default async function ResumenPage({ searchParams }) {
               <strong>{money(flow.incomeTotal)}</strong>
             </li>
             <MoneyLine
-              label="Aporte de tu bolsillo"
-              value={flow.capitalIn}
-              sign="+"
-              href="/admin/caja"
-              hidden={flow.capitalIn === 0}
+              label="Reinvertido en perfumes"
+              value={flow.purchasesReinvested}
+              sign="−"
+              href="/admin/compras"
             />
-            <MoneyLine label="Compra de perfumes" value={flow.purchases} sign="−" href="/admin/compras" />
-            <MoneyLine label="Gastos extras" value={flow.expenses} sign="−" href="/admin/gastos" />
+            <MoneyLine
+              label="Gastos pagados con ganancias"
+              value={flow.expensesFromEarnings}
+              sign="−"
+              href="/admin/gastos"
+              hidden={flow.expensesFromEarnings === 0}
+            />
             <MoneyLine label="Comisiones pagadas" value={flow.commissionsPaid} sign="−" href="/admin/comisiones" />
             <MoneyLine
               label="Retiros para ti"
@@ -269,23 +282,45 @@ export default async function ResumenPage({ searchParams }) {
               href="/admin/caja"
               hidden={flow.withdrawals === 0}
             />
-            <li className={`flow-total${flow.net < 0 ? ' flow-total-negative' : ''}`}>
-              <span>Te quedó {period === 'todo' ? 'en total' : `(${periodLabel})`}</span>
-              <strong>{money(flow.net)}</strong>
+            <li className={`flow-total${flow.earningsLeft < 0 ? ' flow-total-negative' : ''}`}>
+              <span>Te quedó de ganancias</span>
+              <strong>{money(flow.earningsLeft)}</strong>
             </li>
           </ul>
-          {flow.net < 0 ? (
+          {reinvestPct != null && flow.purchasesReinvested > 0 ? (
             <p className="hint">
-              Salió <strong>{money(-flow.net)}</strong> más de lo que entró: esa diferencia la pusiste
-              de tu capital (reinversión en stock).
+              Reinvertiste en perfumes el <strong>{reinvestPct.toFixed(0)}%</strong> de lo que entró.
             </p>
           ) : null}
-          {reinvestPct != null && flow.purchases > 0 ? (
+          {flow.earningsLeft < 0 ? (
             <p className="hint">
-              Reinvertiste en perfumes el equivalente al <strong>{reinvestPct.toFixed(0)}%</strong> de lo
-              que entró.
+              Salió más de lo que entró. Revisa si alguna compra o gasto marcado como
+              &quot;Reinversión&quot; en realidad lo pagaste con tu capital.
             </p>
           ) : null}
+        </div>
+
+        <div className="chart-card">
+          <h3 className="chart-title">Tu capital · {periodLabel}</h3>
+          <ul className="profit-list flow-list flow-list-neutral">
+            <MoneyLine label="En compra de perfumes" value={flow.purchasesCapital} sign="+" href="/admin/compras" />
+            <MoneyLine label="En gastos extras" value={flow.expensesCapital} sign="+" href="/admin/gastos" />
+            <MoneyLine
+              label="Aportes en efectivo"
+              value={flow.capitalIn}
+              sign="+"
+              href="/admin/caja"
+              hidden={flow.capitalIn === 0}
+            />
+            <li className="flow-total flow-total-capital">
+              <span>Total que pusiste de tu bolsillo</span>
+              <strong>{money(flow.capitalPut)}</strong>
+            </li>
+          </ul>
+          <p className="hint">
+            Es dinero tuyo invertido en el negocio: no se resta de tus ganancias. Al registrar una compra
+            o un gasto eliges si lo pagaste con tu capital o con las ganancias.
+          </p>
         </div>
 
         <PanderoProgress groups={summary.panderoInProgress} />

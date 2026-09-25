@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerPurchaseAction } from '@/lib/actions';
+import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -139,6 +140,7 @@ function PurchaseFormFields({ perfumes, prefill, onSaved }) {
           defaultValue={prefill?.note || ''}
         />
       </label>
+      <PaidWithField />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />
     </form>

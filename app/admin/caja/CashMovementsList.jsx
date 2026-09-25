@@ -42,8 +42,8 @@ export default function CashMovementsList({ movements }) {
   if (movements.length === 0) {
     return (
       <p className="hint">
-        Todavía no registras aportes ni retiros. Empieza anotando el capital con el que arrancaste el
-        negocio (con su fecha) para que la caja y la reinversión salgan exactas.
+        Todavía no registras retiros. Cuando saques ganancia para ti, anótala aquí para que las
+        ganancias disponibles salgan exactas.
       </p>
     );
   }

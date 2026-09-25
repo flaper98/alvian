@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { receiveOrdersToStockAction } from '@/lib/actions';
+import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -95,6 +96,7 @@ function ReceiveStockForm({ orders, onClose }) {
         {checkedIds.length} pedido{checkedIds.length === 1 ? '' : 's'} · Costo total:{' '}
         <strong>S/ {totalCost.toFixed(2)}</strong>
       </p>
+      <PaidWithField />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />

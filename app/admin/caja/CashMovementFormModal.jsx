@@ -20,7 +20,7 @@ function todayInLima() {
 
 function CashMovementForm({ onSaved }) {
   const [state, formAction] = useActionState(registerCashMovementAction, { error: null });
-  const [kind, setKind] = useState('aporte');
+  const [kind, setKind] = useState('retiro');
 
   useEffect(() => {
     if (state?.success) onSaved();
@@ -32,8 +32,8 @@ function CashMovementForm({ onSaved }) {
       <label>
         Tipo
         <select name="kind" value={kind} onChange={(event) => setKind(event.target.value)}>
-          <option value="aporte">Aporte: pongo dinero de mi bolsillo</option>
           <option value="retiro">Retiro: saco ganancia para mí</option>
+          <option value="aporte">Aporte: dejo efectivo mío en el negocio</option>
         </select>
       </label>
       <label>
@@ -49,12 +49,12 @@ function CashMovementForm({ onSaved }) {
         <input
           name="note"
           type="text"
-          placeholder={kind === 'aporte' ? 'Ej: capital inicial, préstamo' : 'Ej: sueldo del mes'}
+          placeholder={kind === 'aporte' ? 'Ej: efectivo para dar vuelto' : 'Ej: sueldo del mes'}
         />
       </label>
       <p className="hint">
         {kind === 'aporte'
-          ? 'Dinero tuyo que entra al negocio (por ejemplo, para comprar stock). No es una venta.'
+          ? 'Solo efectivo que dejas en el negocio sin gastarlo. Si lo usaste en una compra o gasto, no lo anotes aquí: marca esa compra o gasto como pagado con tu capital.'
           : 'Dinero que sacas del negocio para ti. No es un gasto: sale de la ganancia.'}
       </p>
       {state?.error ? <p className="form-error">{state.error}</p> : null}

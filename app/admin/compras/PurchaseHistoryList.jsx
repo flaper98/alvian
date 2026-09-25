@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { deletePurchaseAction } from '@/lib/actions';
+import { PaidWithBadge } from '../PaidWithField';
 import EditPurchaseModal from './EditPurchaseModal';
 
 function PurchaseTableRow({ purchase }) {
@@ -24,7 +25,8 @@ function PurchaseTableRow({ purchase }) {
     <>
       <tr className="perfume-table-row">
         <td className="table-cards-title">
-          <strong>{purchase.perfume_name}</strong>
+          <strong>{purchase.perfume_name}</strong>{' '}
+          <PaidWithBadge value={purchase.paid_with} />
           {purchase.note ? <p className="perfume-table-description">{purchase.note}</p> : null}
         </td>
         <td className="perfume-table-stock-cell" data-label="Cantidad">{purchase.quantity}</td>

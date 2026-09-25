@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { editExpenseAction } from '@/lib/actions';
+import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -37,6 +38,7 @@ function EditExpenseForm({ expense, onClose }) {
         Nota (opcional)
         <input name="note" type="text" defaultValue={expense.note || ''} />
       </label>
+      <PaidWithField defaultValue={expense.paid_with} />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />
