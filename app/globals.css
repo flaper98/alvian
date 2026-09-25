@@ -1963,10 +1963,6 @@ button {
   color: var(--status-critical);
 }
 
-.reinvest-headline {
-  margin: 0;
-  font-size: 0.95rem;
-}
 
 /* ---------- Resumen: charts ---------- */
 
@@ -2040,112 +2036,156 @@ button {
   font-size: 1.15rem;
 }
 
-.bar-chart {
+.profit-highlight strong.text-critical {
+  color: var(--status-critical);
+}
+
+/* ---------- Resumen: números grandes ---------- */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 960px) {
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.kpi-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--green-800);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.kpi-tile-good {
+  border-top-color: var(--status-good);
+}
+
+.kpi-tile-bad {
+  border-top-color: var(--status-critical);
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.kpi-value {
+  font-size: clamp(1.25rem, 4.5vw, 1.6rem);
+  color: var(--green-900);
+  white-space: nowrap;
+}
+
+.kpi-tile-good .kpi-value {
+  color: var(--status-good);
+}
+
+.kpi-tile-bad .kpi-value {
+  color: var(--status-critical);
+}
+
+.kpi-sub {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+/* ---------- Resumen: dinero del período ---------- */
+
+.flow-list .flow-subtotal,
+.flow-list .flow-total {
+  font-weight: 700;
+}
+
+.flow-list .flow-subtotal {
+  background: rgba(10, 125, 46, 0.06);
+  margin: 0 -0.6rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  border-bottom: none;
+}
+
+.flow-list .flow-subtotal strong {
+  color: var(--status-good);
+}
+
+.flow-list .flow-total {
+  border-top: 2px solid var(--green-900);
+  padding-top: 0.7rem;
+  font-size: 1rem;
+}
+
+.flow-list .flow-total strong {
+  font-size: 1.2rem;
+  color: var(--status-good);
+}
+
+.flow-list .flow-total-negative strong {
+  color: var(--status-critical);
+}
+
+/* ---------- Resumen: pandero en curso ---------- */
+
+.pandero-progress-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 1.1rem;
 }
 
-.bar-chart-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 2fr auto;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.bar-chart-label {
-  font-size: 0.85rem;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bar-chart-track {
-  height: 14px;
-  border-radius: 4px;
-  background: var(--border);
-  overflow: hidden;
-  display: block;
-}
-
-.bar-chart-fill {
-  display: block;
-  height: 100%;
-  background: var(--series-contado);
-  border-radius: 0 4px 4px 0;
-}
-
-.bar-chart-fill-low {
-  background: var(--status-critical);
-}
-
-.bar-chart-value {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-.split-bar {
-  display: flex;
-  gap: 2px;
-  height: 22px;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--cream-soft);
-}
-
-.split-bar-segment {
-  display: block;
-  height: 100%;
-}
-
-.split-bar-contado {
-  background: var(--series-contado);
-}
-
-.split-bar-credito {
-  background: var(--series-credito);
-}
-
-.split-bar-pandero {
-  background: var(--series-pandero);
-}
-
-.split-bar-legend {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.pandero-progress-list li {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+.pandero-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+}
+
+.pandero-progress-head span {
+  color: var(--ink-soft);
   font-size: 0.85rem;
-  color: var(--ink);
 }
 
-.legend-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  margin-right: 0.5rem;
-  vertical-align: -1px;
+.pandero-progress-bar {
+  height: 12px;
+  background: rgba(21, 57, 44, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-.legend-dot-contado {
-  background: var(--series-contado);
+.pandero-progress-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-800), var(--gold));
+  border-radius: 999px;
 }
 
-.legend-dot-credito {
-  background: var(--series-credito);
-}
-
-.legend-dot-pandero {
-  background: var(--series-pandero);
+.pandero-progress-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green-900);
 }
 
 /* ---------- Historiales (compras, ventas, crédito, comisiones) ---------- */

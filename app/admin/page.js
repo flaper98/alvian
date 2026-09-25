@@ -2,22 +2,18 @@ import { getCurrentRole } from '@/lib/session';
 import Link from 'next/link';
 import { getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
-import {
-  IconBottle,
-  IconLayers,
-  IconReceipt,
-  IconCoin,
-  IconClock,
-  IconWallet,
-  IconTruck,
-} from './icons';
-import StockBarChart from './StockBarChart';
-import PaymentSplitBar from './PaymentSplitBar';
+import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import PendingDeliveryRow from './PendingDeliveryRow';
 
 export const dynamic = 'force-dynamic';
 
-const money = (value) => `S/ ${Number(value).toFixed(2)}`;
+const money = (value) => {
+  const n = Number(value);
+  return `${n < 0 ? '−' : ''}S/ ${Math.abs(n).toLocaleString('es-PE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
 
 function StatTile({ icon, label, value, tone }) {
   return (
@@ -27,6 +23,16 @@ function StatTile({ icon, label, value, tone }) {
         <span className="stat-tile-label">{label}</span>
         <strong className="stat-tile-value">{value}</strong>
       </div>
+    </div>
+  );
+}
+
+function KpiTile({ label, value, sub, tone }) {
+  return (
+    <div className={`kpi-tile${tone ? ` kpi-tile-${tone}` : ''}`}>
+      <span className="kpi-label">{label}</span>
+      <strong className="kpi-value">{value}</strong>
+      <span className="kpi-sub">{sub}</span>
     </div>
   );
 }
@@ -41,7 +47,8 @@ function AttentionTile({ href, label, value, hint, active }) {
   );
 }
 
-function FlowLine({ label, value, sign, href }) {
+function MoneyLine({ label, value, sign, href, hidden }) {
+  if (hidden) return null;
   return (
     <li className={`flow-line flow-line-${sign === '+' ? 'in' : 'out'}`}>
       <span>{href ? <Link href={href}>{label}</Link> : label}</span>
@@ -100,6 +107,47 @@ function PeriodSwitch({ period }) {
   );
 }
 
+function PanderoProgress({ groups }) {
+  if (groups.length === 0) return null;
+  return (
+    <div className="chart-card">
+      <h3 className="chart-title">Pandero · número de esta semana</h3>
+      <ul className="pandero-progress-list">
+        {groups.map((group) => {
+          const pct = group.size > 0 ? (group.paying / group.size) * 100 : 0;
+          return (
+            <li key={group.id}>
+              <div className="pandero-progress-head">
+                <strong>{group.name}</strong>
+                <span>
+                  Número {group.next_position} · le toca a {group.next_customer}
+                </span>
+              </div>
+              <div
+                className="pandero-progress-bar"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={group.size}
+                aria-valuenow={group.paying}
+              >
+                <span style={{ width: `${pct}%` }} />
+              </div>
+              <span className="pandero-progress-text">
+                {group.paying} de {group.size} pagaron · {money(group.collected)} de {money(group.goal)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="hint">
+        Lo que se junta en la semana no se suma a &quot;Entró&quot;. Cuando marcas el número como
+        entregado, entra una sola vez como venta de pandero y la barra vuelve a cero para el siguiente
+        número.
+      </p>
+    </div>
+  );
+}
+
 export default async function ResumenPage({ searchParams }) {
   const role = await getCurrentRole();
   const { periodo } = await searchParams;
@@ -149,7 +197,7 @@ export default async function ResumenPage({ searchParams }) {
 
   const { flow } = summary;
   const periodLabel = PERIODS[period].toLowerCase();
-  const reinvestPct = flow.purchases > 0 ? (flow.purchasesFromSales / flow.purchases) * 100 : 0;
+  const reinvestPct = flow.incomeTotal > 0 ? (flow.purchases / flow.incomeTotal) * 100 : null;
 
   return (
     <section className="admin-section">
@@ -159,48 +207,89 @@ export default async function ResumenPage({ searchParams }) {
       </div>
       <WebOrdersBanner counts={webCounts} />
 
-      {/* 1. ¿Cuánto dinero tengo? */}
-      <div className="money-hero">
-        <div className="money-hero-main">
-          <span className="money-hero-label">Dinero en caja hoy</span>
-          <strong className={`money-hero-value${summary.cashOnHand < 0 ? ' text-critical' : ''}`}>
-            {money(summary.cashOnHand)}
-          </strong>
-          <Link href="/admin/caja" className="money-hero-link">
-            Registrar aporte o retiro →
-          </Link>
-        </div>
-        <ul className="money-hero-stats">
-          <li>
-            <span>Entró ({periodLabel})</span>
-            <strong className="text-good">+ {money(flow.capitalIn + flow.incomeTotal)}</strong>
-          </li>
-          <li>
-            <span>Salió ({periodLabel})</span>
-            <strong className="text-critical">− {money(flow.outTotal)}</strong>
-          </li>
-          <li>
-            <span>Ganancia neta ({periodLabel})</span>
-            <strong className={summary.netProfit < 0 ? 'text-critical' : 'text-good'}>
-              {money(summary.netProfit)}
-            </strong>
-          </li>
-        </ul>
+      <div className="kpi-grid">
+        <KpiTile
+          label="Entró"
+          value={money(flow.incomeTotal)}
+          sub="Dinero cobrado (no incluye lo que te deben)"
+          tone="good"
+        />
+        <KpiTile label="Compra de perfumes" value={money(flow.purchases)} sub="Stock que compraste" />
+        <KpiTile label="Gastos extras" value={money(flow.expenses)} sub="Envíos, empaque, publicidad…" />
+        <KpiTile
+          label="Ganancia de lo vendido"
+          value={money(summary.salesProfit)}
+          sub={`Ventas ${money(summary.salesTotal)} − costo ${money(summary.estimatedCost)} − comisiones ${money(summary.commissionsEarned)}`}
+          tone={summary.salesProfit < 0 ? 'bad' : 'good'}
+        />
       </div>
-      {summary.cashOnHand < 0 ? (
-        <p className="form-error">
-          La caja sale negativa: probablemente falta registrar el capital que pusiste de tu bolsillo.{' '}
-          <Link href="/admin/caja">Anótalo en Caja</Link>.
-        </p>
-      ) : null}
 
-      {/* 2. ¿Qué tengo que atender? */}
+      <div className="chart-grid">
+        <div className="chart-card">
+          <h3 className="chart-title">Dinero · {periodLabel}</h3>
+          <ul className="profit-list flow-list">
+            <MoneyLine
+              label={`Ventas al contado (${flow.contadoCount})`}
+              value={flow.contado}
+              sign="+"
+              href="/admin/ventas"
+            />
+            <MoneyLine label="Abonos de crédito" value={flow.creditPayments} sign="+" href="/admin/creditos" />
+            <MoneyLine
+              label={`Pandero (${flow.panderoCount} número${flow.panderoCount === 1 ? '' : 's'} completado${flow.panderoCount === 1 ? '' : 's'})`}
+              value={flow.pandero}
+              sign="+"
+              href="/admin/panderos"
+            />
+            <li className="flow-subtotal">
+              <span>Entró</span>
+              <strong>{money(flow.incomeTotal)}</strong>
+            </li>
+            <MoneyLine
+              label="Aporte de tu bolsillo"
+              value={flow.capitalIn}
+              sign="+"
+              href="/admin/caja"
+              hidden={flow.capitalIn === 0}
+            />
+            <MoneyLine label="Compra de perfumes" value={flow.purchases} sign="−" href="/admin/compras" />
+            <MoneyLine label="Gastos extras" value={flow.expenses} sign="−" href="/admin/gastos" />
+            <MoneyLine label="Comisiones pagadas" value={flow.commissionsPaid} sign="−" href="/admin/comisiones" />
+            <MoneyLine
+              label="Retiros para ti"
+              value={flow.withdrawals}
+              sign="−"
+              href="/admin/caja"
+              hidden={flow.withdrawals === 0}
+            />
+            <li className={`flow-total${flow.net < 0 ? ' flow-total-negative' : ''}`}>
+              <span>Te quedó {period === 'todo' ? 'en total' : `(${periodLabel})`}</span>
+              <strong>{money(flow.net)}</strong>
+            </li>
+          </ul>
+          {flow.net < 0 ? (
+            <p className="hint">
+              Salió <strong>{money(-flow.net)}</strong> más de lo que entró: esa diferencia la pusiste
+              de tu capital (reinversión en stock).
+            </p>
+          ) : null}
+          {reinvestPct != null && flow.purchases > 0 ? (
+            <p className="hint">
+              Reinvertiste en perfumes el equivalente al <strong>{reinvestPct.toFixed(0)}%</strong> de lo
+              que entró.
+            </p>
+          ) : null}
+        </div>
+
+        <PanderoProgress groups={summary.panderoInProgress} />
+      </div>
+
       <div>
         <h2 className="dashboard-heading">Pendientes</h2>
         <div className="attention-grid">
           <AttentionTile
             href="/admin/creditos"
-            label="Te deben (crédito / pandero)"
+            label="Te deben (crédito)"
             value={money(summary.creditPending)}
             hint="Cobrar"
             active={summary.creditPending > 0}
@@ -221,158 +310,12 @@ export default async function ResumenPage({ searchParams }) {
           />
           <AttentionTile
             href="/admin/catalogo"
-            label="Perfumes con stock bajo (≤ 3)"
+            label="Stock bajo (3 o menos)"
             value={summary.lowStockCount}
             hint="Reponer"
             active={summary.lowStockCount > 0}
           />
         </div>
-      </div>
-
-      {/* 3. ¿Por dónde entró y salió el dinero? */}
-      <div className="chart-grid">
-        <div className="chart-card">
-          <h3 className="chart-title">Flujo de dinero · {periodLabel}</h3>
-          <ul className="profit-list flow-list">
-            <FlowLine label="Cobrado de ventas" value={flow.collectedSales} sign="+" href="/admin/ventas" />
-            <FlowLine label="Cuotas de pandero" value={flow.panderoCuotas} sign="+" href="/admin/panderos" />
-            <FlowLine label="Aportes de tu bolsillo" value={flow.capitalIn} sign="+" href="/admin/caja" />
-            <FlowLine label="Compras de stock" value={flow.purchases} sign="−" href="/admin/compras" />
-            <FlowLine label="Gastos extras" value={flow.expenses} sign="−" href="/admin/gastos" />
-            <FlowLine label="Comisiones pagadas" value={flow.commissionsPaid} sign="−" href="/admin/comisiones" />
-            <FlowLine label="Retiros para ti" value={flow.withdrawals} sign="−" href="/admin/caja" />
-            <li className="profit-highlight">
-              <span>Resultado del período</span>
-              <strong className={flow.net < 0 ? 'text-critical' : undefined}>{money(flow.net)}</strong>
-            </li>
-          </ul>
-          <p className="hint">
-            &quot;Cobrado&quot; es dinero que realmente entró: ventas al contado y abonos de crédito.
-            Lo que aún te deben no se cuenta hasta que lo cobres.
-          </p>
-        </div>
-
-        <div className="chart-card">
-          <h3 className="chart-title">Reinversión · {periodLabel}</h3>
-          {flow.purchases > 0 ? (
-            <>
-              <p className="reinvest-headline">
-                Compraste stock por <strong>{money(flow.purchases)}</strong>
-              </p>
-              <div
-                className="split-bar"
-                role="img"
-                aria-label={`${reinvestPct.toFixed(0)}% pagado con ventas, ${(100 - reinvestPct).toFixed(0)}% con tu capital`}
-              >
-                {flow.purchasesFromSales > 0 ? (
-                  <span className="split-bar-segment split-bar-contado" style={{ width: `${reinvestPct}%` }} />
-                ) : null}
-                {flow.purchasesFromCapital > 0 ? (
-                  <span
-                    className="split-bar-segment split-bar-credito"
-                    style={{ width: `${100 - reinvestPct}%` }}
-                  />
-                ) : null}
-              </div>
-              <ul className="split-bar-legend">
-                <li>
-                  <span className="legend-dot legend-dot-contado" />
-                  Reinvertido de las ventas — {money(flow.purchasesFromSales)} ({reinvestPct.toFixed(0)}%)
-                </li>
-                <li>
-                  <span className="legend-dot legend-dot-credito" />
-                  Con tu capital (aportes) — {money(flow.purchasesFromCapital)} ({(100 - reinvestPct).toFixed(0)}%)
-                </li>
-              </ul>
-              {flow.reinvestRatePct != null ? (
-                <p className="hint">
-                  De cada S/ 100 que entraron por ventas y cuotas, reinvertiste{' '}
-                  <strong>S/ {Math.min(flow.reinvestRatePct, 999).toFixed(0)}</strong> en stock.
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <p className="hint">No registraste compras en este período.</p>
-          )}
-          <p className="hint">
-            Se considera que las compras se pagan primero con lo que aportaste en el mismo período; el
-            resto salió de lo que ganaste vendiendo.
-          </p>
-        </div>
-
-        <div className="chart-card">
-          <h3 className="chart-title">Rentabilidad · {periodLabel}</h3>
-          <ul className="profit-list">
-            <li>
-              <span>Vendido ({summary.salesCount} venta{summary.salesCount === 1 ? '' : 's'})</span>
-              <strong>{money(summary.salesTotal)}</strong>
-            </li>
-            <li>
-              <span>Costo de lo vendido</span>
-              <strong>− {money(summary.estimatedCost)}</strong>
-            </li>
-            <li>
-              <span>Ganancia bruta</span>
-              <strong>{money(summary.grossProfit)}</strong>
-            </li>
-            <li>
-              <span>Comisiones de la vendedora</span>
-              <strong>− {money(summary.commissionsEarned)}</strong>
-            </li>
-            <li>
-              <span>Gastos extras</span>
-              <strong>− {money(summary.expensesTotal)}</strong>
-            </li>
-            <li className="profit-highlight">
-              <span>Ganancia neta · margen {summary.profitMarginPct.toFixed(1)}%</span>
-              <strong className={summary.netProfit < 0 ? 'text-critical' : undefined}>
-                {money(summary.netProfit)}
-              </strong>
-            </li>
-          </ul>
-          <p className="hint">
-            Cuenta las ventas del período aunque aún no estén cobradas. El costo usa el costo promedio de
-            compra de cada perfume (con flete); si un perfume no tiene compras registradas, su costo
-            cuenta como S/ 0.00.
-          </p>
-        </div>
-
-        <PaymentSplitBar
-          contadoCount={summary.contadoCount}
-          creditoCount={summary.creditoCount}
-          panderoCount={summary.panderoCount}
-          contadoTotal={summary.contadoTotal}
-          creditoTotal={summary.creditoTotal}
-          panderoTotal={summary.panderoTotal}
-        />
-      </div>
-
-      {/* 4. ¿Cómo está mi inventario? */}
-      <div>
-        <h2 className="dashboard-heading">Inventario</h2>
-        <div className="stat-grid">
-          <StatTile icon={<IconBottle size={22} />} label="Perfumes en catálogo" value={summary.perfumesCount} />
-          <StatTile icon={<IconLayers size={22} />} label="Unidades en stock" value={summary.stockTotal} />
-          <StatTile
-            icon={<IconTruck size={22} />}
-            label="Valor del stock (a costo)"
-            value={money(summary.potentialCost)}
-          />
-          <StatTile
-            icon={<IconCoin size={22} />}
-            label="Si vendes todo el stock (ingreso)"
-            value={money(summary.potentialRevenue)}
-          />
-          <StatTile
-            icon={<IconWallet size={22} />}
-            label="Ganancia proyectada del stock"
-            tone="good"
-            value={money(summary.potentialProfit)}
-          />
-        </div>
-      </div>
-      <div className="chart-grid">
-        <StockBarChart perfumes={summary.stockByPerfume} />
       </div>
 
       <PendingDeliveriesSection pendingDeliveries={pendingDeliveries} />
