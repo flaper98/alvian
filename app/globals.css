@@ -1784,6 +1784,190 @@ button {
   color: var(--status-good);
 }
 
+/* ---------- Resumen: dinero, pendientes y flujo ---------- */
+
+.text-good {
+  color: var(--status-good);
+}
+
+.dashboard-heading {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.period-switch .filter-chip {
+  text-decoration: none;
+}
+
+.period-switch {
+  margin: 0;
+}
+
+.money-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  background: linear-gradient(135deg, var(--green-900) 0%, #1a3d33 100%);
+  color: var(--cream-soft);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: 0 14px 30px -12px rgba(14, 43, 33, 0.45);
+}
+
+.money-hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.money-hero-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.money-hero-value {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 7vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--cream);
+}
+
+.money-hero-value.text-critical {
+  color: #ff9b9b;
+}
+
+.money-hero-link,
+.money-hero .hint a {
+  color: var(--gold);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.money-hero .hint {
+  color: rgba(247, 243, 230, 0.75);
+}
+
+.money-hero-stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.money-hero-stats li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.55rem 0.8rem;
+  background: rgba(247, 243, 230, 0.07);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.money-hero-stats strong {
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.money-hero-stats .text-good {
+  color: #7fd79b;
+}
+
+.money-hero-stats .text-critical {
+  color: #ff9b9b;
+}
+
+@media (min-width: 760px) {
+  .money-hero {
+    grid-template-columns: 1fr 1.2fr;
+    align-items: center;
+    padding: 1.75rem 2rem;
+  }
+}
+
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@media (min-width: 860px) {
+  .attention-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.attention-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.attention-tile:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -10px rgba(14, 43, 33, 0.22);
+}
+
+.attention-tile-active {
+  border-left-color: var(--status-attention);
+}
+
+.attention-tile-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.3;
+}
+
+.attention-tile-value {
+  font-size: 1.3rem;
+  color: var(--green-900);
+}
+
+.attention-tile-active .attention-tile-value {
+  color: var(--status-attention);
+}
+
+.attention-tile-hint {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--green-800);
+}
+
+.flow-line a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border);
+}
+
+.flow-line-in strong {
+  color: var(--status-good);
+}
+
+.flow-line-out strong {
+  color: var(--status-critical);
+}
+
+.reinvest-headline {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
 /* ---------- Resumen: charts ---------- */
 
 .chart-grid {

@@ -20,6 +20,7 @@ import {
   IconGlobe,
   IconStore,
   IconBook,
+  IconCash,
 } from './icons';
 
 const NAV_ITEMS = [
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'], icon: IconBottle },
   { href: '/admin/banners', label: 'Banners de inicio', roles: ['admin'], icon: IconImage },
   { href: '/admin/compras', label: 'Compras', roles: ['admin'], icon: IconCart },
+  { href: '/admin/caja', label: 'Caja (aportes / retiros)', roles: ['admin'], icon: IconCash },
   { href: '/admin/gastos', label: 'Gastos', roles: ['admin'], icon: IconExpense },
   { href: '/admin/proveedores', label: 'Proveedores', roles: ['admin'], icon: IconTruck },
   {

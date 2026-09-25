@@ -186,3 +186,13 @@ export function IconBook(props) {
     </Base>
   );
 }
+
+export function IconCash(props) {
+  return (
+    <Base {...props}>
+      <rect x="2.5" y="6.5" width="19" height="11" rx="2" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M6 9.5v5M18 9.5v5" />
+    </Base>
+  );
+}
