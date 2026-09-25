@@ -140,9 +140,9 @@ function PanderoProgress({ groups }) {
         })}
       </ul>
       <p className="hint">
-        Lo que se junta en la semana no se suma a &quot;Entró&quot;. Cuando marcas el número como
-        entregado, entra una sola vez como venta de pandero y la barra vuelve a cero para el siguiente
-        número.
+        Cada cuota que marcas como &quot;Pagando&quot; ya cuenta en &quot;Entró&quot;. Al entregar el
+        perfume, la barra vuelve a cero para el siguiente número; la venta del perfume no se vuelve a
+        sumar porque es el mismo dinero de las cuotas.
       </p>
     </div>
   );
@@ -236,10 +236,17 @@ export default async function ResumenPage({ searchParams }) {
             />
             <MoneyLine label="Abonos de crédito" value={flow.creditPayments} sign="+" href="/admin/creditos" />
             <MoneyLine
-              label={`Pandero (${flow.panderoCount} número${flow.panderoCount === 1 ? '' : 's'} completado${flow.panderoCount === 1 ? '' : 's'})`}
-              value={flow.pandero}
+              label={`Pandero · ${flow.panderoClosedCount} número${flow.panderoClosedCount === 1 ? '' : 's'} completado${flow.panderoClosedCount === 1 ? '' : 's'}`}
+              value={flow.panderoClosed}
               sign="+"
               href="/admin/panderos"
+            />
+            <MoneyLine
+              label="Pandero · cuotas de esta semana"
+              value={flow.panderoThisWeek}
+              sign="+"
+              href="/admin/panderos"
+              hidden={flow.panderoThisWeek === 0}
             />
             <li className="flow-subtotal">
               <span>Entró</span>
