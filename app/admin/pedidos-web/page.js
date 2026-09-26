@@ -56,8 +56,9 @@ export default async function PedidosWebPage({ searchParams }) {
         <h1>Pedidos web</h1>
       </div>
       <p className="hint">
-        Pedidos hechos desde el carrito de la tienda. Revisa el comprobante, confirma el pago y usa
-        <strong> Registrar como venta</strong> para descontar el stock y sumarlo al Resumen.
+        Pedidos hechos desde el carrito de la tienda. Revisa el comprobante y cambia el estado a
+        <strong> Pagado</strong>: se registra solo como venta (descuenta el stock y suma al Resumen).
+        Los pedidos contra entrega se registran al marcarlos como <strong>Entregado</strong>.
       </p>
 
       <div className="status-tabs" role="tablist">

@@ -4,63 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/lib/actions';
-import {
-  IconHome,
-  IconBottle,
-  IconCart,
-  IconReceipt,
-  IconWallet,
-  IconCoin,
-  IconUser,
-  IconClipboard,
-  IconTruck,
-  IconRepeat,
-  IconExpense,
-  IconImage,
-  IconGlobe,
-  IconStore,
-  IconBook,
-  IconCash,
-} from './icons';
-
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Resumen', roles: ['admin', 'vendedora'], icon: IconHome },
-  {
-    href: '/admin/pedidos-web',
-    label: 'Pedidos web',
-    roles: ['admin', 'vendedora'],
-    icon: IconGlobe,
-  },
-  { href: '/admin/catalogo', label: 'Catálogo', roles: ['admin'], icon: IconBottle },
-  { href: '/admin/banners', label: 'Banners de inicio', roles: ['admin'], icon: IconImage },
-  { href: '/admin/compras', label: 'Compras', roles: ['admin'], icon: IconCart },
-  { href: '/admin/caja', label: 'Caja (aportes / retiros)', roles: ['admin'], icon: IconCash },
-  { href: '/admin/gastos', label: 'Gastos', roles: ['admin'], icon: IconExpense },
-  { href: '/admin/proveedores', label: 'Proveedores', roles: ['admin'], icon: IconTruck },
-  {
-    href: '/admin/pedidos',
-    label: 'Pedidos',
-    roles: ['admin', 'vendedora'],
-    icon: IconClipboard,
-  },
-  { href: '/admin/ventas', label: 'Ventas', roles: ['admin', 'vendedora'], icon: IconReceipt },
-  {
-    href: '/admin/creditos',
-    label: 'Crédito / Pandero',
-    roles: ['admin', 'vendedora'],
-    icon: IconWallet,
-  },
-  {
-    href: '/admin/panderos',
-    label: 'Panderos',
-    roles: ['admin', 'vendedora'],
-    icon: IconRepeat,
-  },
-  { href: '/admin/comisiones', label: 'Comisiones', roles: ['admin', 'vendedora'], icon: IconCoin },
-  { href: '/admin/tienda', label: 'Tienda online', roles: ['admin'], icon: IconStore },
-  { href: '/admin/reclamos', label: 'Reclamos', roles: ['admin'], icon: IconBook },
-  { href: '/admin/usuarios', label: 'Usuarios', roles: ['admin'], icon: IconUser },
-];
+import { SECTIONS, isTabActive } from './sections';
 
 const ROLE_LABELS = {
   admin: 'Administrador',
@@ -70,7 +14,7 @@ const ROLE_LABELS = {
 export default function AdminNav({ role, name, pendingWebOrders = 0 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const items = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const items = SECTIONS.filter((section) => section.roles.includes(role));
 
   return (
     <header className="admin-topbar">
@@ -108,17 +52,18 @@ export default function AdminNav({ role, name, pendingWebOrders = 0 }) {
         <ul>
           {items.map((item) => {
             const Icon = item.icon;
-            const active = pathname === item.href;
+            const href = item.tabs[0].href;
+            const active = item.tabs.some((tab) => isTabActive(pathname, tab.href));
             return (
-              <li key={item.href}>
+              <li key={href}>
                 <Link
-                  href={item.href}
+                  href={href}
                   className={active ? 'active' : ''}
                   onClick={() => setOpen(false)}
                 >
                   <Icon size={19} />
                   <span>{item.label}</span>
-                  {item.href === '/admin/pedidos-web' && pendingWebOrders > 0 ? (
+                  {item.label === 'Pedidos' && pendingWebOrders > 0 ? (
                     <span className="nav-count">{pendingWebOrders}</span>
                   ) : null}
                 </Link>

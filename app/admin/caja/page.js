@@ -19,7 +19,7 @@ export default async function CajaPage() {
   } catch (error) {
     return (
       <section className="admin-section">
-        <h1>Caja</h1>
+        <h1>Retiros</h1>
         <p className="form-error">{error.message}</p>
       </section>
     );
@@ -28,7 +28,7 @@ export default async function CajaPage() {
   return (
     <section className="admin-section">
       <div className="admin-header">
-        <h1>Caja</h1>
+        <h1>Retiros</h1>
         <CashMovementFormModal />
       </div>
       <p className="hint">

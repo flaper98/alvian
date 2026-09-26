@@ -35,7 +35,7 @@ export default async function CreditosPage() {
   } catch (error) {
     return (
       <section className="admin-section">
-        <h1>Crédito / Pandero</h1>
+        <h1>Por cobrar</h1>
         <p className="form-error">{error.message}</p>
       </section>
     );
@@ -45,7 +45,7 @@ export default async function CreditosPage() {
 
   return (
     <section className="admin-section">
-      <h1>Crédito</h1>
+      <h1>Por cobrar</h1>
       <CreditosDashboard customerGroups={customerGroups} />
     </section>
   );
