@@ -150,7 +150,11 @@ export default async function HomePage() {
 
       <header id="inicio" className="sf-hero">
         {heroBanners.length > 0 ? (
-          <HeroCarousel slides={heroBanners} />
+          <>
+            {/* Los banners son imágenes: el h1 va oculto a la vista pero legible para Google y lectores de pantalla. */}
+            <h1 className="sr-only">Perfumes árabes originales en Pucallpa - Alvian Perfumes</h1>
+            <HeroCarousel slides={heroBanners} />
+          </>
         ) : (
           <div className="sf-hero-plain">
             <div className="sf-wrap sf-hero-plain-in">

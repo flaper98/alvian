@@ -4,9 +4,19 @@ import SiteFooter from '../SiteFooter';
 
 export const revalidate = 3600;
 
+const DESCRIPTION =
+  'Términos y condiciones de compra en Alvian Perfumes: precios, formas de pago, envíos, cambios y devoluciones, y acceso al Libro de Reclamaciones.';
+
 export const metadata = {
   title: 'Términos y condiciones',
+  description: DESCRIPTION,
   alternates: { canonical: '/terminos' },
+  openGraph: {
+    title: 'Términos y condiciones | Alvian Perfumes',
+    description: DESCRIPTION,
+    url: '/terminos',
+    type: 'website',
+  },
 };
 
 export default async function TerminosPage() {

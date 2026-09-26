@@ -5,10 +5,19 @@ import ComplaintForm from './ComplaintForm';
 
 export const dynamic = 'force-dynamic';
 
+const DESCRIPTION =
+  'Libro de Reclamaciones virtual de Alvian Perfumes, conforme al Código de Protección y Defensa del Consumidor.';
+
 export const metadata = {
   title: 'Libro de Reclamaciones',
-  description: 'Libro de Reclamaciones virtual de Alvian Perfumes, conforme al Código de Protección y Defensa del Consumidor.',
+  description: DESCRIPTION,
   alternates: { canonical: '/reclamaciones' },
+  openGraph: {
+    title: 'Libro de Reclamaciones | Alvian Perfumes',
+    description: DESCRIPTION,
+    url: '/reclamaciones',
+    type: 'website',
+  },
 };
 
 export default async function ReclamacionesPage() {

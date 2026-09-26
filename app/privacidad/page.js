@@ -4,9 +4,19 @@ import SiteFooter from '../SiteFooter';
 
 export const revalidate = 3600;
 
+const DESCRIPTION =
+  'Política de privacidad de Alvian Perfumes: qué datos personales usamos al comprar, para qué los usamos y cómo ejercer tus derechos, conforme a la Ley N.° 29733.';
+
 export const metadata = {
   title: 'Política de privacidad',
+  description: DESCRIPTION,
   alternates: { canonical: '/privacidad' },
+  openGraph: {
+    title: 'Política de privacidad | Alvian Perfumes',
+    description: DESCRIPTION,
+    url: '/privacidad',
+    type: 'website',
+  },
 };
 
 export default async function PrivacidadPage() {

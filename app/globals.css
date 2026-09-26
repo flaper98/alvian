@@ -3232,3 +3232,39 @@ select:focus {
 .flow-list-neutral .flow-total strong {
   color: var(--green-900);
 }
+
+/* ---------- Reparto tipo Profit First ---------- */
+
+.pf-insights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pf-insight {
+  padding: 0.6rem 0.85rem;
+  border-left: 4px solid var(--border);
+  border-radius: 6px;
+  background: var(--cream);
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.pf-insight-good {
+  border-left-color: var(--status-good);
+}
+
+.pf-insight-warn {
+  border-left-color: var(--status-attention);
+}
+
+.pf-insight-bad {
+  border-left-color: var(--status-critical);
+}
+
+.pf-insight-info {
+  border-left-color: var(--gold);
+}

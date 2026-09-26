@@ -6,10 +6,18 @@ import { IconSearch } from '../_store/icons';
 
 export const dynamic = 'force-dynamic';
 
+const DESCRIPTION = 'Consulta el estado de tu pedido en Alvian Perfumes con tu código y celular.';
+
 export const metadata = {
   title: 'Seguir mi pedido',
-  description: 'Consulta el estado de tu pedido en Alvian Perfumes con tu código y celular.',
+  description: DESCRIPTION,
   alternates: { canonical: '/seguimiento' },
+  openGraph: {
+    title: 'Seguir mi pedido | Alvian Perfumes',
+    description: DESCRIPTION,
+    url: '/seguimiento',
+    type: 'website',
+  },
 };
 
 export default async function SeguimientoPage({ searchParams }) {

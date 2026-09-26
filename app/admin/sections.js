@@ -54,6 +54,7 @@ export const SECTIONS = [
     tabs: [
       { href: '/admin/gastos', label: 'Gastos' },
       { href: '/admin/caja', label: 'Retiros' },
+      { href: '/admin/profit-first', label: 'Reparto' },
     ],
   },
   {
