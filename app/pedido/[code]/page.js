@@ -6,6 +6,7 @@ import SiteHeader from '../../_store/SiteHeader';
 import SiteFooter from '../../SiteFooter';
 import OrderView, { orderWhatsAppMessage } from '../../_store/OrderView';
 import ClearCart from '../../_store/ClearCart';
+import MetaPixelPurchase from '../../_store/MetaPixelPurchase';
 import { IconCheck } from '../../_store/icons';
 import WhatsAppIcon from '../../WhatsAppIcon';
 
@@ -33,6 +34,7 @@ export default async function PedidoPage({ params, searchParams }) {
     <>
       <SiteHeader />
       {isNew ? <ClearCart /> : null}
+      {isNew ? <MetaPixelPurchase order={order} /> : null}
       <section className="store-section">
         <div className="wrap narrow">
           <div className="thanks">

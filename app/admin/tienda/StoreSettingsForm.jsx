@@ -32,6 +32,7 @@ export default function StoreSettingsForm({ config }) {
   const [banks, setBanks] = useState(config.payment.banks.length ? config.payment.banks : [{}]);
   const p = config.payment;
   const b = config.business;
+  const m = config.marketing;
 
   return (
     <form action={formAction} className="perfume-form store-settings">
@@ -159,6 +160,25 @@ export default function StoreSettingsForm({ config }) {
             <input name="hours" defaultValue={b.hours} />
           </label>
         </div>
+      </fieldset>
+
+      <fieldset className="store-fields">
+        <legend>Marketing</legend>
+        <label>
+          ID del Pixel de Meta (Facebook / Instagram Ads)
+          <input
+            name="metaPixelId"
+            inputMode="numeric"
+            placeholder="Ej: 1098750579283252"
+            defaultValue={m.metaPixelId}
+          />
+        </label>
+        <p className="hint">
+          Lo encuentras en Meta: Administrador de eventos → tu Pixel → engranaje de Configuración.
+          Con esto se avisa a Meta cada vez que alguien ve una página (PageView) y cada vez que se
+          confirma una compra (Purchase, con el monto real), para que tus anuncios se optimicen
+          mejor. Déjalo vacío para desactivarlo.
+        </p>
       </fieldset>
 
       {state?.error ? <p className="form-error">{state.error}</p> : null}

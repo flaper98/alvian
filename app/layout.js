@@ -4,6 +4,7 @@ import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import AnalyticsWithFilter from './AnalyticsWithFilter';
 import { CartProvider } from './_store/CartProvider';
 import CartDrawer from './_store/CartDrawer';
+import MetaPixel from './_store/MetaPixel';
 import { getStoreConfig } from '@/lib/store-db';
 import './globals.css';
 import './store.css';
@@ -125,6 +126,7 @@ export default async function RootLayout({ children }) {
           {children}
           <CartDrawer freeFrom={Number(config.shipping.freeFrom) || 0} />
         </CartProvider>
+        <MetaPixel pixelId={config.marketing.metaPixelId} />
         <AnalyticsWithFilter />
         <SpeedInsights />
       </body>
