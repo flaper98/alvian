@@ -1,4 +1,5 @@
 import { findWebOrderForTracking } from '@/lib/store-db';
+import { onlyDigits, phoneError, PHONE_PATTERN, PHONE_HINT } from '@/lib/customer-validation';
 import SiteHeader from '../_store/SiteHeader';
 import SiteFooter from '../SiteFooter';
 import OrderView from '../_store/OrderView';
@@ -26,9 +27,12 @@ export default async function SeguimientoPage({ searchParams }) {
   const phone = String(params.tel || '').slice(0, 20);
   let order = null;
   let error = '';
-  if (code && phone) {
+  const phoneProblem = phone ? phoneError(phone) : null;
+  if (phoneProblem) {
+    error = phoneProblem;
+  } else if (code && phone) {
     try {
-      order = await findWebOrderForTracking(code, phone);
+      order = await findWebOrderForTracking(code, onlyDigits(phone));
     } catch (e) {
       order = null;
     }
@@ -52,7 +56,17 @@ export default async function SeguimientoPage({ searchParams }) {
             </label>
             <label className="field">
               Celular
-              <input name="tel" inputMode="tel" placeholder="999 999 999" defaultValue={phone} required />
+              <input
+                name="tel"
+                type="tel"
+                inputMode="numeric"
+                pattern={PHONE_PATTERN}
+                title={PHONE_HINT}
+                maxLength={9}
+                placeholder="987654321"
+                defaultValue={phone}
+                required
+              />
             </label>
             <button className="btn-gold" type="submit">
               Buscar <IconSearch size={18} />

@@ -4,6 +4,15 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { submitComplaintAction } from '@/lib/store-actions';
+import {
+  PHONE_PATTERN,
+  PHONE_HINT,
+  DOC_PATTERN,
+  DOC_HINT,
+  NAME_PATTERN,
+  NAME_HINT,
+  keepDigits,
+} from '@/lib/customer-validation';
 import { IconCheck } from '../_store/icons';
 
 function Submit() {
@@ -47,23 +56,62 @@ export default function ComplaintForm() {
       <h2 className="h4">1. Identificación del consumidor</h2>
       <div className="grid-2">
         <label className="field">
-          Nombre completo *<input name="name" required defaultValue={old.name} />
+          Nombre completo *
+          <input
+            name="name"
+            required
+            pattern={NAME_PATTERN}
+            title={NAME_HINT}
+            maxLength={120}
+            placeholder="Nombre y apellido"
+            defaultValue={old.name}
+          />
         </label>
         <label className="field">
-          DNI / CE *<input name="doc" required defaultValue={old.doc} />
+          DNI / CE *
+          <input
+            name="doc"
+            required
+            inputMode="numeric"
+            pattern={DOC_PATTERN}
+            title={DOC_HINT}
+            maxLength={12}
+            placeholder="8 dígitos"
+            onInput={(event) => keepDigits(event, 12)}
+            defaultValue={old.doc}
+          />
         </label>
         <label className="field">
-          Domicilio *<input name="address" required defaultValue={old.address} />
+          Domicilio *
+          <input name="address" required minLength={5} maxLength={250} defaultValue={old.address} />
         </label>
         <label className="field">
-          Teléfono<input name="phone" defaultValue={old.phone} />
+          Celular
+          <input
+            name="phone"
+            type="tel"
+            inputMode="numeric"
+            pattern={PHONE_PATTERN}
+            title={PHONE_HINT}
+            maxLength={9}
+            placeholder="987654321"
+            onInput={(event) => keepDigits(event, 9)}
+            defaultValue={old.phone}
+          />
         </label>
         <label className="field">
-          Correo electrónico *<input name="email" type="email" required defaultValue={old.email} />
+          Correo electrónico *
+          <input name="email" type="email" required maxLength={120} defaultValue={old.email} />
         </label>
         <label className="field">
           Padre/madre o apoderado (si eres menor de edad)
-          <input name="guardian" defaultValue={old.guardian} />
+          <input
+            name="guardian"
+            pattern={NAME_PATTERN}
+            title={NAME_HINT}
+            maxLength={120}
+            defaultValue={old.guardian}
+          />
         </label>
       </div>
 

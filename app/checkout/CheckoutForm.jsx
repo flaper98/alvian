@@ -6,6 +6,15 @@ import Link from 'next/link';
 import { upload } from '@vercel/blob/client';
 import { placeOrderAction } from '@/lib/store-actions';
 import {
+  PHONE_PATTERN,
+  PHONE_HINT,
+  DOC_PATTERN,
+  DOC_HINT,
+  NAME_PATTERN,
+  NAME_HINT,
+  keepDigits,
+} from '@/lib/customer-validation';
+import {
   DEPARTMENTS,
   PAYMENT_METHODS,
   availablePaymentMethods,
@@ -176,26 +185,56 @@ export default function CheckoutForm({ config }) {
             <div className="grid-2">
               <label className="field">
                 Nombre completo *
-                <input name="name" required autoComplete="name" defaultValue={old.name} />
+                <input
+                  name="name"
+                  required
+                  autoComplete="name"
+                  pattern={NAME_PATTERN}
+                  title={NAME_HINT}
+                  maxLength={120}
+                  placeholder="Nombre y apellido"
+                  defaultValue={old.name}
+                />
               </label>
               <label className="field">
                 Celular (WhatsApp) *
                 <input
                   name="phone"
                   required
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="999 999 999"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  pattern={PHONE_PATTERN}
+                  title={PHONE_HINT}
+                  maxLength={9}
+                  placeholder="987654321"
+                  onInput={(event) => keepDigits(event, 9)}
                   defaultValue={old.phone}
                 />
               </label>
               <label className="field">
                 DNI / CE
-                <input name="doc" inputMode="numeric" defaultValue={old.doc} />
+                <input
+                  name="doc"
+                  inputMode="numeric"
+                  pattern={DOC_PATTERN}
+                  title={DOC_HINT}
+                  maxLength={12}
+                  placeholder="8 dígitos"
+                  onInput={(event) => keepDigits(event, 12)}
+                  defaultValue={old.doc}
+                />
               </label>
               <label className="field">
                 Correo
-                <input name="email" type="email" autoComplete="email" defaultValue={old.email} />
+                <input
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={120}
+                  placeholder="tucorreo@ejemplo.com"
+                  defaultValue={old.email}
+                />
               </label>
             </div>
           </fieldset>
@@ -255,6 +294,8 @@ export default function CheckoutForm({ config }) {
                 <input
                   name="district"
                   required
+                  minLength={3}
+                  maxLength={80}
                   placeholder={option?.local ? 'Callería, Yarinacocha, Manantay…' : ''}
                   defaultValue={old.district}
                 />
@@ -265,6 +306,8 @@ export default function CheckoutForm({ config }) {
               <input
                 name="address"
                 required
+                minLength={5}
+                maxLength={250}
                 autoComplete="street-address"
                 placeholder={option?.local ? 'Jr./Av., número' : 'Ej: Agencia Shalom Av. …'}
                 defaultValue={old.address}
