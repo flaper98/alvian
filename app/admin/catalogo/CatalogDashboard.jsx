@@ -30,8 +30,8 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         Stock
         <input name="stock" type="number" min="0" step="1" defaultValue={perfume.stock} required />
         <span className="hint">
-          Úsalo solo para corregir el stock si no coincide con lo que tienes. Un ajuste manual no
-          registra compra ni costo.
+          Úsalo solo para corregir errores de conteo. Si un perfume se rompió, se perdió o lo
+          regalaste, regístralo en Gastos y retiros → Pérdidas para que reste de tu ganancia.
         </span>
       </label>
       <label>
