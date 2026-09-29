@@ -24,6 +24,7 @@ export const SECTIONS = [
     tabs: [
       { href: '/admin/pedidos-web', label: 'Tienda web', webOrdersBadge: true },
       { href: '/admin/pedidos', label: 'Encargos' },
+      { href: '/admin/envios', label: 'Envíos Shalom' },
     ],
   },
   {

@@ -8,6 +8,7 @@ import {
   deleteWebOrderAction,
 } from '@/lib/store-actions';
 import { ORDER_STATUSES, PAYMENT_METHODS, formatMoney } from '@/lib/store-config';
+import { SHIPMENT_STATUSES } from '@/lib/shalom';
 
 function whatsappLink(phone, text) {
   let digits = String(phone || '').replace(/\D/g, '');
@@ -91,6 +92,16 @@ export default function WebOrderCard({ order, role }) {
               {registered ? (
                 <p className="badge badge-paid">Registrado como venta</p>
               ) : null}
+              {order.shipments?.map((shipment) => (
+                <p key={shipment.id} className="small">
+                  <a href="/admin/envios?estado=todos">
+                    Shalom N° {shipment.order_number} · {shipment.order_code}
+                  </a>{' '}
+                  <span className={`status shipment-status-${shipment.status}`}>
+                    {SHIPMENT_STATUSES[shipment.status] || shipment.status}
+                  </span>
+                </p>
+              ))}
             </div>
             <div>
               <h3>Cliente</h3>

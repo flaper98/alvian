@@ -1,5 +1,6 @@
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { ORDER_FLOW, ORDER_STATUSES, PAYMENT_METHODS, formatMoney } from '@/lib/store-config';
+import { SHALOM_TRACK_URL, SHIPMENT_STATUSES } from '@/lib/shalom';
 import WhatsAppIcon from '../WhatsAppIcon';
 import { IconTruck } from './icons';
 
@@ -46,6 +47,23 @@ export default function OrderView({ order }) {
           ))}
         </ol>
       )}
+
+      {order.shipments?.map((shipment) => (
+        <div className="tracking shalom-tracking" key={shipment.id}>
+          <IconTruck size={22} />
+          <div>
+            <strong>Envío por Shalom · {SHIPMENT_STATUSES[shipment.status] || shipment.status}</strong>
+            <p>
+              N° de orden: <b>{shipment.order_number}</b> · Código: <b>{shipment.order_code}</b>
+              {shipment.destination ? `\nAgencia de destino: ${shipment.destination}` : ''}
+              {shipment.status === 'en_destino' ? '\n¡Ya puedes recogerlo con tu DNI!' : ''}
+            </p>
+            <a href={SHALOM_TRACK_URL} target="_blank" rel="noopener noreferrer">
+              Rastrear en Shalom ↗
+            </a>
+          </div>
+        </div>
+      ))}
 
       {order.tracking ? (
         <div className="tracking">

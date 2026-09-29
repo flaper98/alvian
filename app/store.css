@@ -2577,6 +2577,175 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   }
 }
 
+/* ---------- Envíos Shalom ---------- */
+
+.shipment-head {
+  grid-template-columns: auto auto 1fr auto auto;
+}
+
+.shipment-dir {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.shipment-dir-saliente {
+  background: rgba(107, 74, 143, 0.12);
+  color: #5a3c7a;
+}
+
+.shipment-dir-entrante {
+  background: rgba(14, 143, 118, 0.12);
+  color: #0b6f5c;
+}
+
+.shipment-status-registrado,
+.shipment-status-en_origen {
+  background: rgba(14, 43, 33, 0.08);
+  color: var(--ink-soft);
+}
+
+.shipment-status-en_transito,
+.shipment-status-en_reparto {
+  background: rgba(107, 74, 143, 0.12);
+  color: #5a3c7a;
+}
+
+.shipment-status-en_destino,
+.shipment-status-observado {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.shipment-status-entregado {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.shipment-border-en_transito,
+.shipment-border-en_reparto {
+  border-left-color: #6b4a8f;
+}
+
+.shipment-border-en_destino,
+.shipment-border-observado {
+  border-left-color: var(--status-attention);
+}
+
+.shipment-border-entregado {
+  border-left-color: var(--status-good);
+}
+
+.shipment-codes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.shipment-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.shipment-copy strong {
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+
+.shipment-track {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.shipment-history {
+  list-style: none;
+  padding: 0 0 0 0.9rem;
+  margin: 0;
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shipment-history p {
+  margin: 0.1rem 0 0;
+}
+
+.shipment-status-form {
+  grid-template-columns: 200px 1fr auto;
+}
+
+.shipment-direction {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.perfume-form .shipment-direction label {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.perfume-form .shipment-direction label.active {
+  border-color: var(--green-800);
+  background: rgba(21, 57, 44, 0.06);
+}
+
+.shipment-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.shalom-tracking a {
+  color: var(--green-900);
+  font-weight: 700;
+}
+
+@media (max-width: 820px) {
+  .shipment-status-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shipment-head {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .shipment-head .status {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 480px) {
+  .shipment-direction,
+  .shipment-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .web-order-actions {
   display: flex;
   flex-wrap: wrap;
