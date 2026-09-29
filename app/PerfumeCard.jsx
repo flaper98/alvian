@@ -14,14 +14,13 @@ export default function PerfumeCard({ perfume, preload = false }) {
   const href = `/perfume/${product.slug}`;
   const message = `Hola, vengo desde su página web. ¿Me puede dar más información del perfume "${perfume.name}", por favor?`;
   const off = discountPercent(perfume);
-  const soldOut = (Number(perfume.stock) || 0) <= 0;
   const isNew =
     perfume.created_at &&
     Date.now() - new Date(perfume.created_at).getTime() < NEW_DAYS * 24 * 60 * 60 * 1000;
   const label = categoryLabel(perfume.category);
 
   return (
-    <article className={`sf-card${soldOut ? ' is-soldout' : ''}`} data-hover-video={perfume.video_url ? '' : undefined}>
+    <article className="sf-card" data-hover-video={perfume.video_url ? '' : undefined}>
       <Link href={href} className="sf-card-media" aria-label={perfume.name}>
         <span className="sf-card-badges">
           {off ? <span className="sf-badge sf-badge-sale">-{off}%</span> : null}

@@ -1101,11 +1101,6 @@ body:has(.sf-nav) .btn-wa-outline {
   padding-top: 14px;
 }
 
-.sf-card.is-soldout .sf-card-img {
-  opacity: 0.45;
-  filter: grayscale(0.4);
-}
-
 @media (max-width: 1000px) {
   .sf-grid-featured {
     grid-template-columns: repeat(2, minmax(0, 1fr));
