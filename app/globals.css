@@ -2300,6 +2300,47 @@ button {
   color: var(--status-attention);
 }
 
+/* Ventas: estado de cobro de crédito / pandero */
+.payment-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.badge-debt {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.collection-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 130px;
+}
+
+.collection-detail {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.collection-bar {
+  display: block;
+  width: 100%;
+  max-width: 140px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--status-critical-bg);
+  overflow: hidden;
+}
+
+.collection-bar span {
+  display: block;
+  height: 100%;
+  background: var(--status-good);
+}
+
 .badge-icon {
   display: inline-flex;
   margin-right: 0.3rem;

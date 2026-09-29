@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import SaleRow from './SaleRow';
+import SaleRow, { saleCollection } from './SaleRow';
 
 const FILTERS = [
   { value: 'all', label: 'Todas' },
   { value: 'contado', label: 'Contado' },
   { value: 'credito', label: 'Crédito' },
   { value: 'pandero', label: 'Pandero' },
+  { value: 'with-balance', label: 'Con saldo' },
+  { value: 'settled', label: 'Cancelado' },
   { value: 'pending-delivery', label: 'Pendiente de entrega' },
 ];
 
@@ -36,6 +38,8 @@ export default function SalesList({ sales, canManage, users }) {
       contado: searched.filter((s) => s.payment_type === 'contado').length,
       credito: searched.filter((s) => s.payment_type === 'credito').length,
       pandero: searched.filter((s) => s.payment_type === 'pandero').length,
+      'with-balance': searched.filter((s) => saleCollection(s).balance > 0).length,
+      settled: searched.filter((s) => saleCollection(s).state === 'cancelado').length,
       'pending-delivery': searched.filter((s) => !s.delivered).length,
     }),
     [searched],
@@ -44,6 +48,8 @@ export default function SalesList({ sales, canManage, users }) {
   const rows = useMemo(() => {
     const filtered = searched.filter((sale) => {
       if (filterBy === 'pending-delivery') return !sale.delivered;
+      if (filterBy === 'with-balance') return saleCollection(sale).balance > 0;
+      if (filterBy === 'settled') return saleCollection(sale).state === 'cancelado';
       if (filterBy === 'all') return true;
       return sale.payment_type === filterBy;
     });

@@ -7,6 +7,47 @@ import EditSaleModal from './EditSaleModal';
 
 const PAYMENT_LABELS = { contado: 'Contado', credito: 'Crédito', pandero: 'Pandero' };
 
+const money = (value) => `S/ ${Number(value).toFixed(2)}`;
+
+/** Estado de cobro de una venta: al contado se cobra al momento; a crédito o
+ * pandero depende de los abonos registrados. Los montos van en centavos
+ * redondeados para que S/ 0.001 de diferencia no la deje como "debe". */
+export function saleCollection(sale) {
+  const total = Number(sale.total) || 0;
+  if (sale.payment_type === 'contado') return { state: 'contado', paid: total, balance: 0, total };
+  const paid = Math.round((Number(sale.paid_amount) || 0) * 100) / 100;
+  const balance = Math.max(Math.round((total - paid) * 100) / 100, 0);
+  const state = balance <= 0 ? 'cancelado' : paid > 0 ? 'parcial' : 'sin-abono';
+  return { state, paid, balance, total };
+}
+
+function CollectionStatus({ sale }) {
+  const { state, paid, balance, total } = saleCollection(sale);
+  if (state === 'contado') return null;
+  if (state === 'cancelado') {
+    return (
+      <span className="badge badge-paid">
+        <span className="badge-icon">
+          <IconCheck size={12} />
+        </span>
+        Cancelado
+      </span>
+    );
+  }
+  const percent = Math.round((paid / total) * 100);
+  return (
+    <div className="collection-status">
+      <span className="badge badge-debt">Debe {money(balance)}</span>
+      <span className="collection-detail">
+        {state === 'parcial' ? `Abonó ${money(paid)} de ${money(total)}` : 'Sin abonos'}
+      </span>
+      <span className="collection-bar" aria-hidden="true">
+        <span style={{ width: `${percent}%` }} />
+      </span>
+    </div>
+  );
+}
+
 export default function SaleRow({ sale, canManage, users = [] }) {
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -49,9 +90,12 @@ export default function SaleRow({ sale, canManage, users = [] }) {
         <td className="perfume-table-stock-cell" data-label="Cantidad">{sale.quantity}</td>
         <td className="perfume-table-price-cell" data-label="Total">S/ {Number(sale.total).toFixed(2)}</td>
         <td data-label="Pago">
-          <span className={`badge badge-${sale.payment_type}`}>
-            {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
-          </span>
+          <div className="payment-cell">
+            <span className={`badge badge-${sale.payment_type}`}>
+              {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
+            </span>
+            <CollectionStatus sale={sale} />
+          </div>
         </td>
         <td data-label="Entrega">
           <span className={`badge ${sale.delivered ? 'badge-paid' : 'badge-pending'}`}>
