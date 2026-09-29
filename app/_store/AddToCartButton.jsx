@@ -15,15 +15,6 @@ export default function AddToCartButton({
 }) {
   const { add } = useCart();
   const router = useRouter();
-  const soldOut = Number(product.stock) <= 0;
-
-  if (soldOut) {
-    return (
-      <button type="button" className={`${className} is-disabled`} disabled>
-        Agotado
-      </button>
-    );
-  }
 
   return (
     <button

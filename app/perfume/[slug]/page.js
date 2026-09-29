@@ -86,7 +86,6 @@ export default async function PerfumePage({ params }) {
   const isNew =
     perfume.created_at &&
     Date.now() - new Date(perfume.created_at).getTime() < 30 * 24 * 60 * 60 * 1000;
-  const inStock = Number(perfume.stock) > 0;
   const off = discountPercent(perfume);
   const [config, faqs] = await Promise.all([getStoreConfig(), listPublicFaqs()]);
   const paymentText =
@@ -112,8 +111,7 @@ export default async function PerfumePage({ params }) {
       '@type': 'Offer',
       priceCurrency: 'PEN',
       price: Number(perfume.price).toFixed(2),
-      availability:
-        perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability: 'https://schema.org/InStock',
       areaServed: ['Pucallpa', 'PE'],
       url: `${SITE_URL}/perfume/${slug}`,
     },
@@ -157,9 +155,7 @@ export default async function PerfumePage({ params }) {
             {perfume.category ? (
               <span className="badge badge-gold">{CATEGORY_SHORT_LABELS[perfume.category]}</span>
             ) : null}
-            <span className={`badge ${inStock ? 'badge-paid' : 'badge-pending'}`}>
-              {inStock ? 'Disponible' : 'Agotado'}
-            </span>
+            <span className="badge badge-paid">Disponible</span>
           </div>
 
           <h1>{perfume.name}</h1>

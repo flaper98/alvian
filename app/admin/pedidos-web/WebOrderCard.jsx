@@ -166,7 +166,8 @@ export default function WebOrderCard({ order, role }) {
             </label>
             <SaveButton />
             {state?.error ? <p className="form-error">{state.error}</p> : null}
-            {state?.success ? <p className="form-ok">Guardado.</p> : null}
+            {state?.success && !state.warning ? <p className="form-ok">Guardado.</p> : null}
+            {state?.warning ? <p className="form-error">{state.warning}</p> : null}
           </form>
 
           <div className="web-order-actions">

@@ -81,8 +81,9 @@ export default async function HomePage() {
       return stockDiff || a.name.localeCompare(b.name, 'es');
     });
 
+  // Todo se vende como disponible: los destacados se muestran aunque no haya stock.
   const inStock = perfumes.filter((p) => p.stock > 0);
-  const featured = inStock.filter((p) => p.featured).slice(0, 4);
+  const featured = perfumes.filter((p) => p.featured).slice(0, 4);
 
   // Tarjetas de categoría: usan la foto de un destacado (o del primero con
   // stock) de esa categoría. Una categoría sin perfumes no se muestra.
@@ -129,8 +130,7 @@ export default async function HomePage() {
           '@type': 'Offer',
           priceCurrency: 'PEN',
           price: Number(perfume.price).toFixed(2),
-          availability:
-            perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          availability: 'https://schema.org/InStock',
           areaServed: ['Pucallpa', 'PE'],
         },
       },
