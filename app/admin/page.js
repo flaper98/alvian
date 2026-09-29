@@ -226,10 +226,14 @@ export default async function ResumenPage({ searchParams }) {
           sub={`De ganancias ${money(flow.expensesFromEarnings)} · tu capital ${money(flow.expensesCapital)}`}
         />
         <KpiTile
-          label="Ganancia de lo vendido"
-          value={money(summary.salesProfit)}
-          sub={`Ventas ${money(summary.salesTotal)} − costo ${money(summary.estimatedCost)} − comisiones ${money(summary.commissionsEarned)}`}
-          tone={summary.salesProfit < 0 ? 'bad' : 'good'}
+          label="Ganancia"
+          value={money(summary.profit)}
+          sub={`Ventas ${money(summary.salesTotal)} − costo ${money(summary.estimatedCost)} − comisiones ${money(summary.commissionsEarned)}${
+            summary.lossesTotal > 0
+              ? ` − pérdidas ${money(summary.lossesTotal)} (${summary.lossesCount})`
+              : ''
+          }`}
+          tone={summary.profit < 0 ? 'bad' : 'good'}
         />
       </div>
 

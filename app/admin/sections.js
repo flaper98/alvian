@@ -54,6 +54,7 @@ export const SECTIONS = [
     roles: ADMIN,
     tabs: [
       { href: '/admin/gastos', label: 'Gastos' },
+      { href: '/admin/perdidas', label: 'Pérdidas' },
       { href: '/admin/caja', label: 'Retiros' },
       { href: '/admin/profit-first', label: 'Reparto' },
     ],
