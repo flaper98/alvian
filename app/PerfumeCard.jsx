@@ -14,8 +14,7 @@ export default function PerfumeCard({ perfume, preload = false }) {
   const href = `/perfume/${product.slug}`;
   const message = `Hola, vengo desde su página web. ¿Me puede dar más información del perfume "${perfume.name}", por favor?`;
   const off = discountPercent(perfume);
-  const stock = Number(perfume.stock) || 0;
-  const soldOut = stock <= 0;
+  const soldOut = (Number(perfume.stock) || 0) <= 0;
   const isNew =
     perfume.created_at &&
     Date.now() - new Date(perfume.created_at).getTime() < NEW_DAYS * 24 * 60 * 60 * 1000;
@@ -26,11 +25,7 @@ export default function PerfumeCard({ perfume, preload = false }) {
       <Link href={href} className="sf-card-media" aria-label={perfume.name}>
         <span className="sf-card-badges">
           {off ? <span className="sf-badge sf-badge-sale">-{off}%</span> : null}
-          {soldOut ? (
-            <span className="sf-badge sf-badge-muted">Agotado</span>
-          ) : isNew ? (
-            <span className="sf-badge">Nuevo</span>
-          ) : null}
+          {isNew ? <span className="sf-badge">Nuevo</span> : null}
         </span>
         <ProductImage
           src={perfume.image_url}
@@ -51,11 +46,6 @@ export default function PerfumeCard({ perfume, preload = false }) {
           <strong>{formatMoney(perfume.price)}</strong>
           {off ? <s>{formatMoney(perfume.compare_price)}</s> : null}
         </p>
-        {!soldOut && stock <= 3 ? (
-          <p className="sf-card-stock">
-            {stock === 1 ? '¡Última unidad!' : `¡Últimas ${stock} unidades!`}
-          </p>
-        ) : null}
         <div className="sf-card-actions">
           <AddToCartButton product={product} className="sf-btn sf-btn-dark sf-btn-block" label="Agregar" />
           <a

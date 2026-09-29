@@ -6,6 +6,11 @@ import { useFormStatus } from 'react-dom';
 import { createShipmentAction, updateShipmentAction } from '@/lib/shalom-actions';
 import { SHIPMENT_DIRECTIONS, SHIPMENT_STATUSES } from '@/lib/shalom';
 
+const DIRECTION_HINTS = {
+  saliente: 'Tú lo mandas',
+  entrante: 'Te lo mandan',
+};
+
 function SubmitButton({ editing }) {
   const { pending } = useFormStatus();
   return (
@@ -23,6 +28,7 @@ function ShipmentForm({ shipment, webOrders, suppliers, onClose }) {
   const [contactName, setContactName] = useState(shipment?.contact_name || '');
   const [contactPhone, setContactPhone] = useState(shipment?.contact_phone || '');
   const [destination, setDestination] = useState(shipment?.destination || '');
+  const outgoing = direction === 'saliente';
 
   useEffect(() => {
     if (state?.success) onClose();
@@ -43,10 +49,13 @@ function ShipmentForm({ shipment, webOrders, suppliers, onClose }) {
   }
 
   return (
-    <form action={formAction} className="perfume-form">
-      <h2>{editing ? 'Editar envío Shalom' : 'Registrar envío Shalom'}</h2>
+    <form action={formAction} className="perfume-form shipment-form">
+      <header className="shipment-form-head">
+        <h2>{editing ? 'Editar envío Shalom' : 'Registrar envío Shalom'}</h2>
+        <p className="hint">Solo el N° de orden y el código son obligatorios.</p>
+      </header>
 
-      <fieldset className="shipment-direction">
+      <fieldset className="shipment-direction" aria-label="Tipo de envío">
         {Object.entries(SHIPMENT_DIRECTIONS).map(([key, label]) => (
           <label key={key} className={direction === key ? 'active' : ''}>
             <input
@@ -56,125 +65,168 @@ function ShipmentForm({ shipment, webOrders, suppliers, onClose }) {
               checked={direction === key}
               onChange={() => setDirection(key)}
             />
-            {label}
+            <span className="shipment-direction-icon" aria-hidden="true">
+              {key === 'saliente' ? '↑' : '↓'}
+            </span>
+            <span className="shipment-direction-text">
+              <strong>{label}</strong>
+              <small>{DIRECTION_HINTS[key]}</small>
+            </span>
           </label>
         ))}
       </fieldset>
 
-      <div className="shipment-form-row">
-        <label>
-          N° de orden
-          <input
-            name="orderNumber"
-            inputMode="numeric"
-            placeholder="Ej: 12345678"
-            defaultValue={shipment?.order_number || ''}
-            required
-          />
-        </label>
-        <label>
-          Código
-          <input
-            name="orderCode"
-            placeholder="Ej: A1B2"
-            autoCapitalize="characters"
-            defaultValue={shipment?.order_code || ''}
-            required
-          />
-        </label>
-      </div>
-      <p className="hint">Están en la boleta o ticket que te dio Shalom al registrar el envío.</p>
+      <section className="shipment-block">
+        <h3>
+          <span>1</span> Datos de Shalom
+        </h3>
+        <div className="shipment-form-row">
+          <label>
+            N° de orden *
+            <input
+              name="orderNumber"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={12}
+              placeholder="12345678"
+              defaultValue={shipment?.order_number || ''}
+              required
+            />
+          </label>
+          <label>
+            Código *
+            <input
+              name="orderCode"
+              className="shipment-code-input"
+              autoComplete="off"
+              autoCapitalize="characters"
+              maxLength={8}
+              placeholder="A1B2"
+              defaultValue={shipment?.order_code || ''}
+              required
+            />
+          </label>
+        </div>
+        <p className="shipment-help">Los encuentras en el ticket que te da Shalom al registrar el envío.</p>
+      </section>
 
-      {direction === 'saliente' ? (
-        <label>
-          Pedido web (opcional)
-          <select name="webOrderId" defaultValue={shipment?.web_order_id || ''} onChange={handleWebOrder}>
-            <option value="">— Sin pedido web —</option>
-            {webOrders.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.code} · {o.customer_name}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : (
-        <label>
-          Proveedor (opcional)
-          <select name="supplierId" defaultValue={shipment?.supplier_id || ''} onChange={handleSupplier}>
-            <option value="">— Sin proveedor —</option>
-            {suppliers.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
+      <section className="shipment-block">
+        <h3>
+          <span>2</span> {outgoing ? 'Cliente' : 'Proveedor'}
+        </h3>
+        {outgoing ? (
+          <label>
+            Pedido web
+            <select name="webOrderId" defaultValue={shipment?.web_order_id || ''} onChange={handleWebOrder}>
+              <option value="">Sin pedido web</option>
+              {webOrders.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.code} · {o.customer_name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <label>
+            Proveedor
+            <select name="supplierId" defaultValue={shipment?.supplier_id || ''} onChange={handleSupplier}>
+              <option value="">Sin proveedor</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <div className="shipment-form-row">
+          <label>
+            {outgoing ? 'Nombre del cliente' : 'Remitente'}
+            <input
+              name="contactName"
+              autoComplete="off"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+            />
+          </label>
+          <label>
+            Celular
+            <input
+              name="contactPhone"
+              type="tel"
+              inputMode="numeric"
+              maxLength={9}
+              placeholder="987654321"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+            />
+          </label>
+        </div>
+      </section>
 
-      <div className="shipment-form-row">
-        <label>
-          {direction === 'saliente' ? 'Cliente' : 'Remitente'}
-          <input name="contactName" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-        </label>
-        <label>
-          Celular
-          <input
-            name="contactPhone"
-            type="tel"
-            inputMode="numeric"
-            value={contactPhone}
-            onChange={(e) => setContactPhone(e.target.value)}
-          />
-        </label>
-      </div>
+      <section className="shipment-block">
+        <h3>
+          <span>3</span> Ruta
+        </h3>
+        <div className="shipment-form-row shipment-route">
+          <label>
+            Agencia de origen
+            <input name="origin" placeholder="Pucallpa" defaultValue={shipment?.origin || ''} />
+          </label>
+          <span className="shipment-route-arrow" aria-hidden="true">
+            →
+          </span>
+          <label>
+            Agencia de destino
+            <input
+              name="destination"
+              placeholder="Lima - Los Olivos"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+            />
+          </label>
+        </div>
+      </section>
 
-      <div className="shipment-form-row">
-        <label>
-          Agencia de origen
-          <input name="origin" placeholder="Ej: Pucallpa" defaultValue={shipment?.origin || ''} />
-        </label>
-        <label>
-          Agencia de destino
-          <input
-            name="destination"
-            placeholder="Ej: Lima - Los Olivos"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-          />
-        </label>
-      </div>
+      <section className="shipment-block">
+        <h3>
+          <span>4</span> Estado
+        </h3>
+        <div className="shipment-form-row">
+          <label>
+            Estado actual
+            <select name="status" defaultValue={shipment?.status || 'registrado'}>
+              {Object.entries(SHIPMENT_STATUSES).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Nota
+            <input name="note" defaultValue={shipment?.note || ''} placeholder="2 perfumes, pago en destino" />
+          </label>
+        </div>
+      </section>
 
-      <label>
-        Estado
-        <select name="status" defaultValue={shipment?.status || 'registrado'}>
-          {Object.entries(SHIPMENT_STATUSES).map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Nota (opcional)
-        <input name="note" defaultValue={shipment?.note || ''} placeholder="Ej: 2 perfumes, pago en destino" />
-      </label>
-
-      {state?.error ? <p className="form-error">{state.error}</p> : null}
-      <div className="form-actions">
-        <SubmitButton editing={editing} />
-        <button type="button" className="btn-secondary" onClick={onClose}>
-          Cancelar
-        </button>
-      </div>
+      <footer className="shipment-form-actions">
+        {state?.error ? <p className="form-error">{state.error}</p> : null}
+        <div className="form-actions">
+          <button type="button" className="btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
+          <SubmitButton editing={editing} />
+        </div>
+      </footer>
     </form>
   );
 }
 
 export function ShipmentModal({ shipment, webOrders, suppliers, onClose }) {
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
+    <div className="modal-backdrop modal-backdrop-shipment" onClick={onClose}>
+      <div className="modal-dialog modal-dialog-shipment" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
           ×
         </button>

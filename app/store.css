@@ -2687,24 +2687,61 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   grid-template-columns: 200px 1fr auto;
 }
 
+/* Formulario de envío (modal) */
+
+.modal-dialog-shipment {
+  max-width: 600px;
+}
+
+.shipment-form {
+  gap: 1rem;
+  padding: 1.5rem 1.5rem 0;
+}
+
+.shipment-form-head h2 {
+  margin: 0;
+  padding-right: 1.5rem;
+}
+
+.shipment-form-head .hint {
+  margin: 0.3rem 0 0;
+}
+
+.shipment-form label {
+  min-width: 0;
+}
+
+.shipment-form input,
+.shipment-form select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .shipment-direction {
   border: none;
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
 .perfume-form .shipment-direction label {
+  position: relative;
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  gap: 0.7rem;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
   cursor: pointer;
-  font-size: 0.88rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.perfume-form .shipment-direction label:hover {
+  border-color: var(--green-700);
 }
 
 .perfume-form .shipment-direction label.active {
@@ -2712,10 +2749,144 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   background: rgba(21, 57, 44, 0.06);
 }
 
+.shipment-direction label:has(input:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* El radio se oculta: toda la tarjeta es el botón. */
+.shipment-direction input[type='radio'] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.shipment-direction-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 57, 44, 0.08);
+  color: var(--green-800);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.shipment-direction label.active .shipment-direction-icon {
+  background: var(--green-800);
+  color: var(--cream-soft);
+}
+
+.shipment-direction-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.shipment-direction-text strong {
+  font-size: 0.9rem;
+  color: var(--green-900);
+}
+
+.shipment-direction-text small {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.shipment-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.shipment-block h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.shipment-block h3 span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-800);
+  color: var(--cream-soft);
+  font-size: 0.7rem;
+  letter-spacing: 0;
+}
+
+.shipment-block input,
+.shipment-block select {
+  background-color: var(--cream-soft);
+}
+
 .shipment-form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
+}
+
+.shipment-route {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+}
+
+.shipment-route-arrow {
+  padding-bottom: 0.6rem;
+  color: var(--gold-dark);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.shipment-code-input {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.shipment-help {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* Botones fijos al pie mientras se desplaza el formulario. */
+.shipment-form-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0 -1.5rem;
+  padding: 0.9rem 1.5rem 1.25rem;
+  background: var(--cream-soft);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.shipment-form-actions .form-actions {
+  justify-content: flex-end;
 }
 
 .shalom-tracking a {
@@ -2739,10 +2910,59 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   }
 }
 
-@media (max-width: 480px) {
-  .shipment-direction,
-  .shipment-form-row {
-    grid-template-columns: 1fr;
+@media (max-width: 560px) {
+  .modal-backdrop-shipment {
+    padding: 0.75rem 0.5rem 0;
+  }
+
+  /* En celular se comporta como hoja que sube desde abajo. margin-top: auto
+     (en vez de align-items: flex-end) mantiene visible el inicio si es largo. */
+  .modal-dialog-shipment {
+    margin-top: auto;
+  }
+
+  .modal-dialog-shipment .modal-close {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .shipment-form {
+    padding: 1.1rem 1rem 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  .shipment-form-actions {
+    margin: 0 -1rem;
+    padding: 0.75rem 1rem 1rem;
+    border-radius: 0;
+  }
+
+  .shipment-form-actions .form-actions > * {
+    flex: 1;
+  }
+
+  .shipment-block {
+    padding: 0.85rem 0.85rem 0.9rem;
+  }
+
+  .shipment-form-row,
+  .shipment-route {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shipment-route-arrow {
+    display: none;
+  }
+
+  .perfume-form .shipment-direction label {
+    padding: 0.65rem 0.7rem;
+    gap: 0.55rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .shipment-direction {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
