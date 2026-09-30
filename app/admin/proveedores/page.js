@@ -78,8 +78,7 @@ export default async function ProveedoresPage({ searchParams }) {
       {view === 'comparar' ? (
         <>
           <p className="hint">
-            Cada celda muestra el <strong>mejor precio</strong> de ese proveedor (en su nivel más
-            barato). En verde, dónde te conviene comprar.
+            Compara lo que te cobra cada proveedor. En verde, dónde te conviene comprar.
           </p>
           <PriceComparison comparison={comparison} />
         </>
