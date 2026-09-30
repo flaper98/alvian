@@ -39,38 +39,29 @@ const sans = Poppins({
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
+  // "Perfumes árabes" es el nicho de la tienda: va primero en el título.
   title: {
-    default: 'Alvian Perfumes | Perfumería original en Pucallpa',
+    default: 'Perfumes Árabes Originales en Pucallpa | Lattafa, Armaf, Rasasi – Alvian',
     template: '%s | Alvian Perfumes',
   },
   description:
-    'Perfumería Alvian en Pucallpa: fragancias originales para dama y caballero. Elige tu perfume y compra fácil por WhatsApp, con entrega en Pucallpa y envíos a todo el Perú.',
-  keywords: [
-    'perfumes Pucallpa',
-    'perfumería Pucallpa',
-    'perfumes originales Pucallpa',
-    'fragancias Pucallpa',
-    'comprar perfumes Pucallpa',
-    'envíos de perfumes a todo el Perú',
-    'Alvian Perfumes',
-  ],
+    'Perfumes árabes 100% originales en Pucallpa: Lattafa, Armaf, Rasasi y Afnan. Precios en soles, pago con Yape o Plin y envíos a todo el Perú.',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'es_PE',
     url: '/',
     siteName: 'Alvian Perfumes',
-    title: 'Alvian Perfumes | Perfumería original en Pucallpa',
+    title: 'Perfumes Árabes Originales en Pucallpa | Alvian Perfumes',
     description:
-      'Fragancias originales para dama y caballero. Compra por WhatsApp, con entrega en Pucallpa y envíos a todo el Perú.',
-    images: [{ url: '/logo.jpg', width: 512, height: 512, alt: 'Alvian Perfumes' }],
+      'Lattafa, Armaf, Rasasi y Afnan 100% originales. Paga con Yape o Plin y recíbelo en Pucallpa o en todo el Perú.',
+    images: [{ url: '/og', width: 1200, height: 630, alt: 'Alvian Perfumes · Perfumes árabes originales' }],
   },
   twitter: {
-    card: 'summary',
-    title: 'Alvian Perfumes | Perfumería original en Pucallpa',
-    description:
-      'Fragancias originales para dama y caballero. Entrega en Pucallpa y envíos a todo el Perú.',
-    images: ['/logo.jpg'],
+    card: 'summary_large_image',
+    title: 'Perfumes Árabes Originales en Pucallpa | Alvian Perfumes',
+    description: 'Lattafa, Armaf, Rasasi y Afnan 100% originales. Envíos a todo el Perú.',
+    images: ['/og'],
   },
   icons: {
     icon: '/logo.jpg',

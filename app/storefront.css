@@ -1957,7 +1957,7 @@ body:has(.sf-nav) .btn-wa-outline {
 
 .sf-footer-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
   gap: 32px;
   padding-top: 44px;
   padding-bottom: 44px;
@@ -2149,4 +2149,77 @@ body:has(.sf-nav) .btn-wa-outline {
   .sf-cat:hover {
     transform: none;
   }
+}
+
+/* ---------- Páginas de colección (categoría / marca) ---------- */
+
+.sf-collection {
+  padding-top: 24px;
+}
+
+.sf-collection-head {
+  max-width: 720px;
+  margin-bottom: 32px;
+}
+
+.sf-collection-head h1 {
+  margin: 6px 0 12px;
+}
+
+.sf-collection-count {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sf-muted, #6b6558);
+}
+
+.sf-collection-links {
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(14, 43, 33, 0.1);
+}
+
+.sf-collection-links-title {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+.sf-collection-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sf-collection-links a {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid rgba(14, 43, 33, 0.14);
+  border-radius: 999px;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sf-collection-links a:hover {
+  border-color: currentColor;
+}
+
+/* Marca sobre el nombre en la ficha de producto */
+.product-brand {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark, #a67c2c);
+  text-decoration: none;
+}
+
+.product-brand:hover {
+  text-decoration: underline;
 }

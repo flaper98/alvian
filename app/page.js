@@ -3,6 +3,7 @@ import { listPerfumes, listHeroBanners } from '@/lib/db';
 import { listPublicFaqs, listTestimonials } from '@/lib/store-db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { slugify } from '@/lib/slug';
+import { perfumeBrand } from '@/lib/brands';
 import BrandMarquee from './BrandMarquee';
 import HeroCarousel from './HeroCarousel';
 import PerfumeCard from './PerfumeCard';
@@ -125,12 +126,14 @@ export default async function HomePage() {
           perfume.description ||
           `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
         url: `${SITE_URL}/perfume/${slugify(perfume.name)}`,
+        ...(perfumeBrand(perfume) ? { brand: { '@type': 'Brand', name: perfumeBrand(perfume) } } : {}),
         ...(perfume.category ? { category: CATEGORY_LABELS[perfume.category] } : {}),
         offers: {
           '@type': 'Offer',
           priceCurrency: 'PEN',
           price: Number(perfume.price).toFixed(2),
           availability: 'https://schema.org/InStock',
+          itemCondition: 'https://schema.org/NewCondition',
           areaServed: ['Pucallpa', 'PE'],
         },
       },

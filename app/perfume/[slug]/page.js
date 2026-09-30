@@ -4,6 +4,8 @@ import { listPerfumes } from '@/lib/db';
 import { getStoreConfig, listPublicFaqs } from '@/lib/store-db';
 import { formatMoney } from '@/lib/store-config';
 import { slugify } from '@/lib/slug';
+import { brandSlug, perfumeBrand } from '@/lib/brands';
+import { CATEGORY_PAGES, metaDescription } from '@/lib/seo';
 import PerfumeCard from '../../PerfumeCard';
 import SiteFooter from '../../SiteFooter';
 import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
@@ -53,16 +55,22 @@ export async function generateMetadata({ params }) {
     return { title: 'Perfume no encontrado' };
   }
 
-  const description =
-    perfume.description ||
-    `Compra ${perfume.name} original en Alvian Perfumes, perfumería en Pucallpa. Entrega en Pucallpa y envíos a todo el Perú.`;
+  // Lo que la gente busca: "Hawas Ice Rasasi original precio" → título con
+  // marca, "Original" y precio; descripción comercial de ~155 caracteres.
+  const brand = perfumeBrand(perfume);
+  const fullName = brand && !new RegExp(`\\b${brand}\\b`, 'i').test(perfume.name) ? `${perfume.name} ${brand}` : perfume.name;
+  const description = metaDescription(
+    `Compra ${fullName} original a ${formatMoney(perfume.price)} en Alvian Perfumes, Pucallpa. Paga con Yape o Plin y recíbelo en todo el Perú.${
+      perfume.notes ? ` Notas: ${perfume.notes}.` : ''
+    }`,
+  );
 
   return {
-    title: perfume.name,
+    title: `${fullName} Original – Precio en Perú`,
     description,
     alternates: { canonical: `/perfume/${slug}` },
     openGraph: {
-      title: `${perfume.name} | Alvian Perfumes`,
+      title: `${fullName} Original | Alvian Perfumes`,
       description,
       url: `/perfume/${slug}`,
       type: 'website',
@@ -97,6 +105,17 @@ export default async function PerfumePage({ params }) {
       .filter(Boolean)
       .join(', ') || 'WhatsApp';
 
+  const brand = perfumeBrand(perfume);
+  const categoryPage = CATEGORY_PAGES[perfume.category];
+  // Migas de pan: Inicio / Perfumes árabes para hombre / Hawas Ice.
+  const crumbs = [
+    { name: 'Inicio', href: '/' },
+    categoryPage
+      ? { name: categoryPage.h1, href: `/perfumes/${perfume.category}` }
+      : { name: 'Fragancias', href: '/#catalogo' },
+    { name: perfume.name, href: `/perfume/${slug}` },
+  ];
+
   const productJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -106,25 +125,29 @@ export default async function PerfumePage({ params }) {
       perfume.description ||
       `Perfume ${perfume.name} disponible en Alvian Perfumes, Pucallpa, con envíos a todo el Perú.`,
     sku: String(perfume.id),
+    ...(brand ? { brand: { '@type': 'Brand', name: brand } } : {}),
     ...(perfume.category ? { category: CATEGORY_LABELS[perfume.category] } : {}),
     offers: {
       '@type': 'Offer',
       priceCurrency: 'PEN',
       price: Number(perfume.price).toFixed(2),
       availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
       areaServed: ['Pucallpa', 'PE'],
       url: `${SITE_URL}/perfume/${slug}`,
+      seller: { '@type': 'Organization', name: 'Alvian Perfumes', url: SITE_URL },
     },
   };
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Fragancias', item: `${SITE_URL}/#catalogo` },
-      { '@type': 'ListItem', position: 3, name: perfume.name, item: `${SITE_URL}/perfume/${slug}` },
-    ],
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: `${SITE_URL}${crumb.href}`,
+    })),
   };
 
   return (
@@ -141,7 +164,7 @@ export default async function PerfumePage({ params }) {
       <SiteHeader />
 
       <nav aria-label="Ruta de navegación" className="breadcrumb breadcrumb-wide">
-        <Link href="/">Inicio</Link> <span>/</span> <Link href="/#catalogo">Fragancias</Link>{' '}
+        <Link href="/">Inicio</Link> <span>/</span> <Link href={crumbs[1].href}>{crumbs[1].name}</Link>{' '}
         <span>/</span> <span aria-current="page">{perfume.name}</span>
       </nav>
 
@@ -158,6 +181,11 @@ export default async function PerfumePage({ params }) {
             <span className="badge badge-paid">Disponible</span>
           </div>
 
+          {brand ? (
+            <Link href={`/marca/${brandSlug(brand)}`} className="product-brand">
+              {brand}
+            </Link>
+          ) : null}
           <h1>{perfume.name}</h1>
           {perfume.notes ? <p className="product-notes">Notas: {perfume.notes}</p> : null}
           <div className="product-price-row">
@@ -223,8 +251,8 @@ export default async function PerfumePage({ params }) {
             </details>
           </div>
 
-          <Link href="/#catalogo" className="btn-outline-pill product-detail-back">
-            ← Ver más perfumes
+          <Link href={crumbs[1].href} className="btn-outline-pill product-detail-back">
+            ← Ver más {categoryPage ? categoryPage.h1.toLowerCase() : 'perfumes'}
           </Link>
         </div>
       </section>

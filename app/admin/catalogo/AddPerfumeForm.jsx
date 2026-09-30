@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { upload } from '@vercel/blob/client';
 import { addPerfumeAction } from '@/lib/actions';
+import { KNOWN_BRANDS, perfumeBrand } from '@/lib/brands';
 
 export function SubmitButton({ label, pendingLabel }) {
   const { pending } = useFormStatus();
@@ -87,9 +88,30 @@ export function ImageField({
 
 /** Campos que solo afectan la tienda online (precio tachado, destacado, notas). */
 export function StoreFields({ perfume }) {
+  // Marca que se usaría si el campo queda vacío (deducida del nombre).
+  const detectedBrand = perfume ? perfumeBrand({ ...perfume, brand: '' }) : null;
   return (
     <fieldset className="store-fields">
       <legend>Tienda online</legend>
+      <label>
+        Marca — opcional
+        <input
+          name="brand"
+          type="text"
+          list="known-brands"
+          placeholder={detectedBrand || 'Ej: Lattafa'}
+          defaultValue={perfume?.brand || ''}
+        />
+        <datalist id="known-brands">
+          {KNOWN_BRANDS.map((brand) => (
+            <option key={brand} value={brand} />
+          ))}
+        </datalist>
+        <span className="hint">
+          Ayuda a aparecer en Google (ej. «Yara Lattafa precio»). Si la dejas vacía, se detecta
+          sola por el nombre{detectedBrand ? `: sería «${detectedBrand}»` : ''}.
+        </span>
+      </label>
       <label>
         Precio anterior (S/) — opcional, se muestra tachado
         <input

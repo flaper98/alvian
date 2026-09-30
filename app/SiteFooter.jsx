@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { getStoreConfig } from '@/lib/store-db';
+import { listPerfumes } from '@/lib/db';
+import { CATEGORY_PAGES, brandsInStore } from '@/lib/seo';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import BrandMark from './_store/BrandMark';
 import InstagramIcon from './InstagramIcon';
@@ -10,7 +12,11 @@ const INSTAGRAM_URL = 'https://www.instagram.com/alvian_fragancias/';
 const TIKTOK_URL = 'https://www.tiktok.com/@alvian_fragancias?lang=es';
 
 export default async function SiteFooter() {
-  const { payment, business } = await getStoreConfig();
+  const [{ payment, business }, perfumes] = await Promise.all([
+    getStoreConfig(),
+    listPerfumes().catch(() => []),
+  ]);
+  const brands = brandsInStore(perfumes);
   const whatsappHref = buildWhatsAppLink(
     'Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?',
   );
@@ -64,6 +70,22 @@ export default async function SiteFooter() {
                 <a href={`mailto:${business.email}`}>{business.email}</a>
               </li>
             ) : null}
+          </ul>
+        </div>
+
+        <div>
+          <h3>Perfumes</h3>
+          <ul>
+            {Object.entries(CATEGORY_PAGES).map(([key, page]) => (
+              <li key={key}>
+                <Link href={`/perfumes/${key}`}>{page.h1.replace('Perfumes árabes', 'Árabes')}</Link>
+              </li>
+            ))}
+            {brands.slice(0, 6).map((brand) => (
+              <li key={brand.slug}>
+                <Link href={`/marca/${brand.slug}`}>Perfumes {brand.name}</Link>
+              </li>
+            ))}
           </ul>
         </div>
 
