@@ -2480,58 +2480,391 @@ button {
 
 /* ---------- Proveedores ---------- */
 
-.supplier-price-list {
-  list-style: none;
+/* Selector de proveedor: un botón por proveedor con su resumen. */
+.supplier-picker {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+  scrollbar-width: thin;
+}
+
+.supplier-pick {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 170px;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--cream-soft);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.supplier-pick:hover {
+  border-color: var(--green-700);
+}
+
+.supplier-pick strong {
+  color: var(--green-900);
+  font-size: 0.95rem;
+}
+
+.supplier-pick span {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.supplier-pick.active {
+  border-color: var(--green-800);
+  background: var(--green-800);
+}
+
+.supplier-pick.active strong,
+.supplier-pick.active span {
+  color: var(--cream-soft);
+}
+
+.supplier-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.supplier-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.supplier-detail-head h2 {
   margin: 0;
+}
+
+.supplier-detail-head .hint {
+  margin: 0.2rem 0 0;
+}
+
+.supplier-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.supplier-toolbar input {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.supplier-toolbar select {
+  flex: 0 1 230px;
+  min-width: 0;
+}
+
+.supplier-toolbar .filter-chips {
+  margin: 0;
+}
+
+/* Tabla de precios: una fila por producto y una columna por nivel. La altura
+   se limita para que la página no crezca; el encabezado queda fijo. */
+.pivot-scroll {
+  max-height: min(65vh, 620px);
+  overflow: auto;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.pivot-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+
+.pivot-table th,
+.pivot-table td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.pivot-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--cream);
+  color: var(--green-900);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pivot-table tbody tr:hover th,
+.pivot-table tbody tr:hover td {
+  background: rgba(21, 57, 44, 0.04);
+}
+
+.pivot-name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--cream-soft);
+  min-width: 170px;
+}
+
+tbody .pivot-name {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pivot-table thead .pivot-name {
+  z-index: 3;
+}
+
+.pivot-table .pivot-tier,
+.pivot-table .pivot-price,
+.pivot-table .pivot-empty {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pivot-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.pivot-price.is-pending {
+  opacity: 0.4;
+}
+
+.pivot-empty {
+  color: var(--border);
+}
+
+/* La × para quitar un precio aparece al pasar el mouse (siempre en táctil). */
+.pivot-remove {
+  width: 20px;
+  height: 20px;
+  margin-left: 0.35rem;
   padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--status-critical);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  vertical-align: middle;
+}
+
+.pivot-price:hover .pivot-remove,
+.pivot-remove:focus-visible {
+  opacity: 1;
+}
+
+.pivot-remove:hover {
+  background: var(--status-critical-bg);
+}
+
+@media (hover: none) {
+  .pivot-remove {
+    opacity: 0.55;
+  }
+}
+
+.pivot-flag {
+  display: inline-block;
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+  font-size: 0.68rem;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+.pivot-footnote {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.supplier-danger {
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+}
+
+.btn-link-danger {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--status-critical);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Modal "Cargar precios" */
+.modal-dialog-prices {
+  max-width: 560px;
+}
+
+.prices-modal h2 {
+  margin: 0;
+}
+
+.prices-modal .hint {
+  margin: 0.2rem 0 0;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(21, 57, 44, 0.07);
+}
+
+.segmented button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: #fff;
+  color: var(--green-900);
+  box-shadow: 0 1px 3px rgba(14, 43, 33, 0.15);
+}
+
+.prices-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.prices-form input,
+.prices-form select,
+.prices-form textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.prices-form textarea {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+.prices-form .hint {
+  margin: -0.4rem 0 0;
+}
+
+.prices-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  gap: 0.75rem;
+}
+
+.prices-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tier-field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.supplier-price-row {
-  background: var(--cream);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.6rem 0.9rem;
+.tier-shortcuts {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
   flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.supplier-price-row span:first-child {
-  flex: 1;
-  min-width: 140px;
-  font-weight: 600;
+.tier-shortcuts .filter-chip {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
 }
 
-.supplier-toggle-btn {
-  margin-top: 0.6rem;
-  width: 100%;
-}
-
-.supplier-bulk-form {
+.bulk-result {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  margin-top: 0.25rem;
-  border-top: 1px solid var(--border);
+  gap: 0.4rem;
 }
 
-.supplier-bulk-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--green-900);
-}
-
-.supplier-bulk-form textarea {
-  font-family: monospace;
+.bulk-result-group {
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
   font-size: 0.85rem;
+}
+
+.bulk-result-group summary {
+  cursor: pointer;
+}
+
+.bulk-result-group p {
+  margin: 0.4rem 0 0;
+  line-height: 1.5;
+}
+
+.bulk-ok {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.bulk-warn {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.bulk-error {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+@media (max-width: 560px) {
+  .supplier-detail-head .btn-primary {
+    width: 100%;
+  }
+
+  .pivot-table th,
+  .pivot-table td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.84rem;
+  }
+
+  .pivot-name {
+    min-width: 130px;
+  }
+
+  .prices-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .supplier-bulk-result {
@@ -2625,7 +2958,8 @@ button {
 }
 
 .comparison-table-scroll {
-  overflow-x: auto;
+  max-height: min(65vh, 620px);
+  overflow: auto;
   background: var(--cream-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -2695,8 +3029,108 @@ td.comparison-matrix-sticky {
   white-space: nowrap;
 }
 
-.comparison-cards {
+.comparison-matrix thead th {
+  z-index: 2;
+}
+
+.comparison-matrix thead .comparison-matrix-sticky {
+  z-index: 3;
+  background: var(--cream);
+}
+
+.comparison-tier {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.comparison-min-cell .comparison-tier {
+  color: var(--status-good);
+}
+
+.comparison-savings {
+  color: var(--status-good);
+  font-weight: 700;
+}
+
+/* En celular: lista compacta; cada perfume se abre para ver el detalle. */
+.comparison-list {
   display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.comparison-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.comparison-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.comparison-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.comparison-list details[open] summary {
+  background: rgba(21, 57, 44, 0.05);
+}
+
+.comparison-list-name {
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.comparison-list-best {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  color: var(--status-good);
+}
+
+.comparison-list-best small {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.comparison-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.3rem 0.9rem 0.9rem;
+  font-size: 0.86rem;
+}
+
+.comparison-list-body p {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.comparison-list-body p.is-best {
+  color: var(--status-good);
+  font-weight: 700;
+}
+
+.comparison-list-body .comparison-buy-link {
+  margin-top: 0.4rem;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
@@ -2704,73 +3138,8 @@ td.comparison-matrix-sticky {
     display: none;
   }
 
-  .comparison-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-  }
-
-  .comparison-card {
-    background: var(--cream-soft);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1rem 1.1rem;
-  }
-
-  .comparison-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.7rem;
-    font-size: 1.02rem;
-  }
-
-  .comparison-card-suppliers {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.6rem 0;
-    margin: 0 0 0.7rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .comparison-card-suppliers li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .comparison-card-cheapest {
-    color: var(--status-good);
-    font-weight: 700;
-  }
-
-  .comparison-card-stats {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-    font-size: 0.82rem;
-    color: var(--ink-soft);
-    margin-bottom: 0.8rem;
-  }
-
-  .comparison-min-text {
-    color: var(--status-good);
-  }
-
-  .comparison-max-text {
-    color: var(--status-critical);
-  }
-
-  .comparison-card .comparison-buy-link {
+  .comparison-list {
     display: block;
-    text-align: center;
   }
 }
 

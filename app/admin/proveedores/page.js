@@ -1,26 +1,41 @@
+import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes, listSuppliers, listSupplierPrices, listPriceComparison } from '@/lib/db';
+import { listPerfumes, listSupplierSummaries, listSupplierPrices, listPriceComparison } from '@/lib/db';
 import SupplierFormModal from './SupplierFormModal';
-import SupplierCard from './SupplierCard';
+import SupplierDetail from './SupplierDetail';
 import PriceComparison from './PriceComparison';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProveedoresPage() {
+const VIEWS = [
+  ['comparar', 'Comparar precios'],
+  ['proveedores', 'Mis proveedores'],
+];
+
+export default async function ProveedoresPage({ searchParams }) {
   const role = await getCurrentRole();
   if (role !== 'admin') {
     return <p className="admin-no-access">No tienes permiso para ver esta sección.</p>;
   }
 
-  let perfumes;
+  const params = await searchParams;
+  const view = params.vista === 'proveedores' ? 'proveedores' : 'comparar';
+
   let suppliers;
-  let comparison;
+  let comparison = [];
+  let perfumes = [];
+  let prices = [];
+  let selected = null;
   try {
-    [perfumes, suppliers, comparison] = await Promise.all([
-      listPerfumes(),
-      listSuppliers(),
-      listPriceComparison(),
-    ]);
+    suppliers = await listSupplierSummaries();
+    if (view === 'comparar') {
+      comparison = await listPriceComparison();
+    } else {
+      selected = suppliers.find((s) => s.id === Number(params.p)) || suppliers[0] || null;
+      if (selected) {
+        [perfumes, prices] = await Promise.all([listPerfumes(), listSupplierPrices(selected.id)]);
+      }
+    }
   } catch (error) {
     return (
       <section className="admin-section">
@@ -30,39 +45,63 @@ export default async function ProveedoresPage() {
     );
   }
 
-  const pricesBySupplier = await Promise.all(
-    suppliers.map((supplier) => listSupplierPrices(supplier.id)),
-  );
-
   return (
     <section className="admin-section">
-      <h1>Proveedores</h1>
-      <p className="hint">
-        Registra qué te cobra cada proveedor por cada perfume (puedes pegar varias líneas de una
-        vez) y abajo verás automáticamente cuál te conviene más comprar y dónde.
-      </p>
-
-      <div>
-        <h2>Comparación de precios</h2>
-        <PriceComparison comparison={comparison} />
-      </div>
-
       <div className="admin-header">
-        <h2>Mis proveedores ({suppliers.length})</h2>
+        <h1>Proveedores</h1>
         <SupplierFormModal />
       </div>
 
-      {suppliers.length === 0 ? (
-        <p>Todavía no has agregado ningún proveedor.</p>
+      <nav className="status-tabs" aria-label="Vista">
+        {VIEWS.map(([key, label]) => (
+          <Link
+            key={key}
+            href={`/admin/proveedores?vista=${key}`}
+            className={`status-tab${view === key ? ' active' : ''}`}
+            aria-current={view === key ? 'page' : undefined}
+          >
+            {label}
+            {key === 'proveedores' ? <span>{suppliers.length}</span> : null}
+          </Link>
+        ))}
+      </nav>
+
+      {view === 'comparar' ? (
+        <>
+          <p className="hint">
+            Cada celda muestra el <strong>mejor precio</strong> de ese proveedor (en su nivel más
+            barato). En verde, dónde te conviene comprar.
+          </p>
+          <PriceComparison comparison={comparison} />
+        </>
+      ) : suppliers.length === 0 ? (
+        <div className="empty-state">
+          <p>Todavía no agregaste proveedores.</p>
+          <p className="hint">Usa «+ Nuevo proveedor» y después carga su lista de precios.</p>
+        </div>
       ) : (
-        suppliers.map((supplier, index) => (
-          <SupplierCard
-            key={supplier.id}
-            supplier={supplier}
-            perfumes={perfumes}
-            prices={pricesBySupplier[index]}
-          />
-        ))
+        <>
+          <div className="supplier-picker" role="list">
+            {suppliers.map((s) => (
+              <Link
+                key={s.id}
+                role="listitem"
+                href={`/admin/proveedores?vista=proveedores&p=${s.id}`}
+                className={`supplier-pick${selected?.id === s.id ? ' active' : ''}`}
+                aria-current={selected?.id === s.id ? 'true' : undefined}
+              >
+                <strong>{s.name}</strong>
+                <span>
+                  {s.product_count} producto{s.product_count === 1 ? '' : 's'} · {s.tier_count} nivel
+                  {s.tier_count === 1 ? '' : 'es'}
+                </span>
+              </Link>
+            ))}
+          </div>
+          {selected ? (
+            <SupplierDetail key={selected.id} supplier={selected} prices={prices} perfumes={perfumes} />
+          ) : null}
+        </>
       )}
     </section>
   );
