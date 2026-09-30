@@ -3,7 +3,8 @@ import { COOKIE_NAME, getSessionUser } from '@/lib/auth';
 import LoginForm from './LoginForm';
 import AdminNav from './AdminNav';
 import SectionTabs from './SectionTabs';
-import { countWebOrdersByStatus } from '@/lib/store-db';
+import { countWebOrdersByStatus, getNewWebOrders } from '@/lib/store-db';
+import OrderAlerts from './OrderAlerts';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,8 @@ export default async function AdminLayout({ children }) {
   }
 
   const counts = await countWebOrdersByStatus();
+  // Punto de partida del aviso de pedidos: solo avisa de los que lleguen después.
+  const { latest } = await getNewWebOrders().catch(() => ({ latest: null }));
 
   return (
     <div className="admin-shell admin-shell-dashboard">
@@ -51,6 +54,7 @@ export default async function AdminLayout({ children }) {
         <SectionTabs role={user.role} pendingWebOrders={counts.pendiente || 0} />
         {children}
       </main>
+      <OrderAlerts initialLatestId={latest?.id || 0} />
     </div>
   );
 }
