@@ -5,6 +5,7 @@ import AnalyticsWithFilter from './AnalyticsWithFilter';
 import { CartProvider } from './_store/CartProvider';
 import CartDrawer from './_store/CartDrawer';
 import MetaPixel from './_store/MetaPixel';
+import GoogleTagManager from './_store/GoogleTagManager';
 import { getStoreConfig } from '@/lib/store-db';
 import './globals.css';
 import './store.css';
@@ -109,6 +110,8 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="es" className={`${display.variable} ${body.variable} ${sans.variable}`}>
       <body>
+        {/* Google Tag Manager: justo después de abrir <body>, como indica Google. */}
+        <GoogleTagManager />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
