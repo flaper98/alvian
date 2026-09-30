@@ -178,6 +178,17 @@ export function IconStore(props) {
   );
 }
 
+export function IconChart(props) {
+  return (
+    <Base {...props}>
+      <path d="M4 20h16" />
+      <path d="M7 16v-5" />
+      <path d="M12 16V7" />
+      <path d="M17 16v-8" />
+    </Base>
+  );
+}
+
 export function IconBook(props) {
   return (
     <Base {...props}>

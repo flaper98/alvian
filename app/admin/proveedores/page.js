@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes, listSupplierSummaries, listSupplierPrices, listPriceComparison } from '@/lib/db';
+import {
+  listPerfumes,
+  listSupplierSummaries,
+  listSupplierPrices,
+  listPriceComparison,
+  relinkSupplierPrices,
+} from '@/lib/db';
 import SupplierFormModal from './SupplierFormModal';
 import SupplierDetail from './SupplierDetail';
 import PriceComparison from './PriceComparison';
@@ -27,6 +33,9 @@ export default async function ProveedoresPage({ searchParams }) {
   let prices = [];
   let selected = null;
   try {
+    // Arregla precios que quedaron "Sin catálogo" porque se cargaron antes de
+    // crear el perfume. Es barato: solo revisa los que siguen sin vincular.
+    await relinkSupplierPrices();
     suppliers = await listSupplierSummaries();
     if (view === 'comparar') {
       comparison = await listPriceComparison();
