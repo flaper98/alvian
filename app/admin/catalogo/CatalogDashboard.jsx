@@ -124,6 +124,15 @@ function PerfumeTableRow({ perfume }) {
         <td className={`perfume-table-stock-cell${lowStock ? ' text-critical' : ''}`} data-label="Stock">
           {perfume.stock}
         </td>
+        <td className="perfume-table-stock-cell" data-label="Registrado">
+          {perfume.created_at ? (
+            <time dateTime={new Date(perfume.created_at).toISOString()} title={dateTimeFmt.format(new Date(perfume.created_at))}>
+              {dateFmt.format(new Date(perfume.created_at))}
+            </time>
+          ) : (
+            '—'
+          )}
+        </td>
         <td className="perfume-table-actions-cell">
           <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
             Editar
@@ -140,6 +149,10 @@ function PerfumeTableRow({ perfume }) {
 
 const CATEGORY_LABELS = { hombre: 'Hombre', mujer: 'Mujer', unisex: 'Unisex' };
 
+// Fecha de registro en hora de Lima (igual en el servidor y en el navegador).
+const dateFmt = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' });
+const dateTimeFmt = new Intl.DateTimeFormat('es-PE', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Lima' });
+
 // Los perfumes agregados desde Proveedores llegan sin foto y no salen en la tienda hasta tenerla.
 const hasImage = (perfume) => Boolean(String(perfume.image_url || '').trim());
 
@@ -154,7 +167,7 @@ const FILTERS = [
 
 export default function CatalogDashboard({ perfumes, prefillName, initialFilter = 'all' }) {
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState(initialFilter === 'no-image' ? 'recent' : 'name');
   const [filterBy, setFilterBy] = useState(initialFilter);
 
   const searched = useMemo(() => {
@@ -188,6 +201,8 @@ export default function CatalogDashboard({ perfumes, prefillName, initialFilter 
     return [...filtered].sort((a, b) => {
       if (sortBy === 'stock') return Number(b.stock) - Number(a.stock);
       if (sortBy === 'price') return Number(b.price) - Number(a.price);
+      if (sortBy === 'recent') return new Date(b.created_at) - new Date(a.created_at);
+      if (sortBy === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
       return a.name.localeCompare(b.name);
     });
   }, [searched, filterBy, sortBy]);
@@ -217,6 +232,8 @@ export default function CatalogDashboard({ perfumes, prefillName, initialFilter 
               <option value="name">Ordenar: nombre (A-Z)</option>
               <option value="stock">Ordenar: mayor stock primero</option>
               <option value="price">Ordenar: mayor precio primero</option>
+              <option value="recent">Ordenar: registrados más recientes</option>
+              <option value="oldest">Ordenar: registrados más antiguos</option>
             </select>
             <span className="list-count">
               {rows.length} de {perfumes.length} perfume{perfumes.length === 1 ? '' : 's'}
@@ -251,6 +268,7 @@ export default function CatalogDashboard({ perfumes, prefillName, initialFilter 
                     <th scope="col">Nombre</th>
                     <th scope="col">Precio</th>
                     <th scope="col">Stock</th>
+                    <th scope="col">Registrado</th>
                     <th scope="col">Acciones</th>
                   </tr>
                 </thead>
