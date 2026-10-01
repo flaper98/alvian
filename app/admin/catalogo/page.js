@@ -28,7 +28,11 @@ export default async function CatalogoPage({ searchParams }) {
   return (
     <section className="admin-section">
       <h1>Catálogo</h1>
-      <CatalogDashboard perfumes={perfumes} prefillName={prefillName} />
+      <CatalogDashboard
+        perfumes={perfumes}
+        prefillName={prefillName}
+        initialFilter={params?.filtro === 'sin-imagen' ? 'no-image' : 'all'}
+      />
     </section>
   );
 }

@@ -95,11 +95,16 @@ function PerfumeTableRow({ perfume }) {
     <>
       <tr className="perfume-table-row">
         <td className="perfume-table-image-cell table-cards-thumb">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={perfume.image_url} alt={perfume.name} className="perfume-table-image" />
+          {hasImage(perfume) ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={perfume.image_url} alt={perfume.name} className="perfume-table-image" />
+          ) : (
+            <span className="perfume-table-image perfume-table-noimage">Sin foto</span>
+          )}
         </td>
         <td className="table-cards-title">
           <strong>{perfume.name}</strong>{' '}
+          {!hasImage(perfume) ? <span className="badge badge-debt">Sin imagen · oculto en la tienda</span> : null}{' '}
           {perfume.category ? (
             <span className="badge badge-gold">{CATEGORY_LABELS[perfume.category]}</span>
           ) : (
@@ -135,18 +140,22 @@ function PerfumeTableRow({ perfume }) {
 
 const CATEGORY_LABELS = { hombre: 'Hombre', mujer: 'Mujer', unisex: 'Unisex' };
 
+// Los perfumes agregados desde Proveedores llegan sin foto y no salen en la tienda hasta tenerla.
+const hasImage = (perfume) => Boolean(String(perfume.image_url || '').trim());
+
 const FILTERS = [
   { value: 'all', label: 'Todos' },
   { value: 'in-stock', label: 'Con stock' },
   { value: 'out-of-stock', label: 'Sin stock' },
   { value: 'pending-price', label: 'Pendiente de compra' },
   { value: 'no-category', label: 'Sin categoría' },
+  { value: 'no-image', label: 'Sin imagen' },
 ];
 
-export default function CatalogDashboard({ perfumes, prefillName }) {
+export default function CatalogDashboard({ perfumes, prefillName, initialFilter = 'all' }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
-  const [filterBy, setFilterBy] = useState('all');
+  const [filterBy, setFilterBy] = useState(initialFilter);
 
   const searched = useMemo(() => {
     return search.trim()
@@ -161,6 +170,7 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
       'out-of-stock': searched.filter((p) => Number(p.stock) === 0).length,
       'pending-price': searched.filter((p) => Number(p.price) === 0).length,
       'no-category': searched.filter((p) => !p.category).length,
+      'no-image': searched.filter((p) => !hasImage(p)).length,
     }),
     [searched],
   );
@@ -171,6 +181,7 @@ export default function CatalogDashboard({ perfumes, prefillName }) {
       if (filterBy === 'out-of-stock') return Number(perfume.stock) === 0;
       if (filterBy === 'pending-price') return Number(perfume.price) === 0;
       if (filterBy === 'no-category') return !perfume.category;
+      if (filterBy === 'no-image') return !hasImage(perfume);
       return true;
     });
 

@@ -5,7 +5,7 @@ import { getStoreConfig, listPublicFaqs } from '@/lib/store-db';
 import { formatMoney } from '@/lib/store-config';
 import { slugify } from '@/lib/slug';
 import { brandSlug, perfumeBrand } from '@/lib/brands';
-import { CATEGORY_PAGES, metaDescription } from '@/lib/seo';
+import { CATEGORY_PAGES, isInStore, metaDescription } from '@/lib/seo';
 import PerfumeCard from '../../PerfumeCard';
 import SiteFooter from '../../SiteFooter';
 import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
@@ -31,7 +31,7 @@ async function getPerfume(slug) {
   } catch (error) {
     return { perfume: null, related: [] };
   }
-  const available = perfumes.filter((p) => Number(p.price) > 0);
+  const available = perfumes.filter(isInStore);
   const perfume = available.find((p) => slugify(p.name) === slug) || null;
   // Relacionados: primero misma categoría y con stock.
   const related = perfume

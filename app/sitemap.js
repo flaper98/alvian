@@ -1,6 +1,6 @@
 import { listPerfumes } from '@/lib/db';
 import { slugify } from '@/lib/slug';
-import { CATEGORY_PAGES, brandsInStore } from '@/lib/seo';
+import { CATEGORY_PAGES, brandsInStore, isInStore } from '@/lib/seo';
 
 // Se regenera cada hora para incluir perfumes nuevos.
 export const revalidate = 3600;
@@ -55,7 +55,7 @@ export default async function sitemap() {
         priority: 0.8,
       })),
       ...perfumes
-        .filter((p) => Number(p.price) > 0)
+        .filter(isInStore)
         .map((p) => ({
           url: `${SITE_URL}/perfume/${slugify(p.name)}`,
           lastModified: p.created_at ? new Date(p.created_at) : new Date(),

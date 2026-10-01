@@ -4,6 +4,7 @@ import { listPublicFaqs, listTestimonials } from '@/lib/store-db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { slugify } from '@/lib/slug';
 import { perfumeBrand } from '@/lib/brands';
+import { isInStore } from '@/lib/seo';
 import BrandMarquee from './BrandMarquee';
 import HeroCarousel from './HeroCarousel';
 import PerfumeCard from './PerfumeCard';
@@ -72,10 +73,11 @@ export default async function HomePage() {
     listTestimonials({ onlyActive: true }),
   ]);
 
-  // Un producto recién creado empieza sin precio (se define al registrar la
-  // primera compra), así que no se muestra en la tienda hasta tener precio.
+  // Solo se muestran los perfumes con precio y con foto (ver isInStore): uno
+  // recién creado puede no tener precio todavía, y los agregados desde
+  // Proveedores llegan sin imagen.
   const perfumes = allPerfumes
-    .filter((perfume) => Number(perfume.price) > 0)
+    .filter(isInStore)
     .sort((a, b) => {
       // Primero los que tienen stock, luego por nombre.
       const stockDiff = Number(b.stock > 0) - Number(a.stock > 0);

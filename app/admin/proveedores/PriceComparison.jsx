@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { pickSupplierOption } from '@/lib/supplier-pricing';
+import AddMissingToCatalog from './AddMissingToCatalog';
 
 const FILTERS = [
   { value: 'all', label: 'Todos' },
@@ -17,32 +19,6 @@ const MODES = [
   { value: 'volumen', label: 'Mejor precio por volumen' },
 ];
 
-// Niveles de precio por unidad (menudeo): no cuentan como precio por mayor.
-const RETAIL_TIER = /unidad|unitario|menudeo|\bunit\b|x ?1\b/i;
-
-/**
- * Precio de un proveedor para un perfume según el modo:
- * - "mayor": el nivel por mayor de entrada = el más caro de sus niveles por
- *   mayor (el de menos volumen: "Por mayor", "6 a 11"…), sin contar "Unidad".
- * - "volumen": su precio más bajo, en cualquier nivel (5K, 30K, 12+…).
- */
-function pickOption(options, mode) {
-  if (mode === 'volumen') {
-    return options.reduce((min, opt) => (Number(opt.price) < Number(min.price) ? opt : min));
-  }
-  const wholesale = options.filter((opt) => !RETAIL_TIER.test(opt.tierLabel));
-  if (wholesale.length === 0) return null;
-  // Si varios niveles cuestan lo mismo (ej. Vurv: S/ 50 en todos), se muestra el
-  // llamado "Por mayor" para que la etiqueta no diga "30K".
-  const isEntryLabel = (opt) => /mayor/i.test(opt.tierLabel);
-  return wholesale.reduce((best, opt) => {
-    const diff = Number(opt.price) - Number(best.price);
-    if (diff > 0) return opt;
-    if (diff === 0 && isEntryLabel(opt) && !isEntryLabel(best)) return opt;
-    return best;
-  });
-}
-
 function purchaseHref(row) {
   return row.unlinked
     ? `/admin/catalogo?name=${encodeURIComponent(row.perfumeName)}`
@@ -51,7 +27,7 @@ function purchaseHref(row) {
       )}`;
 }
 
-export default function PriceComparison({ comparison }) {
+export default function PriceComparison({ comparison, catalogPrices = {} }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterBy, setFilterBy] = useState('all');
@@ -71,7 +47,7 @@ export default function PriceComparison({ comparison }) {
   const withStats = useMemo(() => {
     return comparison
       .map((row) => {
-        // Un precio por proveedor, elegido según el modo (ver pickOption).
+        // Un precio por proveedor, elegido según el modo (ver lib/supplier-pricing.js).
         const optionsBySupplier = new Map();
         for (const option of row.options) {
           const list = optionsBySupplier.get(option.supplierId) || [];
@@ -80,7 +56,7 @@ export default function PriceComparison({ comparison }) {
         }
         const bySupplier = new Map();
         for (const [supplierId, options] of optionsBySupplier) {
-          const picked = pickOption(options, mode);
+          const picked = pickSupplierOption(options, mode);
           if (picked) bySupplier.set(supplierId, picked);
         }
         if (bySupplier.size === 0) return null;
@@ -182,6 +158,7 @@ export default function PriceComparison({ comparison }) {
           <option value="name">Orden: A-Z</option>
           <option value="savings">Orden: mayor ahorro</option>
         </select>
+        <AddMissingToCatalog comparison={comparison} catalogPrices={catalogPrices} />
       </div>
 
       <div className="filter-chips" role="group" aria-label="Filtrar">

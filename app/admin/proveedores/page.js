@@ -38,7 +38,7 @@ export default async function ProveedoresPage({ searchParams }) {
     await relinkSupplierPrices();
     suppliers = await listSupplierSummaries();
     if (view === 'comparar') {
-      comparison = await listPriceComparison();
+      [comparison, perfumes] = await Promise.all([listPriceComparison(), listPerfumes()]);
     } else {
       selected = suppliers.find((s) => s.id === Number(params.p)) || suppliers[0] || null;
       if (selected) {
@@ -80,7 +80,10 @@ export default async function ProveedoresPage({ searchParams }) {
           <p className="hint">
             Compara lo que te cobra cada proveedor. En verde, dónde te conviene comprar.
           </p>
-          <PriceComparison comparison={comparison} />
+          <PriceComparison
+            comparison={comparison}
+            catalogPrices={Object.fromEntries(perfumes.map((p) => [p.id, Number(p.price)]))}
+          />
         </>
       ) : suppliers.length === 0 ? (
         <div className="empty-state">
