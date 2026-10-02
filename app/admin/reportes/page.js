@@ -159,7 +159,7 @@ async function GeneralTab({ range }) {
     <>
       <div className="kpi-grid">
         <Kpi label="Ingresos" value={soles(r.income)} sub="Dinero cobrado" />
-        <Kpi label="Salidas" value={soles(r.outflow)} sub="Compras, gastos, comisiones y retiros" />
+        <Kpi label="Salidas" value={soles(r.outflow)} sub="Compras, gastos, comisiones, retiros y deudas" />
         <Kpi
           label="Resultado"
           value={soles(r.result)}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { deleteExpenseAction } from '@/lib/actions';
 import { PaidWithBadge } from '../PaidWithField';
 import EditExpenseModal from './EditExpenseModal';
+import { EXPENSE_CATEGORIES, expenseCategoryLabel } from '@/lib/expense-categories';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -28,6 +29,7 @@ function ExpenseTableRow({ expense }) {
       <tr className="perfume-table-row">
         <td className="table-cards-title">
           <strong>{expense.description}</strong>{' '}
+          <span className="badge badge-gold">{expenseCategoryLabel(expense.category)}</span>{' '}
           <PaidWithBadge value={expense.paid_with} />
           {expense.note ? <p className="perfume-table-description">{expense.note}</p> : null}
         </td>
@@ -54,25 +56,38 @@ function ExpenseTableRow({ expense }) {
 export default function ExpensesList({ expenses }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('recent');
+  const [category, setCategory] = useState('all');
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
 
-  const rows = useMemo(() => {
+  const searched = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const filtered = term
-      ? expenses.filter((e) => e.description.toLowerCase().includes(term))
-      : expenses;
+    return term ? expenses.filter((e) => e.description.toLowerCase().includes(term)) : expenses;
+  }, [expenses, search]);
 
+  // Total por categoría (de lo buscado), para los filtros.
+  const byCategory = useMemo(() => {
+    const totals = new Map();
+    for (const e of searched) {
+      const key = e.category || 'otros';
+      totals.set(key, (totals.get(key) || 0) + Number(e.amount));
+    }
+    return totals;
+  }, [searched]);
+
+  const rows = useMemo(() => {
+    const filtered =
+      category === 'all' ? searched : searched.filter((e) => (e.category || 'otros') === category);
     return [...filtered].sort((a, b) => {
       if (sortBy === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
       if (sortBy === 'amount') return Number(b.amount) - Number(a.amount);
       return new Date(b.created_at) - new Date(a.created_at);
     });
-  }, [expenses, search, sortBy]);
+  }, [searched, category, sortBy]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, sortBy, pageSize]);
+  }, [search, sortBy, pageSize, category]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -104,8 +119,30 @@ export default function ExpensesList({ expenses }) {
         </span>
       </div>
 
+      <div className="filter-chips" role="group" aria-label="Categoría">
+        <button
+          type="button"
+          className={`filter-chip${category === 'all' ? ' active' : ''}`}
+          aria-pressed={category === 'all'}
+          onClick={() => setCategory('all')}
+        >
+          Todas
+        </button>
+        {EXPENSE_CATEGORIES.filter((c) => byCategory.has(c.key)).map((c) => (
+          <button
+            key={c.key}
+            type="button"
+            className={`filter-chip${category === c.key ? ' active' : ''}`}
+            aria-pressed={category === c.key}
+            onClick={() => setCategory(c.key)}
+          >
+            {c.label} <span className="filter-chip-count">S/ {byCategory.get(c.key).toFixed(2)}</span>
+          </button>
+        ))}
+      </div>
+
       {rows.length === 0 ? (
-        <p className="hint">Ningún gasto coincide con &quot;{search}&quot;.</p>
+        <p className="hint">Ningún gasto coincide con la búsqueda o el filtro.</p>
       ) : (
         <>
           <div className="perfume-table-wrap">

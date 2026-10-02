@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { editExpenseAction } from '@/lib/actions';
 import PaidWithField from '../PaidWithField';
+import ExpenseFields from './ExpenseFields';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -26,10 +27,7 @@ function EditExpenseForm({ expense, onClose }) {
   return (
     <form action={formAction} className="perfume-form">
       <h2>Editar gasto</h2>
-      <label>
-        Descripción
-        <input name="description" type="text" defaultValue={expense.description} required />
-      </label>
+      <ExpenseFields expense={expense} />
       <label>
         Monto (S/)
         <input name="amount" type="number" min="0.01" step="0.01" defaultValue={expense.amount} required />

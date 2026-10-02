@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerExpenseAction } from '@/lib/actions';
 import PaidWithField from '../PaidWithField';
+import ExpenseFields from './ExpenseFields';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -38,10 +39,7 @@ function ExpenseFormFields({ onSaved }) {
   return (
     <form action={formAction} className="perfume-form">
       <h2>Registrar gasto</h2>
-      <label>
-        Descripción
-        <input name="description" type="text" placeholder="Ej: envío, empaque, publicidad" required />
-      </label>
+      <ExpenseFields />
       <label>
         Monto (S/)
         <input name="amount" type="number" min="0.01" step="0.01" required />

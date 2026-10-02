@@ -40,8 +40,9 @@ export default function PfOutflowsList({ outflows }) {
   if (outflows.length === 0) {
     return (
       <p className="hint">
-        No hay salidas manuales en este período. Registra aquí lo que pagues de impuestos, deuda o lo
-        que muevas a tu ahorro de ganancia.
+        No hay salidas manuales en este período. Registra aquí lo que pagues de impuestos o lo que
+        muevas a tu ahorro de ganancia. Los pagos de deuda se anotan en Pagos y gastos → Deudas y se
+        suman solos.
       </p>
     );
   }

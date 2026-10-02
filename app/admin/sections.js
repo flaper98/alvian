@@ -51,13 +51,15 @@ export const SECTIONS = [
     ],
   },
   {
-    label: 'Gastos y retiros',
+    label: 'Pagos y gastos',
     icon: IconExpense,
     roles: ADMIN,
     tabs: [
+      { href: '/admin/pagos', label: 'Resumen' },
       { href: '/admin/gastos', label: 'Gastos' },
+      { href: '/admin/deudas', label: 'Deudas' },
       { href: '/admin/perdidas', label: 'Pérdidas' },
-      { href: '/admin/caja', label: 'Retiros' },
+      { href: '/admin/caja', label: 'Mi sueldo' },
       { href: '/admin/profit-first', label: 'Reparto' },
     ],
   },

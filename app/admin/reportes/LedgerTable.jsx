@@ -38,7 +38,7 @@ function downloadCsv(rows, fileName) {
   URL.revokeObjectURL(url);
 }
 
-export default function LedgerTable({ rows, fileName, truncated }) {
+export default function LedgerTable({ rows, fileName, truncated, hideKindFilter = false }) {
   const [kind, setKind] = useState('all');
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -100,21 +100,27 @@ export default function LedgerTable({ rows, fileName, truncated }) {
       </div>
 
       <div className="ledger-summary">
-        <div className="filter-chips" role="group" aria-label="Tipo">
-          {KINDS.map((k) => (
-            <button
-              key={k.value}
-              type="button"
-              className={`filter-chip${kind === k.value ? ' active' : ''}`}
-              aria-pressed={kind === k.value}
-              onClick={() => setKind(k.value)}
-            >
-              {k.label}
-            </button>
-          ))}
-        </div>
+        {hideKindFilter ? null : (
+          <div className="filter-chips" role="group" aria-label="Tipo">
+            {KINDS.map((k) => (
+              <button
+                key={k.value}
+                type="button"
+                className={`filter-chip${kind === k.value ? ' active' : ''}`}
+                aria-pressed={kind === k.value}
+                onClick={() => setKind(k.value)}
+              >
+                {k.label}
+              </button>
+            ))}
+          </div>
+        )}
         <p>
-          <span className="text-good">+ {soles(totals.in)}</span> ·{' '}
+          {hideKindFilter ? null : (
+            <>
+              <span className="text-good">+ {soles(totals.in)}</span> ·{' '}
+            </>
+          )}
           <span className="text-critical">− {soles(totals.out)}</span> · {filtered.length} movimientos
         </p>
       </div>

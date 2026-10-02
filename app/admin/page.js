@@ -286,6 +286,13 @@ export default async function ResumenPage({ searchParams }) {
               href="/admin/caja"
               hidden={flow.withdrawals === 0}
             />
+            <MoneyLine
+              label="Pago de deudas"
+              value={flow.debtPaymentsFromEarnings}
+              sign="−"
+              href="/admin/deudas"
+              hidden={flow.debtPaymentsFromEarnings === 0}
+            />
             <li className={`flow-total${flow.earningsLeft < 0 ? ' flow-total-negative' : ''}`}>
               <span>Te quedó de ganancias</span>
               <strong>{money(flow.earningsLeft)}</strong>
@@ -309,6 +316,13 @@ export default async function ResumenPage({ searchParams }) {
           <ul className="profit-list flow-list flow-list-neutral">
             <MoneyLine label="En compra de perfumes" value={flow.purchasesCapital} sign="+" href="/admin/compras" />
             <MoneyLine label="En gastos extras" value={flow.expensesCapital} sign="+" href="/admin/gastos" />
+            <MoneyLine
+              label="En pago de deudas"
+              value={flow.debtPaymentsCapital}
+              sign="+"
+              href="/admin/deudas"
+              hidden={flow.debtPaymentsCapital === 0}
+            />
             <MoneyLine
               label="Aportes en efectivo"
               value={flow.capitalIn}
