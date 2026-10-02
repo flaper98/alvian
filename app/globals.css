@@ -4990,3 +4990,99 @@ select:focus {
 .sale-more[open] summary {
   margin-bottom: 0.5rem;
 }
+
+/* ---------- Plan ---------- */
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 1rem;
+}
+
+.plan-big {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 700;
+  color: var(--green-900);
+}
+
+.plan-big small {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.plan-progress {
+  height: 12px;
+}
+
+.plan-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.plan-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 12px;
+}
+
+.plan-action strong {
+  color: var(--green-900);
+}
+
+.plan-action p {
+  margin: 0.2rem 0 0;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+
+.plan-action .btn-secondary {
+  flex-shrink: 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.plan-action-good {
+  border-left-color: var(--status-good);
+}
+
+.plan-action-warn {
+  border-left-color: var(--gold);
+}
+
+.plan-action-bad {
+  border-left-color: var(--status-critical);
+}
+
+.plan-buy-table tr.plan-over-budget th,
+.plan-buy-table tr.plan-over-budget td {
+  color: var(--ink-soft);
+}
+
+.web-orders-banner.plan-banner {
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #1b1405;
+}
+
+@media (max-width: 560px) {
+  .plan-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.web-orders-banner.plan-banner strong {
+  color: #1b1405;
+}

@@ -2,6 +2,7 @@ import { getCurrentRole } from '@/lib/session';
 import Link from 'next/link';
 import { getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
+import { getBusinessPlan } from '@/lib/reports';
 import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import PendingDeliveryRow from './PendingDeliveryRow';
 
@@ -56,6 +57,28 @@ function MoneyLine({ label, value, sign, href, hidden }) {
         {sign} {money(value)}
       </strong>
     </li>
+  );
+}
+
+/** Acceso al Plan: cuándo recuperas tu inversión y cuántas cosas hay por hacer. */
+function PlanBanner({ plan }) {
+  if (!plan) return null;
+  const r = plan.recovery;
+  const headline =
+    r.remaining <= 0
+      ? '🎉 Ya recuperaste tu inversión'
+      : r.monthsLeft
+        ? `Recuperas tu inversión en ~${r.monthsLeft.toLocaleString('es-PE')} ${r.monthsLeft === 1 ? 'mes' : 'meses'} (${r.percent}% recuperado)`
+        : `Llevas ${r.percent}% de tu inversión recuperada`;
+  const pending = plan.actions.length;
+  return (
+    <Link href="/admin/plan" className="web-orders-banner plan-banner">
+      <strong>{headline}</strong>
+      <span>
+        {pending ? `${pending} cosa${pending === 1 ? '' : 's'} por hacer` : 'Todo en orden'}
+        {plan.buyList.some((b) => b.fits) ? ' · hay perfumes para reponer' : ''} · ver tu plan →
+      </span>
+    </Link>
   );
 }
 
@@ -156,12 +179,17 @@ export default async function ResumenPage({ searchParams }) {
   let summary = null;
   let pendingDeliveries = [];
   let cashTotal = 0;
+  let plan = null;
   const webCounts = await countWebOrdersByStatus();
   try {
     summary = await getSummary(role, period);
     pendingDeliveries = await listPendingDeliveries();
     // Dinero en caja hoy (desde el inicio), solo para el admin.
-    if (role === 'admin') cashTotal = (await getCashFlow()).net;
+    if (role === 'admin') {
+      cashTotal = (await getCashFlow()).net;
+      // Resumen del plan (recuperación de la inversión y acciones pendientes).
+      plan = await getBusinessPlan().catch(() => null);
+    }
   } catch (error) {
     return (
       <section className="admin-section">
@@ -212,6 +240,7 @@ export default async function ResumenPage({ searchParams }) {
         <PeriodSwitch period={period} />
       </div>
       <WebOrdersBanner counts={webCounts} />
+      <PlanBanner plan={plan} />
 
       <div className="kpi-grid">
         <KpiTile
