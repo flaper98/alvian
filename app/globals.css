@@ -5086,3 +5086,40 @@ select:focus {
 .web-orders-banner.plan-banner strong {
   color: #1b1405;
 }
+
+.plan-perfumes {
+  margin-bottom: 1rem;
+}
+
+.plan-perfumes-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.plan-perfumes-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.plan-perfumes-row .plan-big {
+  font-size: clamp(1.3rem, 4vw, 1.7rem);
+}
+
+.plan-perfumes-row .hint {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.plan-explain {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .plan-perfumes-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

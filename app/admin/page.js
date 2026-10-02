@@ -63,13 +63,12 @@ function MoneyLine({ label, value, sign, href, hidden }) {
 /** Acceso al Plan: cuándo recuperas tu inversión y cuántas cosas hay por hacer. */
 function PlanBanner({ plan }) {
   if (!plan) return null;
-  const r = plan.recovery;
+  const p = plan.perfumes;
+  // Reinvirtiendo todo, lo útil es ver cuánto ya rotó la inversión y cuánto vale el negocio.
   const headline =
-    r.remaining <= 0
-      ? '🎉 Ya recuperaste tu inversión'
-      : r.monthsLeft
-        ? `Recuperas tu inversión en ~${r.monthsLeft.toLocaleString('es-PE')} ${r.monthsLeft === 1 ? 'mes' : 'meses'} (${r.percent}% recuperado)`
-        : `Llevas ${r.percent}% de tu inversión recuperada`;
+    p.invested > 0
+      ? `Tu negocio vale ${money(p.businessValue)} · ya vendiste el ${p.turnedPercent}% de lo que pusiste en perfumes`
+      : `Tu negocio vale ${money(p.businessValue)}`;
   const pending = plan.actions.length;
   return (
     <Link href="/admin/plan" className="web-orders-banner plan-banner">

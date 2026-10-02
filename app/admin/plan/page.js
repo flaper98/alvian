@@ -38,6 +38,7 @@ export default async function PlanPage() {
   }
 
   const r = plan.recovery;
+  const p = plan.perfumes;
   const done = r.remaining <= 0;
 
   return (
@@ -50,9 +51,70 @@ export default async function PlanPage() {
         registras algo.
       </p>
 
+      <div className="chart-card plan-perfumes">
+        <h3 className="chart-title">Tu inversión en perfumes, reinvirtiendo todo</h3>
+        <div className="plan-perfumes-row">
+          <div>
+            <span className="kpi-label">Pusiste en perfumes</span>
+            <strong className="plan-big">{soles(p.invested)}</strong>
+          </div>
+          <div>
+            <span className="kpi-label">Ya vendiste (al costo)</span>
+            <strong className="plan-big">{soles(p.soldCost)}</strong>
+            <span className="hint">{p.turnedPercent}% de tu inversión ya volvió vendiendo</span>
+          </div>
+          <div>
+            <span className="kpi-label">Tu negocio vale hoy</span>
+            <strong className={`plan-big ${p.businessValue >= p.invested ? 'text-good' : ''}`}>{soles(p.businessValue)}</strong>
+            <span className="hint">Caja + perfumes al costo + te deben − deudas − comisión por pagar</span>
+          </div>
+        </div>
+        <p className="plan-explain">
+          {p.businessValue >= p.invested
+            ? `Tu dinero no se perdió: en valor ya superaste lo que pusiste en perfumes. `
+            : `Tu dinero no se perdió: está convertido en perfumes, caja y lo que te deben. `}
+          Como reinviertes todo lo que entra, vuelve a tu bolsillo <strong>solo con lo que saques</strong>
+          {p.withdrawn > 0 ? ` (ya sacaste ${soles(p.withdrawn)})` : ''}. Te faltan{' '}
+          <strong>{soles(p.cashToRecover)}</strong> en efectivo:
+        </p>
+        <table className="report-table plan-scenarios">
+          <thead>
+            <tr>
+              <th scope="col">Si de ahora en adelante…</th>
+              <th scope="col" className="num">Sacas al mes</th>
+              <th scope="col" className="num">Recuperas en</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.scenarios.map((s) => (
+              <tr key={s.key}>
+                <th scope="row">
+                  {s.label}
+                  <span className="report-sub">{s.note}</span>
+                </th>
+                <td className="num">{soles(s.perMonth)}</td>
+                <td className="num">
+                  <strong>
+                    {s.months === 0
+                      ? 'Ya recuperado'
+                      : s.months == null
+                        ? 'Nunca en efectivo'
+                        : `~${s.months.toLocaleString('es-PE')} meses · ${monthFmt.format(new Date(Date.now() + s.months * 30 * 86400000))}`}
+                  </strong>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="hint">
+          «Sacas al mes» usa tu ritmo actual de utilidad neta ({soles(r.monthlyPace)}/mes). Para sacar tu
+          sueldo usa Caja → Registrar salida → Saqué para mí.
+        </p>
+      </div>
+
       <div className="plan-grid">
         <div className="chart-card plan-recovery">
-          <h3 className="chart-title">Recuperación de tu inversión</h3>
+          <h3 className="chart-title">Recuperación de todo lo que pusiste (perfumes y gastos)</h3>
           {done ? (
             <p className="plan-big text-good">🎉 Ya recuperaste lo que pusiste</p>
           ) : r.monthsLeft ? (
