@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import SaleForm from './SaleForm';
 
-export default function SaleFormModal({ perfumes }) {
+export default function SaleFormModal({ perfumes, customers = [] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ export default function SaleFormModal({ perfumes }) {
 
       {open ? (
         <div className="modal-backdrop" onClick={() => setOpen(false)}>
-          <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-dialog modal-dialog-prices" onClick={(event) => event.stopPropagation()}>
             <button
               type="button"
               className="modal-close"
@@ -23,7 +23,7 @@ export default function SaleFormModal({ perfumes }) {
             >
               ×
             </button>
-            <SaleForm perfumes={perfumes} onSaved={() => setOpen(false)} />
+            <SaleForm perfumes={perfumes} customers={customers} onSaved={() => setOpen(false)} />
           </div>
         </div>
       ) : null}

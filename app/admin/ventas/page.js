@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes, listSales, listUsers } from '@/lib/db';
+import { listCustomerNames, listPerfumes, listSales, listUsers } from '@/lib/db';
 import SaleFormModal from './SaleFormModal';
 import SalesList from './SalesList';
 
@@ -14,8 +14,9 @@ export default async function VentasPage() {
   let perfumes;
   let sales;
   let users = [];
+  let customers = [];
   try {
-    [perfumes, sales] = await Promise.all([listPerfumes(), listSales()]);
+    [perfumes, sales, customers] = await Promise.all([listPerfumes(), listSales(), listCustomerNames()]);
     if (role === 'admin') {
       users = await listUsers();
     }
@@ -33,7 +34,7 @@ export default async function VentasPage() {
     <section className="admin-section">
       <div className="admin-header">
         <h1>Ventas</h1>
-        <SaleFormModal perfumes={perfumes} />
+        <SaleFormModal perfumes={perfumes} customers={customers} />
       </div>
 
       <div>
