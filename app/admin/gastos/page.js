@@ -26,12 +26,12 @@ export default async function GastosPage() {
   return (
     <section className="admin-section">
       <div className="admin-header">
-        <h1>Gastos extras</h1>
+        <h1>Gastos del negocio</h1>
         <ExpenseFormModal />
       </div>
       <p className="hint">
-        Gastos que no son ni compra de perfumes ni comisión: envío, empaque, publicidad, etc. Se
-        restan de la ganancia en el Resumen.
+        Fletes, bolsas, publicidad, movilidad… Aquí ves cuánto gastas en cada cosa. Se restan de la
+        Caja (también puedes registrarlos desde Caja → Registrar salida).
       </p>
 
       <ExpensesList expenses={expenses} />

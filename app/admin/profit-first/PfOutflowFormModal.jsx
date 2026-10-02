@@ -49,11 +49,12 @@ function OutflowForm({ onSaved }) {
       </label>
       <label>
         Nota (opcional)
-        <input name="note" type="text" placeholder="Ej: pago de IGV, cuota del préstamo" />
+        <input name="note" type="text" placeholder="Ej: pago de IGV, paso a mi cuenta de ahorro" />
       </label>
-      <p className="hint">
-        Tu sueldo sale de <strong>Retiros</strong> y los gastos operativos de <strong>Gastos</strong> y{' '}
-        <strong>Comisiones</strong>: no los anotes aquí, ya se descuentan solos.
+      <p className="form-error">
+        No anotes aquí lo que ya se registra en otra sección, o se restará dos veces: tu sueldo va en{' '}
+        <strong>Mi sueldo</strong>, los pagos a la vendedora en <strong>Comisiones</strong>, los gastos
+        en <strong>Gastos</strong> y las deudas en <strong>Deudas</strong>.
       </p>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <SubmitButton />

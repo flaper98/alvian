@@ -37,7 +37,7 @@ export default async function DeudasPage() {
       </div>
       <p className="hint">
         Anota cada deuda una vez (a quién y cuánto) y registra cada pago: el saldo baja solo. Los pagos
-        cuentan como salida de dinero en el Resumen, en Reportes y en el Reparto («Pago de deuda»).
+        salen de la Caja (también puedes registrarlos desde Caja → Registrar salida).
       </p>
 
       <div className="kpi-grid">

@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import Link from 'next/link';
-import { getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
+import { getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
 import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import PendingDeliveryRow from './PendingDeliveryRow';
@@ -155,10 +155,13 @@ export default async function ResumenPage({ searchParams }) {
 
   let summary = null;
   let pendingDeliveries = [];
+  let cashTotal = 0;
   const webCounts = await countWebOrdersByStatus();
   try {
     summary = await getSummary(role, period);
     pendingDeliveries = await listPendingDeliveries();
+    // Dinero en caja hoy (desde el inicio), solo para el admin.
+    if (role === 'admin') cashTotal = (await getCashFlow()).net;
   } catch (error) {
     return (
       <section className="admin-section">
@@ -197,8 +200,10 @@ export default async function ResumenPage({ searchParams }) {
 
   const { flow } = summary;
   const periodLabel = PERIODS[period].toLowerCase();
-  const reinvestPct =
-    flow.incomeTotal > 0 ? (flow.purchasesReinvested / flow.incomeTotal) * 100 : null;
+  // Una sola caja: todo lo que salió, sin importar con qué dinero se pagó.
+  const outflow =
+    flow.purchases + flow.expenses + flow.commissionsPaid + flow.withdrawals + flow.debtPayments + flow.pfOutflows;
+  const difference = flow.incomeTotal + flow.capitalPut - outflow;
 
   return (
     <section className="admin-section">
@@ -210,23 +215,15 @@ export default async function ResumenPage({ searchParams }) {
 
       <div className="kpi-grid">
         <KpiTile
-          label="Entró"
-          value={money(flow.incomeTotal)}
-          sub="Dinero cobrado (no incluye lo que te deben)"
-          tone="good"
+          label="Tienes en caja"
+          value={money(cashTotal)}
+          sub="Hoy, sumando todo desde el inicio"
+          tone={cashTotal < 0 ? 'bad' : 'good'}
         />
+        <KpiTile label="Entró por ventas" value={money(flow.incomeTotal)} sub={`Cobrado ${periodLabel}`} tone="good" />
+        <KpiTile label="Salió" value={money(outflow)} sub={`Todo lo pagado ${periodLabel}`} />
         <KpiTile
-          label="Compra de perfumes"
-          value={money(flow.purchases)}
-          sub={`Reinvertido ${money(flow.purchasesReinvested)} · tu capital ${money(flow.purchasesCapital)}`}
-        />
-        <KpiTile
-          label="Gastos extras"
-          value={money(flow.expenses)}
-          sub={`De ganancias ${money(flow.expensesFromEarnings)} · tu capital ${money(flow.expensesCapital)}`}
-        />
-        <KpiTile
-          label="Ganancia"
+          label="Ganancia de las ventas"
           value={money(summary.profit)}
           sub={`Ventas ${money(summary.salesTotal)} − costo ${money(summary.estimatedCost)} − comisiones ${money(summary.commissionsEarned)}${
             summary.lossesTotal > 0
@@ -239,7 +236,7 @@ export default async function ResumenPage({ searchParams }) {
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">Ganancias · {periodLabel}</h3>
+          <h3 className="chart-title">Caja · {periodLabel}</h3>
           <ul className="profit-list flow-list">
             <MoneyLine
               label={`Ventas al contado (${flow.contadoCount})`}
@@ -249,96 +246,45 @@ export default async function ResumenPage({ searchParams }) {
             />
             <MoneyLine label="Abonos de crédito" value={flow.creditPayments} sign="+" href="/admin/creditos" />
             <MoneyLine
-              label={`Pandero · ${flow.panderoClosedCount} número${flow.panderoClosedCount === 1 ? '' : 's'} completado${flow.panderoClosedCount === 1 ? '' : 's'}`}
-              value={flow.panderoClosed}
+              label="Cuotas de pandero"
+              value={flow.panderoClosed + flow.panderoThisWeek}
               sign="+"
               href="/admin/panderos"
+              hidden={flow.panderoClosed + flow.panderoThisWeek === 0}
             />
             <MoneyLine
-              label="Pandero · cuotas de esta semana"
-              value={flow.panderoThisWeek}
-              sign="+"
-              href="/admin/panderos"
-              hidden={flow.panderoThisWeek === 0}
-            />
-            <li className="flow-subtotal">
-              <span>Entró</span>
-              <strong>{money(flow.incomeTotal)}</strong>
-            </li>
-            <MoneyLine
-              label="Reinvertido en perfumes"
-              value={flow.purchasesReinvested}
-              sign="−"
-              href="/admin/compras"
-            />
-            <MoneyLine
-              label="Gastos pagados con ganancias"
-              value={flow.expensesFromEarnings}
-              sign="−"
-              href="/admin/gastos"
-              hidden={flow.expensesFromEarnings === 0}
-            />
-            <MoneyLine label="Comisiones pagadas" value={flow.commissionsPaid} sign="−" href="/admin/comisiones" />
-            <MoneyLine
-              label="Retiros para ti"
-              value={flow.withdrawals}
-              sign="−"
-              href="/admin/caja"
-              hidden={flow.withdrawals === 0}
-            />
-            <MoneyLine
-              label="Pago de deudas"
-              value={flow.debtPaymentsFromEarnings}
-              sign="−"
-              href="/admin/deudas"
-              hidden={flow.debtPaymentsFromEarnings === 0}
-            />
-            <li className={`flow-total${flow.earningsLeft < 0 ? ' flow-total-negative' : ''}`}>
-              <span>Te quedó de ganancias</span>
-              <strong>{money(flow.earningsLeft)}</strong>
-            </li>
-          </ul>
-          {reinvestPct != null && flow.purchasesReinvested > 0 ? (
-            <p className="hint">
-              Reinvertiste en perfumes el <strong>{reinvestPct.toFixed(0)}%</strong> de lo que entró.
-            </p>
-          ) : null}
-          {flow.earningsLeft < 0 ? (
-            <p className="hint">
-              Salió más de lo que entró. Revisa si alguna compra o gasto marcado como
-              &quot;Reinversión&quot; en realidad lo pagaste con tu capital.
-            </p>
-          ) : null}
-        </div>
-
-        <div className="chart-card">
-          <h3 className="chart-title">Tu capital · {periodLabel}</h3>
-          <ul className="profit-list flow-list flow-list-neutral">
-            <MoneyLine label="En compra de perfumes" value={flow.purchasesCapital} sign="+" href="/admin/compras" />
-            <MoneyLine label="En gastos extras" value={flow.expensesCapital} sign="+" href="/admin/gastos" />
-            <MoneyLine
-              label="En pago de deudas"
-              value={flow.debtPaymentsCapital}
-              sign="+"
-              href="/admin/deudas"
-              hidden={flow.debtPaymentsCapital === 0}
-            />
-            <MoneyLine
-              label="Aportes en efectivo"
-              value={flow.capitalIn}
+              label="Pusiste tú"
+              value={flow.capitalPut}
               sign="+"
               href="/admin/caja"
-              hidden={flow.capitalIn === 0}
+              hidden={flow.capitalPut === 0}
             />
-            <li className="flow-total flow-total-capital">
-              <span>Total que pusiste de tu bolsillo</span>
-              <strong>{money(flow.capitalPut)}</strong>
+            <MoneyLine label="Compra de perfumes" value={flow.purchases} sign="−" href="/admin/compras" hidden={flow.purchases === 0} />
+            <MoneyLine label="Gastos del negocio" value={flow.expenses} sign="−" href="/admin/gastos" hidden={flow.expenses === 0} />
+            <MoneyLine
+              label="Pago a la vendedora"
+              value={flow.commissionsPaid}
+              sign="−"
+              href="/admin/comisiones"
+              hidden={flow.commissionsPaid === 0}
+            />
+            <MoneyLine label="Saqué para mí" value={flow.withdrawals} sign="−" href="/admin/caja" hidden={flow.withdrawals === 0} />
+            <MoneyLine label="Pago de deudas" value={flow.debtPayments} sign="−" href="/admin/deudas" hidden={flow.debtPayments === 0} />
+            <MoneyLine
+              label="Otras salidas (Reparto)"
+              value={flow.pfOutflows}
+              sign="−"
+              href="/admin/caja"
+              hidden={flow.pfOutflows === 0}
+            />
+            <li className={`flow-total${difference < 0 ? ' flow-total-negative' : ''}`}>
+              <span>Diferencia {periodLabel}</span>
+              <strong>{money(difference)}</strong>
             </li>
           </ul>
-          <p className="hint">
-            Es dinero tuyo invertido en el negocio: no se resta de tus ganancias. Al registrar una compra
-            o un gasto eliges si lo pagaste con tu capital o con las ganancias.
-          </p>
+          <Link href="/admin/caja" className="chart-footnote">
+            Registrar una salida o dinero que pusiste →
+          </Link>
         </div>
 
         <PanderoProgress groups={summary.panderoInProgress} />

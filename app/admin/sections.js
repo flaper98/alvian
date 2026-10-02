@@ -51,16 +51,17 @@ export const SECTIONS = [
     ],
   },
   {
-    label: 'Pagos y gastos',
+    // Una sola caja: todo el dinero que entra y sale se registra en "Caja".
+    // El Reparto (profit-first) sigue existiendo en /admin/profit-first, pero
+    // se ocultó del menú para simplificar.
+    label: 'Caja',
     icon: IconExpense,
     roles: ADMIN,
     tabs: [
-      { href: '/admin/pagos', label: 'Resumen' },
-      { href: '/admin/gastos', label: 'Gastos' },
+      { href: '/admin/caja', label: 'Caja' },
       { href: '/admin/deudas', label: 'Deudas' },
+      { href: '/admin/gastos', label: 'Gastos' },
       { href: '/admin/perdidas', label: 'Pérdidas' },
-      { href: '/admin/caja', label: 'Mi sueldo' },
-      { href: '/admin/profit-first', label: 'Reparto' },
     ],
   },
   {
