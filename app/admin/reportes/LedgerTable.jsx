@@ -7,7 +7,7 @@ const PAGE_SIZE = 25;
 // "capital" = dinero tuyo que pusiste en la caja (solo aparece en la Caja).
 const KIND_LABELS = { in: 'Ventas y cobros', capital: 'Puse dinero', out: 'Salidas' };
 // Movimientos que se pueden borrar desde aquí (el resto se corrige en su sección).
-const DELETABLE = new Set(['gasto', 'retiro', 'aporte', 'deuda', 'reparto']);
+const DELETABLE = new Set(['gasto', 'retiro', 'aporte', 'deuda', 'reparto', 'sobre']);
 
 const soles = (value) =>
   `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

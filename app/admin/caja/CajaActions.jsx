@@ -9,6 +9,7 @@ import {
   registerExpenseAction,
   payAllCommissionsAction,
   payDebtFromCashAction,
+  registerEnvelopeMovementAction,
 } from '@/lib/actions';
 import { CASH_PURPOSES } from '@/lib/cash-purposes';
 import ExpenseFields from '../gastos/ExpenseFields';
@@ -109,10 +110,12 @@ function PurposeField({ kind }) {
 
 const OUT_TYPES = [
   { key: 'sueldo', icon: '👤', title: 'Saqué para mí', text: 'Tu sueldo, un gasto personal o ahorro' },
-  { key: 'gasto', icon: '🧾', title: 'Gasto del negocio', text: 'Fletes, bolsas, publicidad, movilidad…' },
+  { key: 'gasto', icon: '🧾', title: 'Gasto del negocio', text: 'Bolsas, publicidad, movilidad… (sale de la Reserva)' },
   { key: 'vendedora', icon: '🤝', title: 'Pago a la vendedora', text: 'Su comisión por las ventas' },
   { key: 'deuda', icon: '📉', title: 'Pago de una deuda', text: 'Cuota o abono de algo que debes' },
   { key: 'compra', icon: '🛍️', title: 'Compra de perfumes', text: 'Mercadería para vender' },
+  { key: 'impuestos', icon: '🏛️', title: 'Pagué impuestos', text: 'SUNAT: sale del sobre Impuestos' },
+  { key: 'reserva', icon: '🛟', title: 'Usé la reserva', text: 'Un imprevisto: sale del sobre Reserva' },
 ];
 
 function OutflowForms({ type, commissionDue, debts, onDone }) {
@@ -135,6 +138,16 @@ function OutflowForms({ type, commissionDue, debts, onDone }) {
     );
   }
   if (type === 'vendedora') return <PayCommission due={commissionDue} onDone={onDone} />;
+  if (type === 'impuestos' || type === 'reserva') {
+    return (
+      <ActionForm action={registerEnvelopeMovementAction} onDone={onDone} submitLabel="Registrar salida">
+        <input type="hidden" name="envelope" value={type} />
+        <AmountDateNote
+          notePlaceholder={type === 'impuestos' ? 'Ej: pago SUNAT de setiembre' : '¿En qué la usaste? (obligatorio)'}
+        />
+      </ActionForm>
+    );
+  }
   if (type === 'deuda') {
     const open = debts.filter((d) => d.balance > 0);
     if (open.length === 0) {

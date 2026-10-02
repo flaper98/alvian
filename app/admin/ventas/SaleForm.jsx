@@ -229,6 +229,23 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
           <input name="delivered" type="checkbox" defaultChecked />
           Ya se lo entregué
         </label>
+        <details className="sale-more">
+          <summary>¿Pagaste el envío u otro gasto de esta venta?</summary>
+          <div className="prices-form-row">
+            <label>
+              Envío que pagaste tú (S/)
+              <input name="logistics" type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
+            </label>
+            <label>
+              Otro gasto de la venta (S/)
+              <input name="otherCosts" type="number" min="0" step="0.01" inputMode="decimal" placeholder="0.00" />
+            </label>
+          </div>
+          <p className="hint">
+            Si el cliente pagó el envío, déjalo en 0. Lo que pongas aquí se resta de la ganancia de esta
+            venta y sale de la Caja como gasto.
+          </p>
+        </details>
       </section>
 
       <input type="hidden" name="items" value={JSON.stringify(lines)} />

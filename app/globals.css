@@ -4848,3 +4848,145 @@ select:focus {
     grid-column: 1 / -1;
   }
 }
+
+/* ---------- Distribución de ganancias ---------- */
+
+.envelope-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.envelope-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.1rem;
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--gold);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.envelope-card.is-negative {
+  border-top-color: var(--status-critical);
+}
+
+.envelope-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.envelope-balance {
+  font-family: var(--font-body);
+  font-size: 1.45rem;
+  color: var(--green-900);
+}
+
+.envelope-card.is-negative .envelope-balance {
+  color: var(--status-critical);
+}
+
+.envelope-flow {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.envelope-card .hint {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.envelope-warn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--status-critical);
+}
+
+.distribution-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.distribution-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.distribution-config label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green-900);
+}
+
+.distribution-alerts p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.distribution-table-scroll {
+  max-height: 520px;
+}
+
+.distribution-table tr.is-low-margin th,
+.distribution-table tr.is-low-margin td {
+  background: var(--status-critical-bg);
+}
+
+@media (max-width: 640px) {
+  .distribution-config-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* PDF: "Guardar PDF / Imprimir" deja solo el contenido del reporte. */
+@media print {
+  .admin-topbar,
+  .section-tabs,
+  .no-print,
+  .order-alerts {
+    display: none !important;
+  }
+
+  .admin-shell,
+  .admin-content,
+  body {
+    background: #fff !important;
+  }
+
+  .pivot-scroll,
+  .distribution-table-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  .chart-card,
+  .kpi-tile,
+  .envelope-card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
+
+.sale-more summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green-800);
+}
+
+.sale-more[open] summary {
+  margin-bottom: 0.5rem;
+}

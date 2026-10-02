@@ -271,7 +271,7 @@ export default async function ResumenPage({ searchParams }) {
             <MoneyLine label="Saqué para mí" value={flow.withdrawals} sign="−" href="/admin/caja" hidden={flow.withdrawals === 0} />
             <MoneyLine label="Pago de deudas" value={flow.debtPayments} sign="−" href="/admin/deudas" hidden={flow.debtPayments === 0} />
             <MoneyLine
-              label="Otras salidas (Reparto)"
+              label="Impuestos, reserva y otras salidas"
               value={flow.pfOutflows}
               sign="−"
               href="/admin/caja"

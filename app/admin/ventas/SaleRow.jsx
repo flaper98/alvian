@@ -95,6 +95,15 @@ export default function SaleRow({ sale, canManage, users = [] }) {
               {PAYMENT_LABELS[sale.payment_type] || sale.payment_type}
             </span>
             <CollectionStatus sale={sale} />
+            {/* Margen de la venta (Distribución): solo lo ve el admin. */}
+            {canManage && sale.margin_percent != null ? (
+              <span
+                className={`badge ${sale.low_margin ? 'badge-debt' : 'badge-contado'}`}
+                title={`Utilidad neta S/ ${Number(sale.net_profit).toFixed(2)}`}
+              >
+                {sale.low_margin ? '⚠ ' : ''}Margen {Number(sale.margin_percent).toFixed(0)}%
+              </span>
+            ) : null}
           </div>
         </td>
         <td data-label="Entrega">
