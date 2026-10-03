@@ -159,21 +159,7 @@ function OutflowForms({ type, commissionDue, debts, onDone }) {
     }
     return (
       <ActionForm action={payDebtFromCashAction} onDone={onDone} submitLabel="Registrar pago">
-        <label>
-          ¿Qué deuda pagaste?
-          <select name="debtId" defaultValue={open.length === 1 ? open[0].id : ''} required>
-            <option value="" disabled>
-              Elige la deuda
-            </option>
-            {open.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.creditor} · te falta {soles(d.balance)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <PaidWithField />
-        <AmountDateNote notePlaceholder="Ej: cuota 3 de 6" />
+        <DebtPaymentFields debts={open} />
       </ActionForm>
     );
   }
@@ -187,6 +173,60 @@ function OutflowForms({ type, commissionDue, debts, onDone }) {
         Ir a registrar la compra →
       </Link>
     </div>
+  );
+}
+
+/** Deuda a pagar; si es un préstamo en cuotas, el monto y la nota de la próxima cuota vienen llenos. */
+function DebtPaymentFields({ debts }) {
+  const initial = debts.length === 1 ? String(debts[0].id) : '';
+  const [debtId, setDebtId] = useState(initial);
+  const debt = debts.find((d) => String(d.id) === debtId);
+  const loan = debt?.loan?.nextNumber ? debt.loan : null;
+  return (
+    <>
+      <label>
+        ¿Qué deuda pagaste?
+        <select name="debtId" defaultValue={initial} onChange={(event) => setDebtId(event.target.value)} required>
+          <option value="" disabled>
+            Elige la deuda
+          </option>
+          {debts.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.creditor}
+              {d.loan?.nextNumber ? ` · cuota ${d.loan.nextNumber} de ${d.installments}` : ''} · te falta {soles(d.balance)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <PaidWithField />
+      {/* key: al cambiar de deuda se vuelven a llenar monto y nota. */}
+      <div className="prices-form-row" key={`amount-${debtId}`}>
+        <label>
+          Monto (S/)
+          <input
+            name="amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            inputMode="decimal"
+            defaultValue={loan ? loan.nextAmount : ''}
+            required
+          />
+        </label>
+        <label>
+          Fecha
+          <input name="date" type="date" defaultValue={todayInLima()} required />
+        </label>
+      </div>
+      <label key={`note-${debtId}`}>
+        Nota (opcional)
+        <input
+          name="note"
+          defaultValue={loan ? `Cuota ${loan.nextNumber} de ${debt.installments}` : ''}
+          placeholder="Ej: cuota 3 de 6"
+        />
+      </label>
+    </>
   );
 }
 

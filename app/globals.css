@@ -4415,6 +4415,76 @@ select:focus {
   }
 }
 
+/* Préstamos en cuotas (Deudas) */
+.debt-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.badge-invest {
+  background: rgba(21, 57, 44, 0.1);
+  color: var(--green-800);
+}
+
+.sale-payments.debt-kinds {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loan-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.loan-preview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.loan-preview div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.loan-preview span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+}
+
+.loan-preview strong {
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-900);
+}
+
+.loan-preview .hint {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.perfume-form .debt-invest-hint {
+  margin: -0.65rem 0 0;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 480px) {
+  .loan-fields,
+  .loan-preview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ---------- Caja (una sola caja) ---------- */
 
 .cash-hero {

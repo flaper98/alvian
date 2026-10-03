@@ -15,6 +15,8 @@ const money = (value) => {
     maximumFractionDigits: 2,
   })}`;
 };
+// Fecha de una cuota ('YYYY-MM-DD', sin hora): se muestra tal cual.
+const loanDayFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 function StatTile({ icon, label, value, tone }) {
   return (
@@ -70,11 +72,13 @@ function PlanBanner({ plan }) {
       ? `Tu negocio vale ${money(p.businessValue)} · ya vendiste el ${p.turnedPercent}% de lo que pusiste en perfumes`
       : `Tu negocio vale ${money(p.businessValue)}`;
   const pending = plan.actions.length;
+  const next = plan.loans?.next;
   return (
     <Link href="/admin/plan" className="web-orders-banner plan-banner">
       <strong>{headline}</strong>
       <span>
         {pending ? `${pending} cosa${pending === 1 ? '' : 's'} por hacer` : 'Todo en orden'}
+        {next ? ` · cuota ${next.number}/${next.of} del préstamo: ${money(next.amount)} el ${loanDayFmt.format(new Date(`${next.dueDate}T00:00:00Z`))}` : ''}
         {plan.buyList.some((b) => b.fits) ? ' · hay perfumes para reponer' : ''} · ver tu plan →
       </span>
     </Link>

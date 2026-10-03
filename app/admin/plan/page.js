@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import { backfillBreakdowns } from '@/lib/db';
 import { getBusinessPlan } from '@/lib/reports';
+import { addMonths } from '@/lib/loans.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,83 @@ const soles = (value) => {
   return `${n < 0 ? '−' : ''}S/ ${Math.abs(n).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 const monthFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric', timeZone: 'America/Lima' });
+// Fechas de cuotas: días 'YYYY-MM-DD' sin hora, se muestran tal cual (UTC).
+const dayDate = (iso) => new Date(`${iso}T00:00:00Z`);
+const loanMonthFmt = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const loanDayFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+/** Préstamos con los que invertiste: cuánto falta, la próxima cuota y cuánto de la utilidad se lleva. */
+function LoanCard({ loans, pace }) {
+  const done = loans.balance <= 0;
+  return (
+    <div className="chart-card plan-perfumes" id="prestamo">
+      <h3 className="chart-title">{loans.count === 1 ? 'Tu préstamo para invertir' : 'Tus préstamos para invertir'}</h3>
+      <div className="plan-perfumes-row">
+        <div>
+          <span className="kpi-label">Te prestaron</span>
+          <strong className="plan-big">{soles(loans.borrowed)}</strong>
+          <span className="hint">
+            Devuelves {soles(loans.total)}
+            {loans.interest > 0 ? ` · ${soles(loans.interest)} son intereses` : ''}
+          </span>
+        </div>
+        <div>
+          <span className="kpi-label">Te falta pagar</span>
+          <strong className={`plan-big ${done ? 'text-good' : 'text-critical'}`}>{soles(loans.balance)}</strong>
+          <span className="hint">
+            {loans.next
+              ? `Cuota ${loans.next.number} de ${loans.next.of}: ${soles(loans.next.amount)} el ${loanDayFmt.format(dayDate(loans.next.dueDate))}`
+              : done
+                ? 'Préstamo pagado 🎉'
+                : 'Sin cuotas programadas'}
+          </span>
+        </div>
+        <div>
+          <span className="kpi-label">Terminas de pagar</span>
+          <strong className="plan-big">
+            {loans.payoffDate ? loanMonthFmt.format(dayDate(loans.payoffDate)) : done ? 'Listo' : '—'}
+          </strong>
+          {loans.payoffDate ? <span className="hint">Pagando cada cuota a tiempo</span> : null}
+        </div>
+      </div>
+      <div
+        className="debt-progress plan-progress"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={loans.percentPaid}
+        aria-label={`Préstamo pagado ${loans.percentPaid}%`}
+      >
+        <span style={{ width: `${loans.percentPaid}%` }} />
+      </div>
+      {loans.monthlyInstallment > 0 ? (
+        <p className="plan-explain">
+          {pace <= 0 ? (
+            <>
+              Todavía no hay ventas para comparar con la cuota de <strong>{soles(loans.monthlyInstallment)}</strong>.
+            </>
+          ) : pace >= loans.monthlyInstallment ? (
+            <>
+              Cada mes la cuota de <strong>{soles(loans.monthlyInstallment)}</strong> se lleva el{' '}
+              <strong>{loans.installmentShare}%</strong> de tu utilidad ({soles(pace)}/mes). Hasta que termines te
+              quedan <strong>{soles(loans.leftAfterInstallment)}</strong> al mes para reinvertir o para ti.
+            </>
+          ) : (
+            <>
+              Tu utilidad ({soles(pace)}/mes) todavía no cubre la cuota de{' '}
+              <strong>{soles(loans.monthlyInstallment)}</strong>: la diferencia sale de lo que tienes para reponer.
+              Vende más o cobra lo que te deben para no atrasarte.
+            </>
+          )}
+        </p>
+      ) : null}
+      <p className="hint">
+        Las cuotas salen de la caja y se descuentan de Reposición y Reinversión (es pagar la mercadería que
+        compraste), no de tu Reserva. <Link href="/admin/deudas">Registrar cuotas →</Link>
+      </p>
+    </div>
+  );
+}
 
 function buyHref(item) {
   if (!item.best) return '/admin/proveedores';
@@ -39,7 +117,12 @@ export default async function PlanPage() {
 
   const r = plan.recovery;
   const p = plan.perfumes;
+  const loans = plan.loans;
   const done = r.remaining <= 0;
+  const hasLoan = loans.count > 0;
+  // Con préstamo, se compara el valor del negocio (ya sin lo que debes) con TU dinero.
+  const yourMoney = hasLoan ? p.own : p.invested;
+  const afterLoan = loans.payoffDate ? loanMonthFmt.format(dayDate(addMonths(loans.payoffDate, 1))) : null;
 
   return (
     <section className="admin-section reports">
@@ -51,12 +134,19 @@ export default async function PlanPage() {
         registras algo.
       </p>
 
+      {hasLoan ? <LoanCard loans={loans} pace={r.monthlyPace} /> : null}
+
       <div className="chart-card plan-perfumes">
         <h3 className="chart-title">Tu inversión en perfumes, reinvirtiendo todo</h3>
         <div className="plan-perfumes-row">
           <div>
             <span className="kpi-label">Pusiste en perfumes</span>
             <strong className="plan-big">{soles(p.invested)}</strong>
+            {p.borrowed > 0 ? (
+              <span className="hint">
+                {soles(p.own)} tuyos + {soles(p.borrowed)} prestados
+              </span>
+            ) : null}
           </div>
           <div>
             <span className="kpi-label">Ya vendiste (al costo)</span>
@@ -65,17 +155,18 @@ export default async function PlanPage() {
           </div>
           <div>
             <span className="kpi-label">Tu negocio vale hoy</span>
-            <strong className={`plan-big ${p.businessValue >= p.invested ? 'text-good' : ''}`}>{soles(p.businessValue)}</strong>
+            <strong className={`plan-big ${p.businessValue >= yourMoney ? 'text-good' : ''}`}>{soles(p.businessValue)}</strong>
             <span className="hint">Caja + perfumes al costo + te deben − deudas − comisión por pagar</span>
           </div>
         </div>
         <p className="plan-explain">
-          {p.businessValue >= p.invested
-            ? `Tu dinero no se perdió: en valor ya superaste lo que pusiste en perfumes. `
+          {p.businessValue >= yourMoney
+            ? `Tu dinero no se perdió: en valor ya superaste lo que pusiste ${hasLoan ? 'de tu bolsillo' : 'en perfumes'}. `
             : `Tu dinero no se perdió: está convertido en perfumes, caja y lo que te deben. `}
           Como reinviertes todo lo que entra, vuelve a tu bolsillo <strong>solo con lo que saques</strong>
           {p.withdrawn > 0 ? ` (ya sacaste ${soles(p.withdrawn)})` : ''}. Te faltan{' '}
-          <strong>{soles(p.cashToRecover)}</strong> en efectivo:
+          <strong>{soles(p.cashToRecover)}</strong>
+          {p.borrowed > 0 ? ' de tu dinero (lo prestado lo devuelves con las cuotas)' : ''} en efectivo:
         </p>
         <table className="report-table plan-scenarios">
           <thead>
@@ -92,7 +183,14 @@ export default async function PlanPage() {
                   {s.label}
                   <span className="report-sub">{s.note}</span>
                 </th>
-                <td className="num">{soles(s.perMonth)}</td>
+                <td className="num">
+                  {soles(s.perMonth)}
+                  {afterLoan && s.perMonthAfter > s.perMonth ? (
+                    <span className="report-sub">
+                      {soles(s.perMonthAfter)} desde {afterLoan}
+                    </span>
+                  ) : null}
+                </td>
                 <td className="num">
                   <strong>
                     {s.months === 0
@@ -107,8 +205,11 @@ export default async function PlanPage() {
           </tbody>
         </table>
         <p className="hint">
-          «Sacas al mes» usa tu ritmo actual de utilidad neta ({soles(r.monthlyPace)}/mes). Para sacar tu
-          sueldo usa Caja → Registrar salida → Saqué para mí.
+          «Sacas al mes» usa tu ritmo actual de utilidad neta ({soles(r.monthlyPace)}/mes)
+          {loans.monthlyInstallment > 0
+            ? ` y ya descuenta la cuota del préstamo (${soles(loans.monthlyInstallment)}/mes) hasta que termines de pagarlo`
+            : ''}
+          . Para sacar tu sueldo usa Caja → Registrar salida → Saqué para mí.
         </p>
       </div>
 
@@ -136,10 +237,27 @@ export default async function PlanPage() {
             <span style={{ width: `${r.percent}%` }} />
           </div>
           <ul className="profit-list">
-            <li>
-              <span>Pusiste de tu bolsillo</span>
-              <strong>{soles(r.invested)}</strong>
-            </li>
+            {hasLoan ? (
+              <>
+                <li>
+                  <span>Tu dinero (lo que pusiste − lo prestado)</span>
+                  <strong>{soles(r.own)}</strong>
+                </li>
+                <li>
+                  <span>Préstamo con intereses (lo devuelves con las ventas)</span>
+                  <strong>{soles(r.loanToRecover)}</strong>
+                </li>
+                <li>
+                  <span>Total por recuperar</span>
+                  <strong>{soles(r.invested)}</strong>
+                </li>
+              </>
+            ) : (
+              <li>
+                <span>Pusiste de tu bolsillo</span>
+                <strong>{soles(r.invested)}</strong>
+              </li>
+            )}
             <li>
               <span>Ya recuperaste (utilidad neta acumulada · {r.percent}%)</span>
               <strong className="text-good">{soles(r.recovered)}</strong>
