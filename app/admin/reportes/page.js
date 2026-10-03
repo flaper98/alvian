@@ -407,7 +407,12 @@ async function InventoryTab() {
         <Kpi label="Unidades en stock" value={r.units.toLocaleString('es-PE')} />
         <Kpi label="Invertido en stock" value={soles(r.costValue)} sub="Valor al costo de compra" />
         <Kpi label="Valor a precio de venta" value={soles(r.retailValue)} />
-        <Kpi label="Ganancia si vendes todo" value={soles(r.potentialProfit)} tone="good" />
+        <Kpi
+          label="Ganancia si vendes todo"
+          value={soles(r.sellOut.profit)}
+          sub={`Ya sin la comisión de la vendedora (${r.sellOut.commissionPercent}%)`}
+          tone="good"
+        />
       </div>
       {r.withoutCost > 0 ? (
         <p className="hint">

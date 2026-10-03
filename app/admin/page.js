@@ -1,6 +1,6 @@
 import { getCurrentRole } from '@/lib/session';
 import Link from 'next/link';
-import { getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
+import { backfillBreakdowns, getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
 import { getBusinessPlan } from '@/lib/reports';
 import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
@@ -59,6 +59,106 @@ function MoneyLine({ label, value, sign, href, hidden }) {
         {sign} {money(value)}
       </strong>
     </li>
+  );
+}
+
+/** Barra que muestra en qué se reparte un monto (capital, ganancia, comisión), con su leyenda. */
+function SplitBar({ label, parts }) {
+  const total = parts.reduce((sum, p) => sum + Math.max(p.value, 0), 0);
+  if (total <= 0) return null;
+  const percent = (value) => Math.round((Math.max(value, 0) / total) * 100);
+  return (
+    <div className="split">
+      <div
+        className="split-bar"
+        role="img"
+        aria-label={`${label}: ${parts.map((p) => `${p.label} ${percent(p.value)}%`).join(', ')}`}
+      >
+        {parts.map((p) =>
+          p.value > 0 ? <span key={p.key} className={`split-${p.key}`} style={{ width: `${(p.value / total) * 100}%` }} /> : null,
+        )}
+      </div>
+      <ul className="split-legend">
+        {parts.map((p) => (
+          <li key={p.key}>
+            <span className={`split-dot split-${p.key}`} aria-hidden="true" />
+            {p.label} <strong>{money(p.value)}</strong> · {percent(p.value)}%
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Si vendes todo tu stock a precio de lista: el capital que vuelve, la ganancia y hasta dónde llega tu caja. */
+function SellOutCard({ forecast }) {
+  if (!forecast) return null;
+  const f = forecast;
+  return (
+    <div className="chart-card">
+      <div className="sellout-head">
+        <h3 className="chart-title">Si vendes todo tu stock</h3>
+        <span className="hint">
+          {f.units} perfume{f.units === 1 ? '' : 's'} a precio de lista
+        </span>
+      </div>
+      {f.units === 0 ? (
+        <p className="hint">No hay perfumes con stock, precio y compra registrada para calcularlo.</p>
+      ) : (
+        <>
+          <div className="sellout-kpis">
+            <div>
+              <span className="kpi-label">Capital que vuelve</span>
+              <strong className="sellout-value">{money(f.capital)}</strong>
+              <span className="kpi-sub">Lo que te costaron: es para volver a comprar</span>
+            </div>
+            <div>
+              <span className="kpi-label">Ganancia</span>
+              <strong className={`sellout-value ${f.profit < 0 ? 'text-critical' : 'text-good'}`}>{money(f.profit)}</strong>
+              <span className="kpi-sub">
+                Margen {f.marginPercent}% · ya sin la comisión de la vendedora ({f.commissionPercent}%)
+              </span>
+            </div>
+            <div>
+              <span className="kpi-label">Tu caja llegaría a</span>
+              <strong className="sellout-value">{money(f.cashAfter)}</strong>
+              <span className="kpi-sub">
+                Hoy {money(f.cash)} + {money(f.cashIn)} que entrarían
+              </span>
+            </div>
+          </div>
+          <SplitBar
+            label="Cómo se reparte lo que venderías"
+            parts={[
+              { key: 'capital', label: 'Capital', value: f.capital },
+              { key: 'profit', label: 'Ganancia', value: f.profit },
+              { key: 'costs', label: f.tax > 0 ? 'Comisión e impuesto' : 'Comisión', value: f.commission + f.tax },
+            ]}
+          />
+          {f.receivables > 0 || f.owed > 0 || f.noCost.count > 0 ? (
+            <ul className="sellout-notes">
+              {f.receivables > 0 ? (
+                <li>
+                  Si además cobras lo que te deben ({money(f.receivables)}), llegarías a{' '}
+                  <strong>{money(f.cashAfterCollecting)}</strong>.
+                </li>
+              ) : null}
+              {f.owed > 0 ? (
+                <li>
+                  Todavía debes {money(f.owed)}: <Link href="/admin/deudas">ver deudas</Link>.
+                </li>
+              ) : null}
+              {f.noCost.count > 0 ? (
+                <li>
+                  No incluye {f.noCost.count} perfume{f.noCost.count === 1 ? '' : 's'} sin compra registrada (
+                  {money(f.noCost.retail)} a precio de venta).
+                </li>
+              ) : null}
+            </ul>
+          ) : null}
+        </>
+      )}
+    </div>
   );
 }
 
@@ -185,6 +285,8 @@ export default async function ResumenPage({ searchParams }) {
   let plan = null;
   const webCounts = await countWebOrdersByStatus();
   try {
+    // El capital y la ganancia salen del desglose de cada venta: se completa el de ventas antiguas.
+    if (role !== 'vendedora') await backfillBreakdowns();
     summary = await getSummary(role, period);
     pendingDeliveries = await listPendingDeliveries();
     // Dinero en caja hoy (desde el inicio), solo para el admin.
@@ -231,10 +333,14 @@ export default async function ResumenPage({ searchParams }) {
 
   const { flow } = summary;
   const periodLabel = PERIODS[period].toLowerCase();
+  const periodPhrase = { mes: 'este mes', 'mes-pasado': 'el mes pasado', todo: 'desde el inicio' }[period] || periodLabel;
   // Una sola caja: todo lo que salió, sin importar con qué dinero se pagó.
   const outflow =
     flow.purchases + flow.expenses + flow.commissionsPaid + flow.withdrawals + flow.debtPayments + flow.pfOutflows;
   const difference = flow.incomeTotal + flow.capitalPut - outflow;
+  // Lo vendido se reparte en capital (lo que costó) + comisión y envíos + ganancia.
+  const margin = summary.salesTotal > 0 ? Math.round((summary.netProfit / summary.salesTotal) * 100) : 0;
+  const salesCount = summary.salesCount;
 
   return (
     <section className="admin-section">
@@ -247,28 +353,47 @@ export default async function ResumenPage({ searchParams }) {
 
       <div className="kpi-grid">
         <KpiTile
+          label="Vendiste"
+          value={money(summary.salesTotal)}
+          sub={`${salesCount} venta${salesCount === 1 ? '' : 's'} ${periodPhrase}${
+            summary.salesPending > 0 ? ` · aún te deben ${money(summary.salesPending)}` : ''
+          }`}
+        />
+        <KpiTile
+          label="Capital vendido"
+          value={money(summary.capitalSold)}
+          sub={`Lo que te costaron esos perfumes: es para volver a comprar${
+            summary.costUnknownCount > 0
+              ? ` · ${summary.costUnknownCount} venta${summary.costUnknownCount === 1 ? '' : 's'} sin compra registrada`
+              : ''
+          }`}
+        />
+        <KpiTile
+          label="Ganancia"
+          value={money(summary.profit)}
+          sub={`Margen ${margin}% · ya sin comisión y envíos (${money(summary.saleCosts)})${
+            summary.lossesTotal > 0
+              ? ` y menos ${money(summary.lossesTotal)} de pérdidas (${summary.lossesCount})`
+              : ''
+          }`}
+          tone={summary.profit < 0 ? 'bad' : 'good'}
+        />
+        <KpiTile
           label="Tienes en caja"
           value={money(cashTotal)}
           sub="Hoy, sumando todo desde el inicio"
           tone={cashTotal < 0 ? 'bad' : 'good'}
         />
-        <KpiTile label="Entró por ventas" value={money(flow.incomeTotal)} sub={`Cobrado ${periodLabel}`} tone="good" />
-        <KpiTile label="Salió" value={money(outflow)} sub={`Todo lo pagado ${periodLabel}`} />
-        <KpiTile
-          label="Ganancia de las ventas"
-          value={money(summary.profit)}
-          sub={`Ventas ${money(summary.salesTotal)} − costo ${money(summary.estimatedCost)} − comisiones ${money(summary.commissionsEarned)}${
-            summary.lossesTotal > 0
-              ? ` − pérdidas ${money(summary.lossesTotal)} (${summary.lossesCount})`
-              : ''
-          }`}
-          tone={summary.profit < 0 ? 'bad' : 'good'}
-        />
       </div>
+
+      <SellOutCard forecast={plan?.sellOut} />
 
       <div className="chart-grid">
         <div className="chart-card">
           <h3 className="chart-title">Caja · {periodLabel}</h3>
+          <p className="hint flow-summary">
+            Entró por ventas <strong>{money(flow.incomeTotal)}</strong> · salió <strong>{money(outflow)}</strong>
+          </p>
           <ul className="profit-list flow-list">
             <MoneyLine
               label={`Ventas al contado (${flow.contadoCount})`}

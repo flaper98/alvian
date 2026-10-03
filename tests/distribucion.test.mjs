@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   computeBreakdown,
   normalizeConfig,
+  sellOutForecast,
   splitProportionally,
   DEFAULT_DISTRIBUTION_CONFIG,
 } from '../lib/distribucion.mjs';
@@ -71,4 +72,35 @@ test('reparto proporcional del envío sin perder céntimos', () => {
   assert.deepEqual(parts, [3.75, 3.75, 2.5]);
   const odd = splitProportionally(10, [1, 1, 1]);
   assert.equal(Math.round(odd.reduce((s, p) => s + p, 0) * 100), 1000);
+});
+
+test('si vendes todo: capital + ganancia + comisión = precio de lista; sin costo o sin precio van aparte', () => {
+  const f = sellOutForecast(
+    [
+      { stock: 2, price: 150, unitCost: 80 }, // se cuenta: 300 a precio de venta, 160 de capital
+      { stock: 1, price: 100, unitCost: null }, // sin compra registrada
+      { stock: 3, price: 0, unitCost: 50 }, // sin precio (no está a la venta)
+      { stock: 0, price: 200, unitCost: 90 }, // sin stock
+    ],
+    { commissionPercent: 10, taxPercent: 0 },
+  );
+  assert.equal(f.units, 2);
+  assert.equal(f.retail, 300);
+  assert.equal(f.capital, 160);
+  assert.equal(f.commission, 30);
+  assert.equal(f.profit, 110);
+  assert.equal(f.cashIn, 270);
+  assert.equal(f.marginPercent, 36.7);
+  assert.deepEqual(f.noCost, { count: 1, units: 1, retail: 100 });
+  assert.deepEqual(f.noPrice, { count: 1, units: 3 });
+});
+
+test('si vendes todo: costo promedio con muchos decimales e impuesto, en céntimos exactos', () => {
+  const f = sellOutForecast([{ stock: 3, price: 129.9, unitCost: 250 / 3 }], { commissionPercent: 10, taxPercent: 2 });
+  assert.equal(f.capital, 250);
+  assert.equal(f.commission, 38.97);
+  assert.equal(f.tax, 7.79);
+  assert.equal(f.profit, 92.94);
+  assert.equal(f.cashIn, 342.94);
+  assert.equal(sellOutForecast([]).marginPercent, 0);
 });

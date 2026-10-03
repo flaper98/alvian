@@ -2181,6 +2181,124 @@ button {
   color: var(--status-critical);
 }
 
+.flow-summary {
+  margin: 0;
+}
+
+/* ---------- Resumen: si vendes todo tu stock ---------- */
+
+.sellout-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.sellout-head .hint {
+  margin: 0;
+}
+
+.sellout-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sellout-kpis > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sellout-value {
+  font-size: clamp(1.3rem, 4vw, 1.7rem);
+  font-weight: 700;
+  color: var(--green-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.sellout-notes {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* Barra de reparto: capital / ganancia / comisión */
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.split-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--border);
+}
+
+.split-bar span {
+  display: block;
+  height: 100%;
+}
+
+.split-bar span + span {
+  border-left: 2px solid var(--cream-soft);
+}
+
+.split-capital {
+  background: var(--gold-dark);
+}
+
+.split-profit {
+  background: var(--status-good);
+}
+
+.split-costs {
+  background: #b9b3a3;
+}
+
+.split-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.split-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.split-legend strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.split-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+@media (max-width: 720px) {
+  .sellout-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ---------- Resumen: pandero en curso ---------- */
 
 .pandero-progress-list {
