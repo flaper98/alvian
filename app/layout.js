@@ -1,4 +1,5 @@
 import { Playfair_Display, Inter, Poppins } from 'next/font/google';
+import { jsonLdHtml } from '@/lib/seo';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
 import AnalyticsWithFilter from './AnalyticsWithFilter';
@@ -117,7 +118,7 @@ export default async function RootLayout({ children }) {
         <GoogleTagManagerNoscript />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdHtml(businessJsonLd) }}
         />
         <CartProvider>
           {children}

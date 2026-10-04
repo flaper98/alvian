@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_URL, jsonLdHtml } from '@/lib/seo';
 import { slugify } from '@/lib/slug';
 import PerfumeCard from '../PerfumeCard';
 import SiteFooter from '../SiteFooter';
@@ -42,8 +42,8 @@ export default function CollectionPage({ eyebrow, title, intro, path, perfumes, 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(itemListJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbJsonLd) }} />
 
       <SiteHeader />
 

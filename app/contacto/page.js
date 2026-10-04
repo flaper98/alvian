@@ -1,4 +1,5 @@
 import { buildWhatsAppLink, WHATSAPP_NUMBER } from '@/lib/whatsapp';
+import { jsonLdHtml } from '@/lib/seo';
 import SiteFooter from '../SiteFooter';
 import SiteHeader from '../_store/SiteHeader';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
@@ -57,11 +58,11 @@ export default function ContactoPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(contactJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbJsonLd) }}
       />
 
       <SiteHeader />

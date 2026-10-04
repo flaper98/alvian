@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { jsonLdHtml } from '@/lib/seo';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import WhatsAppIcon from '../WhatsAppIcon';
 import ProductImage from './ProductImage';
@@ -334,7 +335,7 @@ export function FaqSection({ faqs, title = 'Preguntas frecuentes' }) {
   };
   return (
     <section className="sf-section sf-section-soft" id="preguntas">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }} />
       <div className="sf-wrap sf-faq-layout">
         <div className="sf-faq-intro reveal">
           <p className="sf-eyebrow">Ayuda</p>

@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { COOKIE_NAME, getSessionUser } from '@/lib/auth';
+import { COOKIE_NAME, getActiveSessionUser, getSessionUser } from '@/lib/auth';
 import LoginForm from './LoginForm';
 import AdminNav from './AdminNav';
 import SectionTabs from './SectionTabs';
@@ -34,6 +34,8 @@ export default async function AdminLayout({ children }) {
       </main>
     );
   }
+  // Un usuario desactivado (o con otro rol) queda fuera al instante.
+  if (user) user = await getActiveSessionUser(session).catch(() => user);
 
   if (!user) {
     return (

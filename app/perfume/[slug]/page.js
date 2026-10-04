@@ -5,7 +5,7 @@ import { getStoreConfig, listPublicFaqs } from '@/lib/store-db';
 import { formatMoney } from '@/lib/store-config';
 import { slugify } from '@/lib/slug';
 import { brandSlug, perfumeBrand } from '@/lib/brands';
-import { CATEGORY_PAGES, isInStore, metaDescription } from '@/lib/seo';
+import { CATEGORY_PAGES, isInStore, metaDescription, jsonLdHtml, offerShippingAndReturns } from '@/lib/seo';
 import PerfumeCard from '../../PerfumeCard';
 import SiteFooter from '../../SiteFooter';
 import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
@@ -136,6 +136,7 @@ export default async function PerfumePage({ params }) {
       areaServed: ['Pucallpa', 'PE'],
       url: `${SITE_URL}/perfume/${slug}`,
       seller: { '@type': 'Organization', name: 'Alvian Perfumes', url: SITE_URL },
+      ...offerShippingAndReturns(config),
     },
   };
 
@@ -154,11 +155,11 @@ export default async function PerfumePage({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(productJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbJsonLd) }}
       />
 
       <SiteHeader />

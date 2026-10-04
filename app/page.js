@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { listPerfumes, listHeroBanners } from '@/lib/db';
-import { listPublicFaqs, listTestimonials } from '@/lib/store-db';
+import { getStoreConfig, listPublicFaqs, listTestimonials } from '@/lib/store-db';
 import { buildWhatsAppLink } from '@/lib/whatsapp';
 import { slugify } from '@/lib/slug';
 import { perfumeBrand } from '@/lib/brands';
-import { isInStore } from '@/lib/seo';
+import { isInStore, jsonLdHtml, offerShippingAndReturns } from '@/lib/seo';
 import BrandMarquee from './BrandMarquee';
 import HeroCarousel from './HeroCarousel';
 import PerfumeCard from './PerfumeCard';
@@ -66,11 +66,12 @@ async function safe(promise, fallback) {
 }
 
 export default async function HomePage() {
-  const [allPerfumes, heroBanners, faqs, reviews] = await Promise.all([
+  const [allPerfumes, heroBanners, faqs, reviews, storeConfig] = await Promise.all([
     safe(listPerfumes(), []),
     safe(listHeroBanners({ onlyActive: true }), []),
     listPublicFaqs(),
     listTestimonials({ onlyActive: true }),
+    safe(getStoreConfig(), null),
   ]);
 
   // Solo se muestran los perfumes con precio y con foto (ver isInStore): uno
@@ -114,6 +115,8 @@ export default async function HomePage() {
     'Hola, vengo desde su página web. ¿Me puede dar más información sobre sus perfumes, por favor?',
   );
 
+  // Envío (Shalom / delivery) y "sin devoluciones", para Google Shopping.
+  const offerExtras = offerShippingAndReturns(storeConfig);
   const productsJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -137,6 +140,7 @@ export default async function HomePage() {
           availability: 'https://schema.org/InStock',
           itemCondition: 'https://schema.org/NewCondition',
           areaServed: ['Pucallpa', 'PE'],
+          ...offerExtras,
         },
       },
     })),
@@ -147,7 +151,7 @@ export default async function HomePage() {
       {perfumes.length > 0 ? (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(productsJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdHtml(productsJsonLd) }}
         />
       ) : null}
 

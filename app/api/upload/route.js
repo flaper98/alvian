@@ -1,7 +1,7 @@
 import { handleUpload } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { COOKIE_NAME, getSessionRole } from '@/lib/auth';
+import { COOKIE_NAME, getActiveSessionUser } from '@/lib/auth';
 
 export async function POST(request) {
   const body = await request.json();
@@ -13,7 +13,7 @@ export async function POST(request) {
       onBeforeGenerateToken: async () => {
         const cookieStore = await cookies();
         const session = cookieStore.get(COOKIE_NAME)?.value;
-        if (getSessionRole(session) !== 'admin') {
+        if ((await getActiveSessionUser(session))?.role !== 'admin') {
           throw new Error('No autorizado.');
         }
 

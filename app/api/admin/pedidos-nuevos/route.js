@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { COOKIE_NAME, getSessionRole } from '@/lib/auth';
+import { COOKIE_NAME, getActiveSessionUser } from '@/lib/auth';
 import { getNewWebOrders } from '@/lib/store-db';
 
 // El panel consulta aquí cada pocos segundos si entraron pedidos web nuevos.
@@ -8,7 +8,7 @@ export async function GET(request) {
   const cookieStore = await cookies();
   let role = null;
   try {
-    role = getSessionRole(cookieStore.get(COOKIE_NAME)?.value);
+    role = (await getActiveSessionUser(cookieStore.get(COOKIE_NAME)?.value))?.role ?? null;
   } catch (error) {
     role = null;
   }

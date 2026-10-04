@@ -1,4 +1,5 @@
 import SiteFooter from '../SiteFooter';
+import { jsonLdHtml } from '@/lib/seo';
 import SiteHeader from '../_store/SiteHeader';
 import WhatsAppFloatingButton from '../WhatsAppFloatingButton';
 
@@ -45,11 +46,11 @@ export default function NosotrosPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(aboutJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(breadcrumbJsonLd) }}
       />
 
       <SiteHeader />
