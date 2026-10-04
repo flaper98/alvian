@@ -49,7 +49,7 @@ test('el precio "antes" mantiene el mismo % de descuento; sin descuento no se to
   assert.equal(scaleComparePrice(140, 150, 209, 'nueve'), 140);
 });
 
-test('plan: sube los que están por debajo, respeta los fijos y nunca baja precios', () => {
+test('plan: sube los que están por debajo, marca para bajar los que están por encima y respeta los fijos', () => {
   const plan = planPrices(
     [
       { id: 1, price: 130, cost: 80 },
@@ -57,6 +57,7 @@ test('plan: sube los que están por debajo, respeta los fijos y nunca baja preci
       { id: 3, price: 100, cost: null },
       { id: 4, price: 120, cost: 80, locked: true },
       { id: 5, price: 0, cost: 60 },
+      { id: 6, price: 209, cost: 80 },
     ],
     { marginPercent: 50, rounding: 'nueve' },
     RATES,
@@ -66,7 +67,8 @@ test('plan: sube los que están por debajo, respeta los fijos y nunca baja preci
   assert.equal(byId[1].suggested, 209);
   assert.equal(byId[1].marginNow, 28.5);
   assert.equal(byId[1].marginNew, 51.7);
-  assert.equal(byId[2].status, 'ok');
+  assert.equal(byId[2].status, 'bajar');
+  assert.equal(byId[6].status, 'ok');
   assert.equal(byId[3].status, 'sin-costo');
   assert.equal(byId[4].status, 'fijo');
   // Un perfume sin precio todavía (0) recibe su precio: 60 × 2.5 = 150 → 159.

@@ -11,7 +11,8 @@ const percent = (value) => (value == null ? '—' : `${value.toLocaleString('es-
 const PRESETS = [30, 40, 50];
 const FILTERS = [
   { key: 'subir', label: 'Por subir' },
-  { key: 'ok', label: 'Ya cumplen' },
+  { key: 'bajar', label: 'Por bajar' },
+  { key: 'ok', label: 'Justo en tu margen' },
   { key: 'fijo', label: 'Precio fijo' },
   { key: 'sin-costo', label: 'Sin costo' },
   { key: 'all', label: 'Todos' },
@@ -52,8 +53,13 @@ function PriceRow({ item, pending, onApply, onToggleLock }) {
             +{soles(diff)}
             {item.price > 0 ? <span className="report-sub">+{Math.round((diff / item.price) * 100)}%</span> : null}
           </span>
+        ) : item.status === 'bajar' ? (
+          <span className="pricing-down">
+            −{soles(-diff)}
+            <span className="report-sub">−{Math.round((-diff / item.price) * 100)}%</span>
+          </span>
         ) : item.status === 'ok' ? (
-          'Ya cumple'
+          'Justo en tu margen'
         ) : item.status === 'fijo' ? (
           'Precio fijo'
         ) : item.status === 'imposible' ? (
@@ -63,9 +69,9 @@ function PriceRow({ item, pending, onApply, onToggleLock }) {
         )}
       </td>
       <td className="pricing-actions">
-        {item.status === 'subir' ? (
+        {item.status === 'subir' || item.status === 'bajar' ? (
           <button type="button" className="btn-secondary" disabled={pending} onClick={() => onApply(item)}>
-            Subir
+            {item.status === 'subir' ? 'Subir' : 'Bajar'}
           </button>
         ) : null}
         <button
@@ -106,21 +112,28 @@ export default function PricingBoard({ items, config, rates }) {
     margin.trim() !== '' && Number.isFinite(marginValue) && marginValue >= 0 && marginValue <= MAX_MARGIN_PERCENT;
   const ruleMargin = validMargin ? marginValue : config.marginPercent;
 
-  const { plan, toRaise, counts, stats } = useMemo(() => {
+  const { plan, toRaise, toLower, counts, stats } = useMemo(() => {
     const planned = planPrices(items, { marginPercent: ruleMargin, rounding }, rates);
     const raise = planned.filter((p) => p.status === 'subir');
-    const tally = { subir: 0, ok: 0, fijo: 0, 'sin-costo': 0, all: planned.length };
+    const lower = planned.filter((p) => p.status === 'bajar');
+    const tally = { subir: 0, bajar: 0, ok: 0, fijo: 0, 'sin-costo': 0, all: planned.length };
     for (const p of planned) tally[p.status === 'imposible' ? 'sin-costo' : p.status] += 1;
     const withPrice = raise.filter((p) => p.price > 0);
+    const priced = planned.filter((p) => p.price > 0 && p.marginNow != null);
     return {
       plan: planned,
       toRaise: raise,
+      toLower: lower,
       counts: tally,
       stats: {
+        // Margen limpio promedio de tus precios de hoy (perfumes con costo y precio).
+        currentMargin: average(priced, (p) => p.marginNow),
         raise: average(withPrice, (p) => ((p.suggested - p.price) / p.price) * 100),
         marginNow: average(withPrice, (p) => p.marginNow),
         marginNew: average(raise, (p) => p.marginNew),
         newOnes: raise.length - withPrice.length,
+        lower: average(lower, (p) => ((p.price - p.suggested) / p.price) * 100),
+        lowerMarginNow: average(lower, (p) => p.marginNow),
       },
     };
   }, [items, ruleMargin, rounding, rates]);
@@ -137,15 +150,18 @@ export default function PricingBoard({ items, config, rates }) {
   const example = suggestPrice(100, rule);
   const exampleFees = example == null ? 0 : (example * (rates.commissionPercent + rates.taxPercent)) / 100;
 
-  function save(withPrices) {
+  /** direction: 'subir' | 'bajar' | null (solo guardar la regla). */
+  function save(direction) {
     if (!validMargin) {
       setMessage({ tone: 'bad', text: `Pon un margen entre 0% y ${MAX_MARGIN_PERCENT}%.` });
       return;
     }
+    const list = direction === 'subir' ? toRaise : direction === 'bajar' ? toLower : [];
+    const verb = direction === 'subir' ? 'Subir' : 'Bajar';
     if (
-      withPrices &&
+      direction &&
       !window.confirm(
-        `¿Subir el precio de ${toRaise.length} perfume${toRaise.length === 1 ? '' : 's'}? Los clientes verán los precios nuevos en la tienda al instante.`,
+        `¿${verb} el precio de ${list.length} perfume${list.length === 1 ? '' : 's'}? Los clientes verán los precios nuevos en la tienda al instante.`,
       )
     ) {
       return;
@@ -156,14 +172,14 @@ export default function PricingBoard({ items, config, rates }) {
         marginPercent: ruleMargin,
         rounding,
         auto,
-        prices: withPrices ? toRaise.map((p) => ({ id: p.id, price: p.suggested })) : [],
+        prices: list.map((p) => ({ id: p.id, price: p.suggested })),
       });
       if (result?.error) setMessage({ tone: 'bad', text: result.error });
       else
         setMessage({
           tone: 'good',
-          text: withPrices
-            ? `Listo: subiste ${result.applied} precio${result.applied === 1 ? '' : 's'} y tu regla quedó guardada.`
+          text: direction
+            ? `Listo: ${direction === 'subir' ? 'subiste' : 'bajaste'} ${result.applied} precio${result.applied === 1 ? '' : 's'} y tu regla quedó guardada.`
             : `Regla guardada${auto ? ': desde ahora los precios se ajustan solos' : ''}.`,
         });
     });
@@ -264,11 +280,21 @@ export default function PricingBoard({ items, config, rates }) {
             type="button"
             className="btn-primary"
             disabled={isPending || !validMargin || toRaise.length === 0}
-            onClick={() => save(true)}
+            onClick={() => save('subir')}
           >
             {isPending ? 'Guardando…' : `Guardar y subir ${toRaise.length} precio${toRaise.length === 1 ? '' : 's'}`}
           </button>
-          <button type="button" className="btn-secondary" disabled={isPending || !validMargin} onClick={() => save(false)}>
+          {toLower.length > 0 ? (
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={isPending || !validMargin}
+              onClick={() => save('bajar')}
+            >
+              Guardar y bajar {toLower.length} precio{toLower.length === 1 ? '' : 's'}
+            </button>
+          ) : null}
+          <button type="button" className="btn-secondary" disabled={isPending || !validMargin} onClick={() => save(null)}>
             Solo guardar la regla
           </button>
         </div>
@@ -279,12 +305,15 @@ export default function PricingBoard({ items, config, rates }) {
         ) : null}
       </div>
 
-      <p className="pricing-summary">
-        {toRaise.length === 0 ? (
-          'Todos tus precios con costo conocido ya cumplen este margen. 👌'
-        ) : (
-          <>
-            <strong>{toRaise.length}</strong> perfume{toRaise.length === 1 ? '' : 's'} por debajo de tu margen
+      <ul className="pricing-summary">
+        {stats.currentMargin != null ? (
+          <li>
+            Hoy tu margen limpio promedio es <strong>{stats.currentMargin}%</strong>.
+          </li>
+        ) : null}
+        {toRaise.length > 0 ? (
+          <li>
+            <strong>{toRaise.length}</strong> perfume{toRaise.length === 1 ? '' : 's'} por debajo de {ruleMargin}%
             {stats.raise != null ? (
               <>
                 : subirían en promedio <strong>+{stats.raise}%</strong> y su margen pasaría de{' '}
@@ -292,9 +321,17 @@ export default function PricingBoard({ items, config, rates }) {
               </>
             ) : null}
             {stats.newOnes > 0 ? ` (${stats.newOnes} todavía sin precio)` : ''}.
-          </>
-        )}
-      </p>
+          </li>
+        ) : null}
+        {toLower.length > 0 ? (
+          <li>
+            <strong>{toLower.length}</strong> perfume{toLower.length === 1 ? '' : 's'} por encima de {ruleMargin}%
+            (margen promedio {stats.lowerMarginNow}%): con este margen bajarían en promedio{' '}
+            <strong>−{stats.lower}%</strong>. Mira la pestaña «Por bajar». Solo bajan si tú lo aplicas.
+          </li>
+        ) : null}
+        {toRaise.length === 0 && toLower.length === 0 ? <li>Todos tus precios están justo en este margen. 👌</li> : null}
+      </ul>
 
       <div className="pricing-toolbar">
         <div className="filter-chips" role="group" aria-label="Filtrar perfumes">
@@ -321,7 +358,10 @@ export default function PricingBoard({ items, config, rates }) {
       </div>
 
       {visible.length === 0 ? (
-        <p className="hint">No hay perfumes en esta vista.</p>
+        <p className="hint">
+          No hay perfumes en esta vista.
+          {filter === 'subir' && toLower.length > 0 ? ' Con este margen ninguno sube: revisa «Por bajar».' : ''}
+        </p>
       ) : (
         <div className="pivot-scroll">
           <table className="report-table pricing-table">

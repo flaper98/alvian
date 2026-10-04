@@ -5391,7 +5391,16 @@ select:focus {
 
 .pricing-summary {
   margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   font-size: 0.95rem;
+}
+
+.pricing-down {
+  color: var(--status-attention);
+  font-weight: 600;
 }
 
 .pricing-toolbar {
