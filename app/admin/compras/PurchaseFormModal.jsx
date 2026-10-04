@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import PurchaseForm from './PurchaseForm';
 
-export default function PurchaseFormModal({ perfumes, prefill }) {
+export default function PurchaseFormModal({ perfumes, prefill, pricing }) {
   const hasPrefill = Boolean(prefill?.perfumeId);
   const [open, setOpen] = useState(hasPrefill);
 
@@ -30,7 +30,12 @@ export default function PurchaseFormModal({ perfumes, prefill }) {
             >
               ×
             </button>
-            <PurchaseForm perfumes={perfumes} prefill={prefill} onSaved={() => setOpen(false)} />
+            <PurchaseForm
+              perfumes={perfumes}
+              prefill={prefill}
+              pricing={pricing}
+              onSaved={() => setOpen(false)}
+            />
           </div>
         </div>
       ) : null}

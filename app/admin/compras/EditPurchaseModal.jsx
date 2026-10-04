@@ -99,7 +99,7 @@ function EditPurchaseForm({ purchase, onClose }) {
           type="number"
           min="0"
           step="0.01"
-          placeholder="Déjalo vacío para no tocar el precio de venta"
+          placeholder="Opcional"
           value={marginPerUnit}
           onChange={(event) => setMarginPerUnit(event.target.value)}
         />
@@ -107,7 +107,7 @@ function EditPurchaseForm({ purchase, onClose }) {
       <p className="hint">
         {suggestedPrice !== null
           ? `Se actualizará el precio de venta a: S/ ${suggestedPrice.toFixed(2)}`
-          : 'Precio de venta actual del perfume — solo cambia si completas la ganancia.'}
+          : 'Si la dejas vacía, el precio solo cambia si tienes precios automáticos (Catálogo → Precios) y quedó por debajo de tu margen.'}
       </p>
 
       <label>

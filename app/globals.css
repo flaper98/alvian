@@ -5311,3 +5311,135 @@ select:focus {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------- Precios automáticos ---------- */
+
+.pricing-rule-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+}
+
+.pricing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green-900);
+}
+
+.pricing-margin-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--green-900);
+}
+
+.pricing-margin-input input {
+  width: 6.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-chips.pricing-presets {
+  margin-bottom: 0;
+}
+
+.pricing-example {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: var(--status-good-bg);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.pricing-auto {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.pricing-auto input[type='checkbox'] {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 0.15rem;
+  accent-color: var(--green-800);
+}
+
+.pricing-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pricing-message-ok {
+  margin: 0;
+  color: var(--status-good);
+  font-weight: 600;
+}
+
+.pricing-summary {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.pricing-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.pricing-toolbar .filter-chips {
+  margin-bottom: 0;
+}
+
+.pricing-search {
+  min-width: min(100%, 240px);
+}
+
+.pricing-table .pricing-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.pricing-table .pricing-actions .btn-secondary {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.pricing-lock {
+  margin-left: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.pricing-lock.is-locked {
+  border-style: solid;
+  border-color: var(--gold);
+  color: var(--gold-dark);
+  font-weight: 600;
+}
+
+.pricing-row-locked th,
+.pricing-row-locked td {
+  background: rgba(201, 153, 60, 0.06);
+}

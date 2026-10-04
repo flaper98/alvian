@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes, listPurchases } from '@/lib/db';
+import { getPricingPlan, listPerfumes, listPurchases } from '@/lib/db';
 import PurchaseFormModal from './PurchaseFormModal';
 import PurchaseHistoryList from './PurchaseHistoryList';
 
@@ -20,8 +20,18 @@ export default async function ComprasPage({ searchParams }) {
 
   let perfumes;
   let purchases;
+  let pricing = null;
   try {
-    [perfumes, purchases] = await Promise.all([listPerfumes(), listPurchases()]);
+    let plan;
+    [perfumes, purchases, plan] = await Promise.all([listPerfumes(), listPurchases(), getPricingPlan()]);
+    // Para mostrar en el formulario a cuánto quedará el precio con tu regla automática.
+    pricing = {
+      config: plan.config,
+      rates: plan.rates,
+      perfumes: Object.fromEntries(
+        plan.items.map((p) => [p.id, { avgCost: p.avgCost, units: p.purchasedUnits, price: p.price, locked: p.locked }]),
+      ),
+    };
   } catch (error) {
     return (
       <section className="admin-section">
@@ -35,7 +45,7 @@ export default async function ComprasPage({ searchParams }) {
     <section className="admin-section">
       <div className="admin-header">
         <h1>Compras</h1>
-        <PurchaseFormModal perfumes={perfumes} prefill={prefill} />
+        <PurchaseFormModal perfumes={perfumes} prefill={prefill} pricing={pricing} />
       </div>
 
       <div>

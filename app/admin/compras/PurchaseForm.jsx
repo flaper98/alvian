@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerPurchaseAction } from '@/lib/actions';
+import { suggestPrice } from '@/lib/pricing.mjs';
 import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
@@ -15,13 +16,14 @@ function SubmitButton() {
   );
 }
 
-export default function PurchaseForm({ perfumes, prefill, onSaved }) {
+export default function PurchaseForm({ perfumes, prefill, pricing, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <PurchaseFormFields
       key={formKey}
       perfumes={perfumes}
       prefill={prefill}
+      pricing={pricing}
       onSaved={() => {
         setFormKey((key) => key + 1);
         onSaved?.();
@@ -30,8 +32,11 @@ export default function PurchaseForm({ perfumes, prefill, onSaved }) {
   );
 }
 
-function PurchaseFormFields({ perfumes, prefill, onSaved }) {
+const soles = (value) => `S/ ${Number(value).toFixed(2)}`;
+
+function PurchaseFormFields({ perfumes, prefill, pricing, onSaved }) {
   const [state, formAction] = useActionState(registerPurchaseAction, { error: null });
+  const [perfumeId, setPerfumeId] = useState(String(prefill?.perfumeId || ''));
   const [quantity, setQuantity] = useState('');
   const [unitCost, setUnitCost] = useState(prefill?.unitCost || '');
   const [freightCost, setFreightCost] = useState('');
@@ -56,12 +61,41 @@ function PurchaseFormFields({ perfumes, prefill, onSaved }) {
     return landedUnitCost + margin;
   }, [landedUnitCost, marginPerUnit]);
 
+  // Precio automático (Catálogo → Precios): con el nuevo costo promedio, ¿a cuánto
+  // quedará el precio? Solo sube si quedó por debajo de tu margen.
+  const auto = pricing?.config?.auto ? pricing.config : null;
+  const info = pricing?.perfumes?.[perfumeId];
+  const autoPrice = useMemo(() => {
+    if (!auto || !info || info.locked || landedUnitCost === null || marginPerUnit !== '') return null;
+    const q = Number(quantity);
+    const newAvg =
+      info.avgCost != null && info.units > 0 ? (info.avgCost * info.units + landedUnitCost * q) / (info.units + q) : landedUnitCost;
+    const price = suggestPrice(newAvg, { ...pricing.rates, marginPercent: auto.marginPercent, rounding: auto.rounding });
+    if (price == null) return null;
+    return { price, current: info.price, raises: info.price < price };
+  }, [auto, info, pricing, landedUnitCost, marginPerUnit, quantity]);
+
+  let priceHint;
+  if (suggestedPrice !== null) priceHint = `Se guardará como precio de venta: ${soles(suggestedPrice)}`;
+  else if (autoPrice?.raises)
+    priceHint = `Con tu margen automático (${auto.marginPercent}%), el precio de venta pasará de ${soles(autoPrice.current)} a ${soles(autoPrice.price)}.`;
+  else if (autoPrice)
+    priceHint = `Su precio (${soles(autoPrice.current)}) ya cumple tu margen de ${auto.marginPercent}%: no cambia.`;
+  else if (auto && info?.locked) priceHint = 'Este perfume tiene precio fijo: no cambia solo.';
+  else if (auto) priceHint = `Si lo dejas vacío, el precio se ajusta solo a tu margen de ${auto.marginPercent}% (solo sube).`;
+  else priceHint = 'Si completas la ganancia, el precio de venta del producto se actualiza solo (se ve en la tienda).';
+
   return (
     <form action={formAction} className="perfume-form">
       <h2>Registrar compra</h2>
       <label>
         Perfume
-        <select name="perfumeId" required defaultValue={prefill?.perfumeId || ''}>
+        <select
+          name="perfumeId"
+          required
+          defaultValue={prefill?.perfumeId || ''}
+          onChange={(event) => setPerfumeId(event.target.value)}
+        >
           <option value="" disabled>
             Selecciona un perfume
           </option>
@@ -114,22 +148,18 @@ function PurchaseFormFields({ perfumes, prefill, onSaved }) {
       ) : null}
 
       <label>
-        Ganancia deseada por unidad (S/)
+        {auto ? 'Ganancia fija por unidad (opcional, en vez de tu margen)' : 'Ganancia deseada por unidad (S/)'}
         <input
           name="marginPerUnit"
           type="number"
           min="0"
           step="0.01"
-          placeholder="Ej: 15.00"
+          placeholder={auto ? 'Vacío = tu margen automático' : 'Ej: 15.00'}
           value={marginPerUnit}
           onChange={(event) => setMarginPerUnit(event.target.value)}
         />
       </label>
-      <p className="hint">
-        {suggestedPrice !== null
-          ? `Se guardará como precio de venta: S/ ${suggestedPrice.toFixed(2)}`
-          : 'Si completas la ganancia, el precio de venta del producto se actualiza solo (se ve en la tienda).'}
-      </p>
+      <p className="hint">{priceHint}</p>
 
       <label>
         Nota (opcional)

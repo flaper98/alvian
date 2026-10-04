@@ -40,7 +40,15 @@ export const SECTIONS = [
     ],
   },
   { label: 'Panderos', icon: IconRepeat, roles: ALL, tabs: [{ href: '/admin/panderos', label: 'Panderos' }] },
-  { label: 'Catálogo', icon: IconBottle, roles: ADMIN, tabs: [{ href: '/admin/catalogo', label: 'Catálogo' }] },
+  {
+    label: 'Catálogo',
+    icon: IconBottle,
+    roles: ADMIN,
+    tabs: [
+      { href: '/admin/catalogo', label: 'Catálogo' },
+      { href: '/admin/precios', label: 'Precios' },
+    ],
+  },
   {
     label: 'Compras',
     icon: IconCart,

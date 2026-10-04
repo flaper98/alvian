@@ -27,7 +27,7 @@ function purchaseHref(row) {
       )}`;
 }
 
-export default function PriceComparison({ comparison, catalogPrices = {} }) {
+export default function PriceComparison({ comparison, catalogPrices = {}, lockedIds = [], pricingRule = null }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterBy, setFilterBy] = useState('all');
@@ -158,7 +158,12 @@ export default function PriceComparison({ comparison, catalogPrices = {} }) {
           <option value="name">Orden: A-Z</option>
           <option value="savings">Orden: mayor ahorro</option>
         </select>
-        <AddMissingToCatalog comparison={comparison} catalogPrices={catalogPrices} />
+        <AddMissingToCatalog
+          comparison={comparison}
+          catalogPrices={catalogPrices}
+          lockedIds={lockedIds}
+          pricingRule={pricingRule}
+        />
       </div>
 
       <div className="filter-chips" role="group" aria-label="Filtrar">

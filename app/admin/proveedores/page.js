@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import {
+  getPricingRule,
   listPerfumes,
   listSupplierSummaries,
   listSupplierPrices,
@@ -32,13 +33,14 @@ export default async function ProveedoresPage({ searchParams }) {
   let perfumes = [];
   let prices = [];
   let selected = null;
+  let pricingRule = null;
   try {
     // Arregla precios que quedaron "Sin catálogo" porque se cargaron antes de
     // crear el perfume. Es barato: solo revisa los que siguen sin vincular.
     await relinkSupplierPrices();
     suppliers = await listSupplierSummaries();
     if (view === 'comparar') {
-      [comparison, perfumes] = await Promise.all([listPriceComparison(), listPerfumes()]);
+      [comparison, perfumes, pricingRule] = await Promise.all([listPriceComparison(), listPerfumes(), getPricingRule()]);
     } else {
       selected = suppliers.find((s) => s.id === Number(params.p)) || suppliers[0] || null;
       if (selected) {
@@ -83,6 +85,8 @@ export default async function ProveedoresPage({ searchParams }) {
           <PriceComparison
             comparison={comparison}
             catalogPrices={Object.fromEntries(perfumes.map((p) => [p.id, Number(p.price)]))}
+            lockedIds={perfumes.filter((p) => p.price_locked).map((p) => p.id)}
+            pricingRule={pricingRule}
           />
         </>
       ) : suppliers.length === 0 ? (

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { addMissingSupplierProductsAction } from '@/lib/actions';
 import { bestWholesaleOption, catalogName, salePrice } from '@/lib/supplier-pricing';
 import { findPerfumeInfo } from '@/lib/perfume-info';
+import { suggestPrice } from '@/lib/pricing.mjs';
 
 const CATEGORY_LABELS = { hombre: 'Hombre', mujer: 'Mujer', unisex: 'Unisex' };
 
@@ -24,25 +25,32 @@ function SubmitButton({ count }) {
 
 /**
  * Botón + vista previa para agregar al catálogo todos los perfumes de los
- * proveedores que todavía no tienes, con precio = mejor precio por mayor + ganancia.
+ * proveedores que todavía no tienes. Precio desde el mejor precio por mayor:
+ * con tu regla de precios (margen limpio %, Catálogo → Precios) o + una
+ * ganancia fija en soles.
  */
-export default function AddMissingToCatalog({ comparison, catalogPrices }) {
+export default function AddMissingToCatalog({ comparison, catalogPrices, lockedIds = [], pricingRule = null }) {
   const [open, setOpen] = useState(false);
+  const [priceMode, setPriceMode] = useState(pricingRule?.configured ? 'regla' : 'fija');
   const [margin, setMargin] = useState(DEFAULT_MARGIN);
   const [updateExisting, setUpdateExisting] = useState(false);
   const [state, formAction] = useActionState(addMissingSupplierProductsAction, { error: null });
+  const useRule = priceMode === 'regla' && pricingRule;
 
   const preview = useMemo(() => {
     const m = Number(margin) || 0;
+    const locked = new Set(lockedIds);
     const create = [];
     const update = [];
     for (const row of comparison) {
       const best = bestWholesaleOption(row.options, 'mayor');
       if (!best) continue;
-      const item = { key: row.perfumeId ?? row.perfumeName, best, price: salePrice(best.price, m) };
+      const price = useRule ? suggestPrice(best.price, pricingRule) : salePrice(best.price, m);
+      if (price == null) continue;
+      const item = { key: row.perfumeId ?? row.perfumeName, best, price };
       if (row.unlinked) {
         create.push({ ...item, name: catalogName(row.perfumeName), info: findPerfumeInfo(row.perfumeName) || {} });
-      } else {
+      } else if (!locked.has(row.perfumeId)) {
         const current = Number(catalogPrices[row.perfumeId] ?? 0);
         if (current !== item.price) update.push({ ...item, name: row.perfumeName, current });
       }
@@ -50,7 +58,7 @@ export default function AddMissingToCatalog({ comparison, catalogPrices }) {
     create.sort((a, b) => a.name.localeCompare(b.name, 'es'));
     update.sort((a, b) => a.name.localeCompare(b.name, 'es'));
     return { create, update };
-  }, [comparison, catalogPrices, margin]);
+  }, [comparison, catalogPrices, lockedIds, margin, useRule, pricingRule]);
 
   const missingCount = comparison.filter((row) => row.unlinked).length;
   const changes = preview.create.length + (updateExisting ? preview.update.length : 0);
@@ -78,8 +86,8 @@ export default function AddMissingToCatalog({ comparison, catalogPrices }) {
               <div>
                 <h2 id="add-missing-title">Agregar al catálogo</h2>
                 <p className="hint">
-                  Precio de venta = mejor precio <strong>por mayor</strong> entre tus proveedores (sin contar el
-                  precio por unidad) + tu ganancia.
+                  El precio de venta sale del mejor precio <strong>por mayor</strong> entre tus proveedores (sin
+                  contar el precio por unidad).
                 </p>
               </div>
 
@@ -122,19 +130,50 @@ export default function AddMissingToCatalog({ comparison, catalogPrices }) {
                 </div>
               ) : (
                 <form action={formAction} className="prices-form">
-                  <label>
-                    Ganancia por perfume (S/)
-                    <input
-                      name="margin"
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      inputMode="decimal"
-                      value={margin}
-                      onChange={(event) => setMargin(event.target.value)}
-                      required
-                    />
-                  </label>
+                  <input type="hidden" name="priceMode" value={useRule ? 'regla' : 'fija'} />
+                  {pricingRule ? (
+                    <div className="segmented" role="radiogroup" aria-label="Cómo calcular el precio">
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={priceMode === 'regla'}
+                        className={priceMode === 'regla' ? 'active' : ''}
+                        onClick={() => setPriceMode('regla')}
+                      >
+                        Con mi margen ({pricingRule.marginPercent}% limpio)
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={priceMode === 'fija'}
+                        className={priceMode === 'fija' ? 'active' : ''}
+                        onClick={() => setPriceMode('fija')}
+                      >
+                        Costo + ganancia fija
+                      </button>
+                    </div>
+                  ) : null}
+                  {useRule ? (
+                    <p className="hint">
+                      Precio con tu regla de Catálogo → Precios: te queda {pricingRule.marginPercent}% limpio después
+                      de la comisión de la vendedora ({pricingRule.commissionPercent}%).
+                      {pricingRule.configured ? '' : ' Todavía no guardaste tu regla: revísala en Precios.'}
+                    </p>
+                  ) : (
+                    <label>
+                      Ganancia por perfume (S/)
+                      <input
+                        name="margin"
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        inputMode="decimal"
+                        value={margin}
+                        onChange={(event) => setMargin(event.target.value)}
+                        required
+                      />
+                    </label>
+                  )}
 
                   <h3 className="report-subtitle">Se agregarán ({preview.create.length})</h3>
                   {preview.create.length === 0 ? (
