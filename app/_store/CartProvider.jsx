@@ -6,6 +6,9 @@ const CartContext = createContext(null);
 const STORAGE_KEY = 'alvian_cart_v1';
 const MAX_QTY = 10;
 
+/** Cada línea del carrito: el perfume y su tamaño (frasco, o decant de N ml). */
+export const cartKey = (item) => item.key || String(item.id);
+
 function readStorage() {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
@@ -65,13 +68,14 @@ export function CartProvider({ children }) {
     (product, qty = 1, { openDrawer = true } = {}) => {
       const limit = Math.max(1, Math.min(MAX_QTY, Number(product.stock) || MAX_QTY));
       update((current) => {
-        const found = current.find((i) => i.id === product.id);
+        const key = cartKey(product);
+        const found = current.find((i) => cartKey(i) === key);
         if (found) {
           return current.map((i) =>
-            i.id === product.id ? { ...i, ...product, qty: Math.min(limit, i.qty + qty) } : i,
+            cartKey(i) === key ? { ...i, ...product, key, qty: Math.min(limit, i.qty + qty) } : i,
           );
         }
-        return [...current, { ...product, qty: Math.min(limit, qty) }];
+        return [...current, { ...product, key, qty: Math.min(limit, qty) }];
       });
       showToast(`${product.name} agregado al carrito`);
       if (openDrawer) setOpen(true);
@@ -80,12 +84,12 @@ export function CartProvider({ children }) {
   );
 
   const setQty = useCallback(
-    (id, qty) => {
+    (key, qty) => {
       update((current) =>
         qty <= 0
-          ? current.filter((i) => i.id !== id)
+          ? current.filter((i) => cartKey(i) !== key)
           : current.map((i) => {
-              if (i.id !== id) return i;
+              if (cartKey(i) !== key) return i;
               const limit = Math.max(1, Math.min(MAX_QTY, Number(i.stock) || MAX_QTY));
               return { ...i, qty: Math.min(limit, qty) };
             }),

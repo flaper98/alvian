@@ -47,6 +47,7 @@ export const SECTIONS = [
     tabs: [
       { href: '/admin/catalogo', label: 'Catálogo' },
       { href: '/admin/precios', label: 'Precios' },
+      { href: '/admin/decants', label: 'Decants' },
     ],
   },
   {

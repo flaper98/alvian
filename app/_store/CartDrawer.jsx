@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatMoney } from '@/lib/store-config';
-import { useCart } from './CartProvider';
+import { cartKey, useCart } from './CartProvider';
 import { IconBag, IconClose, IconMinus, IconPlus, IconArrow, IconCheck } from './icons';
 
 export default function CartDrawer({ freeFrom = 0 }) {
@@ -84,7 +84,7 @@ export default function CartDrawer({ freeFrom = 0 }) {
             </div>
           ) : (
             items.map((item) => (
-              <div className="ci" key={item.id}>
+              <div className="ci" key={cartKey(item)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className="ci-img" src={item.image} alt="" />
                 <div className="ci-info">
@@ -93,13 +93,13 @@ export default function CartDrawer({ freeFrom = 0 }) {
                   </Link>
                   <p className="ci-unit">{formatMoney(item.price)} c/u</p>
                   <div className="qty">
-                    <button type="button" onClick={() => setQty(item.id, item.qty - 1)} aria-label={`Quitar uno de ${item.name}`}>
+                    <button type="button" onClick={() => setQty(cartKey(item), item.qty - 1)} aria-label={`Quitar uno de ${item.name}`}>
                       <IconMinus size={16} />
                     </button>
                     <span aria-live="polite">{item.qty}</span>
                     <button
                       type="button"
-                      onClick={() => setQty(item.id, item.qty + 1)}
+                      onClick={() => setQty(cartKey(item), item.qty + 1)}
                       aria-label={`Agregar uno de ${item.name}`}
                       disabled={item.stock > 0 && item.qty >= item.stock}
                     >
@@ -109,7 +109,7 @@ export default function CartDrawer({ freeFrom = 0 }) {
                 </div>
                 <div className="ci-side">
                   <strong>{formatMoney(item.price * item.qty)}</strong>
-                  <button type="button" className="ci-remove" onClick={() => setQty(item.id, 0)}>
+                  <button type="button" className="ci-remove" onClick={() => setQty(cartKey(item), 0)}>
                     Quitar
                   </button>
                 </div>

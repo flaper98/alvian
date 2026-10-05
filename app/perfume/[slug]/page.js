@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { listPerfumes } from '@/lib/db';
+import { getDecantOffers, listPerfumes } from '@/lib/db';
 import { getStoreConfig, listPublicFaqs } from '@/lib/store-db';
 import { formatMoney } from '@/lib/store-config';
 import { slugify } from '@/lib/slug';
@@ -95,7 +95,13 @@ export default async function PerfumePage({ params }) {
     perfume.created_at &&
     Date.now() - new Date(perfume.created_at).getTime() < 30 * 24 * 60 * 60 * 1000;
   const off = discountPercent(perfume);
-  const [config, faqs] = await Promise.all([getStoreConfig(), listPublicFaqs()]);
+  const [config, faqs, decantOffers] = await Promise.all([
+    getStoreConfig(),
+    listPublicFaqs(),
+    // Decants a la venta de este perfume (3, 5, 10 ml…). Si falla, solo se vende el frasco.
+    getDecantOffers().catch(() => new Map()),
+  ]);
+  const decants = decantOffers.get(perfume.id) || [];
   const paymentText =
     [
       config.payment.yapeEnabled ? 'Yape o Plin' : null,
@@ -203,7 +209,7 @@ export default async function PerfumePage({ params }) {
             <p className="product-detail-description">{perfume.description}</p>
           ) : null}
 
-          <ProductPurchasePanel product={toCartProduct(perfume)} />
+          <ProductPurchasePanel product={toCartProduct(perfume)} decants={decants} bottleMl={perfume.volume_ml || null} />
 
           <ul className="mini-trust">
             <li>

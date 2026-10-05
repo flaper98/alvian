@@ -5452,3 +5452,66 @@ select:focus {
 .pricing-row-locked td {
   background: rgba(201, 153, 60, 0.06);
 }
+
+/* ---------- Decants ---------- */
+
+.decant-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.decant-size {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.decant-size label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--green-900);
+}
+
+.decant-size input {
+  width: 6.5rem;
+}
+
+.decant-volume {
+  width: 5rem;
+  text-align: right;
+}
+
+.decant-prices span {
+  display: block;
+  white-space: nowrap;
+  font-size: 0.82rem;
+}
+
+.decant-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.decant-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green-800);
+}
+
+.sale-line-size {
+  display: block;
+  margin-top: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}

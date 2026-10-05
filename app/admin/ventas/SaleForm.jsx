@@ -24,7 +24,7 @@ function SubmitButton({ total, disabled }) {
 }
 
 /** Buscador de perfumes: toca uno para agregarlo a la venta. */
-function PerfumePicker({ perfumes, onPick }) {
+function PerfumePicker({ perfumes, decants = {}, onPick }) {
   const [search, setSearch] = useState('');
   const results = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -45,7 +45,9 @@ function PerfumePicker({ perfumes, onPick }) {
       />
       <ul className="sale-results">
         {results.map((p) => {
-          const noStock = Number(p.stock) <= 0;
+          // Sin frascos pero con ml abiertos para decants: igual se puede vender (como decant).
+          const poolMl = decants[p.id]?.poolMl || 0;
+          const noStock = Number(p.stock) <= 0 && poolMl <= 0;
           return (
             <li key={p.id}>
               <button
@@ -67,6 +69,7 @@ function PerfumePicker({ perfumes, onPick }) {
                 <span className="sale-result-meta">
                   {Number(p.price) > 0 ? soles(p.price) : 'Sin precio'} ·{' '}
                   <span className={noStock ? 'text-critical' : ''}>{noStock ? 'Sin stock' : `Stock ${p.stock}`}</span>
+                  {poolMl > 0 ? ` · ${poolMl} ml para decants` : ''}
                 </span>
                 {!noStock ? <span className="sale-result-add" aria-hidden="true">+</span> : null}
               </button>
@@ -79,7 +82,10 @@ function PerfumePicker({ perfumes, onPick }) {
   );
 }
 
-function SaleFormFields({ perfumes, customers, onSaved }) {
+/** Cada línea: un perfume y su tamaño (frasco, o decant de N ml). */
+const lineKey = (perfumeId, decantMl) => `${perfumeId}:${decantMl ?? ''}`;
+
+function SaleFormFields({ perfumes, customers, decants, onSaved }) {
   const [state, formAction] = useActionState(registerQuickSaleAction, { error: null });
   const [lines, setLines] = useState([]);
   const [paymentType, setPaymentType] = useState('contado');
@@ -92,24 +98,41 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
   const total = lines.reduce((sum, l) => sum + l.quantity * (Number(l.unitPrice) || 0), 0);
   const needsCustomer = paymentType !== 'contado';
   const stockOf = (id) => Number(perfumes.find((p) => p.id === id)?.stock || 0);
+  // Máximo de una línea: frascos en stock, o cuántos decants alcanzan con los ml abiertos.
+  const maxOf = (l) => (l.decantMl ? Math.floor((decants[l.perfumeId]?.poolMl || 0) / l.decantMl) : stockOf(l.perfumeId));
 
   function addPerfume(perfume) {
     setLines((current) => {
-      const existing = current.find((l) => l.perfumeId === perfume.id);
+      // Sin frascos pero con ml abiertos: se agrega como decant del tamaño más chico.
+      const offer = decants[perfume.id];
+      const decant = stockOf(perfume.id) <= 0 && offer ? offer.sizes[0] : null;
+      const key = lineKey(perfume.id, decant?.ml);
+      const existing = current.find((l) => l.key === key);
       if (existing) {
-        return current.map((l) =>
-          l.perfumeId === perfume.id ? { ...l, quantity: Math.min(l.quantity + 1, stockOf(perfume.id)) } : l,
-        );
+        return current.map((l) => (l.key === key ? { ...l, quantity: Math.min(l.quantity + 1, maxOf(l)) } : l));
       }
+      const price = decant ? decant.price : Number(perfume.price) > 0 ? Number(perfume.price) : '';
       return [
         ...current,
-        { perfumeId: perfume.id, name: perfume.name, quantity: 1, unitPrice: Number(perfume.price) > 0 ? Number(perfume.price) : '' },
+        { key, perfumeId: perfume.id, name: perfume.name, decantMl: decant?.ml ?? null, quantity: 1, unitPrice: price },
       ];
     });
   }
 
-  function update(perfumeId, changes) {
-    setLines((current) => current.map((l) => (l.perfumeId === perfumeId ? { ...l, ...changes } : l)));
+  function update(key, changes) {
+    setLines((current) => current.map((l) => (l.key === key ? { ...l, ...changes } : l)));
+  }
+
+  /** Cambia el tamaño de una línea (frasco ↔ decant) y pone el precio de ese tamaño. */
+  function changeSize(line, value) {
+    const decantMl = value === '' ? null : Number(value);
+    const perfume = perfumes.find((p) => p.id === line.perfumeId);
+    const price = decantMl
+      ? decants[line.perfumeId]?.sizes.find((s) => s.ml === decantMl)?.price ?? ''
+      : Number(perfume?.price) > 0
+        ? Number(perfume.price)
+        : '';
+    update(line.key, { key: lineKey(line.perfumeId, decantMl), decantMl, unitPrice: price, quantity: 1 });
   }
 
   return (
@@ -120,20 +143,39 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
         <h3>
           <span>1</span> ¿Qué perfumes vendiste?
         </h3>
-        <PerfumePicker perfumes={perfumes} onPick={addPerfume} />
+        <PerfumePicker perfumes={perfumes} decants={decants} onPick={addPerfume} />
         {lines.length ? (
           <ul className="sale-lines">
             {lines.map((l) => (
-              <li key={l.perfumeId}>
-                <span className="sale-line-name">{l.name}</span>
+              <li key={l.key}>
+                <span className="sale-line-name">
+                  {l.name}
+                  {decants[l.perfumeId] ? (
+                    <select
+                      className="sale-line-size"
+                      value={l.decantMl ?? ''}
+                      aria-label={`Tamaño de ${l.name}`}
+                      onChange={(event) => changeSize(l, event.target.value)}
+                    >
+                      <option value="" disabled={stockOf(l.perfumeId) <= 0}>
+                        Frasco
+                      </option>
+                      {decants[l.perfumeId].sizes.map((s) => (
+                        <option key={s.ml} value={s.ml}>
+                          Decant {s.ml} ml
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                </span>
                 <div className="qty" aria-label={`Cantidad de ${l.name}`}>
                   <button
                     type="button"
                     aria-label="Quitar uno"
                     onClick={() =>
                       l.quantity <= 1
-                        ? setLines((current) => current.filter((x) => x.perfumeId !== l.perfumeId))
-                        : update(l.perfumeId, { quantity: l.quantity - 1 })
+                        ? setLines((current) => current.filter((x) => x.key !== l.key))
+                        : update(l.key, { quantity: l.quantity - 1 })
                     }
                   >
                     −
@@ -142,8 +184,8 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
                   <button
                     type="button"
                     aria-label="Agregar uno"
-                    disabled={l.quantity >= stockOf(l.perfumeId)}
-                    onClick={() => update(l.perfumeId, { quantity: l.quantity + 1 })}
+                    disabled={l.quantity >= maxOf(l)}
+                    onClick={() => update(l.key, { quantity: l.quantity + 1 })}
                   >
                     +
                   </button>
@@ -157,7 +199,7 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
                     step="0.01"
                     inputMode="decimal"
                     value={l.unitPrice}
-                    onChange={(event) => update(l.perfumeId, { unitPrice: event.target.value })}
+                    onChange={(event) => update(l.key, { unitPrice: event.target.value })}
                     required
                   />
                 </label>
@@ -256,13 +298,14 @@ function SaleFormFields({ perfumes, customers, onSaved }) {
   );
 }
 
-export default function SaleForm({ perfumes, customers = [], onSaved }) {
+export default function SaleForm({ perfumes, customers = [], decants = {}, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <SaleFormFields
       key={formKey}
       perfumes={perfumes}
       customers={customers}
+      decants={decants}
       onSaved={() => {
         setFormKey((key) => key + 1);
         onSaved?.();

@@ -3116,3 +3116,57 @@ body:has(.sticky-buy.show) .whatsapp-fab {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ---------- Tamaño: frasco o decant ---------- */
+
+.size-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 0.5rem;
+}
+
+.size-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.size-option span {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.size-option strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.size-option:hover {
+  border-color: var(--green-900);
+}
+
+.size-option.is-on {
+  border-color: var(--green-900);
+  background: var(--green-900);
+  color: var(--cream-soft);
+}
+
+.size-option.is-on span {
+  color: var(--cream-soft);
+}
+
+.size-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}

@@ -7,10 +7,25 @@ import AddToCartButton from '../../_store/AddToCartButton';
 import { IconMinus, IconPlus } from '../../_store/icons';
 import WhatsAppIcon from '../../WhatsAppIcon';
 
-export default function ProductPurchasePanel({ product }) {
+/**
+ * Compra del perfume. Si vende decants, primero se elige el tamaño: el frasco
+ * completo o un decant (3, 5, 10 ml…); cada uno va al carrito como línea propia.
+ */
+export default function ProductPurchasePanel({ product: bottle, decants = [], bottleMl = null }) {
   const [quantity, setQuantity] = useState(1);
   const [showSticky, setShowSticky] = useState(false);
+  const [size, setSize] = useState(null); // null = frasco completo; si no, ml del decant
   const panelRef = useRef(null);
+  const decant = size == null ? null : decants.find((d) => d.ml === size);
+  const product = decant
+    ? {
+        ...bottle,
+        key: `${bottle.id}:${decant.ml}`,
+        ml: decant.ml,
+        name: `${bottle.name} · Decant ${decant.ml} ml`,
+        price: decant.price,
+      }
+    : bottle;
   const maxQty = Math.max(1, Math.min(10, product.stock || 1));
   const total = product.price * quantity;
 
@@ -32,6 +47,32 @@ export default function ProductPurchasePanel({ product }) {
   return (
     <>
       <div className="product-purchase" ref={panelRef}>
+        {decants.length > 0 ? (
+          <div className="size-picker" role="radiogroup" aria-label="Tamaño">
+            {[{ ml: null, price: bottle.price }, ...decants].map((option) => {
+              const active = option.ml === size;
+              return (
+                <button
+                  key={option.ml ?? 'frasco'}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  className={`size-option${active ? ' is-on' : ''}`}
+                  onClick={() => setSize(option.ml)}
+                >
+                  <span>{option.ml == null ? `Frasco${bottleMl ? ` ${bottleMl} ml` : ''}` : `Decant ${option.ml} ml`}</span>
+                  <strong>{formatMoney(option.price)}</strong>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+        {decant ? (
+          <p className="size-note">
+            Decant: perfume original fraccionado en un frasquito de vidrio con atomizador. Ideal para probarlo antes
+            de comprar el frasco.
+          </p>
+        ) : null}
         <div className="purchase-row">
           <div className="qty qty-lg" aria-label="Cantidad">
             <button

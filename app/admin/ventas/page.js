@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listCustomerNames, listPerfumes, listSales, listUsers } from '@/lib/db';
+import { listCustomerNames, listDecantCatalog, listPerfumes, listSales, listUsers } from '@/lib/db';
 import SaleFormModal from './SaleFormModal';
 import SalesList from './SalesList';
 
@@ -15,8 +15,20 @@ export default async function VentasPage() {
   let sales;
   let users = [];
   let customers = [];
+  let decants = {};
   try {
-    [perfumes, sales, customers] = await Promise.all([listPerfumes(), listSales(), listCustomerNames()]);
+    let catalog;
+    [perfumes, sales, customers, catalog] = await Promise.all([
+      listPerfumes(),
+      listSales(),
+      listCustomerNames(),
+      listDecantCatalog().catch(() => null),
+    ]);
+    // Decants que se pueden vender: los que tienen ml abiertos o están en la tienda, con su precio.
+    for (const item of catalog?.items || []) {
+      const sizes = item.sizes.filter((s) => s.price != null).map((s) => ({ ml: s.ml, price: s.price }));
+      if (sizes.length && (item.poolMl > 0 || item.enabled)) decants[item.id] = { poolMl: item.poolMl, sizes };
+    }
     if (role === 'admin') {
       users = await listUsers();
     }
@@ -34,7 +46,7 @@ export default async function VentasPage() {
     <section className="admin-section">
       <div className="admin-header">
         <h1>Ventas</h1>
-        <SaleFormModal perfumes={perfumes} customers={customers} />
+        <SaleFormModal perfumes={perfumes} customers={customers} decants={decants} />
       </div>
 
       <div>

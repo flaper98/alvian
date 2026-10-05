@@ -21,7 +21,7 @@ import {
   formatMoney,
   shippingCostFor,
 } from '@/lib/store-config';
-import { useCart } from '../_store/CartProvider';
+import { cartKey, useCart } from '../_store/CartProvider';
 import { IconBag, IconLock, IconUpload, IconCheck } from '../_store/icons';
 
 function SubmitButton({ disabled }) {
@@ -149,7 +149,7 @@ export default function CheckoutForm({ config }) {
   const shipping = shippingCostFor(config, option, subtotal);
   const total = subtotal + shipping;
   const voucherRequired = config.payment.voucherRequired && method !== 'contraentrega';
-  const cartJson = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty })));
+  const cartJson = JSON.stringify(items.map((i) => ({ id: i.id, qty: i.qty, ml: i.ml || null })));
 
   if (ready && items.length === 0) {
     return (
@@ -435,7 +435,7 @@ export default function CheckoutForm({ config }) {
             <h2 className="h4">Resumen del pedido</h2>
             <div className="sum-items">
               {items.map((item) => (
-                <div className="si" key={item.id}>
+                <div className="si" key={cartKey(item)}>
                   <div className="si-img">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.image} alt="" />
