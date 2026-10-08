@@ -6075,6 +6075,92 @@ select:focus {
   color: var(--green-900);
 }
 
-.stock-out .report-chips {
-  padding: 0 0.8rem 0.8rem;
+/* Sin stock: lista con foto, costo, precio y botón Comprar */
+.stock-out-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.stock-out-title small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.stock-out-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.8rem 0.4rem;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.stock-out-list li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.stock-out-list img,
+.stock-out-nophoto {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  background: var(--cream);
+}
+
+.stock-out-nophoto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  color: var(--status-attention);
+  text-decoration: none;
+  background: var(--status-attention-bg);
+}
+
+.stock-out-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.stock-out-info strong {
+  font-size: 0.9rem;
+  color: var(--green-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stock-out-info span {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.stock-out-buy {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--green-800);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--green-800);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.stock-out-buy:hover,
+.stock-out-buy:focus-visible {
+  background: var(--green-800);
+  color: #fff;
 }

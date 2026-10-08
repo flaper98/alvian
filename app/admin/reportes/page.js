@@ -10,6 +10,7 @@ import {
   getReceivablesReport,
   getInventoryReport,
 } from '@/lib/reports';
+import { listPurchaseCosts } from '@/lib/db';
 import { LEDGER_GROUPS, movementsHref, sectionOfSrc } from '@/lib/ledger-types';
 import TrendChart from './TrendChart';
 import LedgerTable from './LedgerTable';
@@ -480,8 +481,62 @@ async function ReceivablesTab() {
   );
 }
 
+/**
+ * Perfumes sin stock como lista: foto (o "Sin foto": no se ve en la tienda),
+ * a cuánto lo compras y a quién, a cuánto lo vendes y un botón para comprarlo.
+ */
+function OutOfStockGroup({ title, items, costs }) {
+  if (!items.length) return null;
+  const round = (value) => `S/ ${Math.round(Number(value) || 0).toLocaleString('es-PE')}`;
+  const hidden = items.filter((p) => !p.image).length;
+  return (
+    <details className="stock-out" open={title === 'Nunca comprados'}>
+      <summary>
+        <span className="stock-out-title">
+          {title}
+          <small>
+            {items.length - hidden} en la tienda{hidden ? ` · ${hidden} sin foto` : ''}
+          </small>
+        </span>
+        <strong>{items.length}</strong>
+      </summary>
+      <ul className="stock-out-list">
+        {items.map((p) => {
+          const supplier = costs[p.id]?.supplier || null;
+          const cost = p.unitCost ?? supplier?.price ?? null;
+          const note = supplier ? `&note=${encodeURIComponent(`${supplier.name} · ${supplier.tier}`)}` : '';
+          const buyHref = cost != null ? `/admin/compras?perfumeId=${p.id}&unitCost=${cost}${note}` : '/admin/proveedores';
+          return (
+            <li key={p.id}>
+              {p.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.image} alt="" width={36} height={36} loading="lazy" />
+              ) : (
+                <Link href="/admin/catalogo?filtro=sin-imagen" className="stock-out-nophoto" title="Sube su foto para que se vea en la tienda">
+                  Sin foto
+                </Link>
+              )}
+              <div className="stock-out-info">
+                <strong>{p.name}</strong>
+                <span>
+                  {cost != null ? `Compra ${round(cost)}` : 'Sin precio de compra'}
+                  {supplier ? ` · ${supplier.name}` : ''} · Venta {round(p.price)}
+                </span>
+              </div>
+              <Link href={buyHref} className="stock-out-buy">
+                Comprar
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
+}
+
 async function InventoryTab() {
-  const r = await getInventoryReport();
+  // Precio de compra (o del proveedor, si nunca lo compraste) para la lista "Sin stock".
+  const [r, costs] = await Promise.all([getInventoryReport(), listPurchaseCosts()]);
   const s = r.sellOut;
   const round = (value) => `S/ ${Math.round(Number(value) || 0).toLocaleString('es-PE')}`;
   const parts = [
@@ -570,33 +625,8 @@ async function InventoryTab() {
             <p className="stock-empty">✓ Nada sin stock</p>
           ) : (
             <div className="stock-out-groups">
-              {r.outIdle.length ? (
-                <details className="stock-out">
-                  <summary>
-                    <span>Ya no se piden</span>
-                    <strong>{r.outIdle.length}</strong>
-                  </summary>
-                  <ul className="report-chips">
-                    {r.outIdle.map((p) => (
-                      <li key={p.id}>{p.name}</li>
-                    ))}
-                  </ul>
-                </details>
-              ) : null}
-              {r.neverBought.length ? (
-                <details className="stock-out">
-                  <summary>
-                    <span>Nunca comprados</span>
-                    <strong>{r.neverBought.length}</strong>
-                  </summary>
-                  <ul className="report-chips">
-                    {r.neverBought.map((p) => (
-                      <li key={p.id}>{p.name}</li>
-                    ))}
-                  </ul>
-                </details>
-              ) : null}
-              <p className="stock-mini-note">Se siguen vendiendo en la tienda.</p>
+              <OutOfStockGroup title="Nunca comprados" items={r.neverBought} costs={costs} />
+              <OutOfStockGroup title="Ya no se piden" items={r.outIdle} costs={costs} />
             </div>
           )}
         </div>
