@@ -5782,3 +5782,299 @@ select:focus {
   color: var(--status-critical);
   font-size: 0.88rem;
 }
+
+/* ---------- Reportes: Inventario ---------- */
+
+.stock-split {
+  padding: 0.25rem 0.1rem;
+}
+
+.stock-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Botones por estado: número grande + palabra; filtran las tarjetas. */
+.stock-pills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 0.5rem;
+}
+
+.stock-pill {
+  --tone: var(--green-900);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--tone);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stock-pill strong {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--tone);
+}
+
+.stock-pill span {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.stock-pill.is-on {
+  background: var(--tone);
+}
+
+.stock-pill.is-on strong,
+.stock-pill.is-on span {
+  color: #fff;
+}
+
+.stock-pill:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.stock-vende {
+  --tone: var(--status-good);
+}
+
+.stock-nuevo {
+  --tone: var(--gold-dark);
+}
+
+.stock-lento {
+  --tone: var(--status-attention);
+}
+
+.stock-parado {
+  --tone: var(--status-critical);
+}
+
+.stock-board-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stock-board-total {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.stock-board-bar input {
+  width: min(100%, 220px);
+}
+
+/* Una tarjeta por perfume. */
+.stock-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 0.75rem;
+}
+
+.stock-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--tone);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.stock-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.stock-card-top img,
+.stock-noimg {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--cream);
+  border: 1px solid var(--border);
+}
+
+.stock-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.stock-card-title strong {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  color: var(--green-900);
+}
+
+.stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--tone);
+}
+
+.stock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.stock-status-note {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.stock-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+  text-align: center;
+}
+
+.stock-card-stats strong {
+  display: block;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-900);
+}
+
+.stock-card-stats strong.text-good {
+  color: var(--status-good);
+}
+
+.stock-card-stats span {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.stock-card-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+/* Por reponer / Sin stock */
+.stock-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stock-side-head .btn-secondary {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.stock-empty {
+  margin: 0;
+  font-weight: 600;
+  color: var(--status-good);
+}
+
+.stock-mini-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stock-mini-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stock-mini-list li:last-child {
+  border-bottom: none;
+}
+
+.stock-mini-name {
+  font-weight: 600;
+}
+
+.stock-mini-tag {
+  justify-self: end;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stock-mini-tag.is-out {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.stock-mini-tag.is-low {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.stock-mini-note {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.stock-out-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stock-out {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.stock-out summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.stock-out summary strong {
+  font-size: 1.1rem;
+  color: var(--green-900);
+}
+
+.stock-out .report-chips {
+  padding: 0 0.8rem 0.8rem;
+}

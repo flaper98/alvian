@@ -13,6 +13,7 @@ import {
 import { LEDGER_GROUPS, movementsHref, sectionOfSrc } from '@/lib/ledger-types';
 import TrendChart from './TrendChart';
 import LedgerTable from './LedgerTable';
+import StockTable from './StockTable';
 
 export const dynamic = 'force-dynamic';
 
@@ -481,94 +482,123 @@ async function ReceivablesTab() {
 
 async function InventoryTab() {
   const r = await getInventoryReport();
+  const s = r.sellOut;
+  const round = (value) => `S/ ${Math.round(Number(value) || 0).toLocaleString('es-PE')}`;
+  const parts = [
+    { key: 'capital', label: 'Costo', value: s.capital },
+    { key: 'profit', label: 'Ganancia', value: Math.max(s.profit, 0) },
+    { key: 'costs', label: 'Comisión', value: s.commission + s.tax },
+  ];
+  const partsTotal = parts.reduce((sum, p) => sum + p.value, 0);
+  const share = (value) => (partsTotal > 0 ? Math.round((value / partsTotal) * 100) : 0);
+
   return (
     <>
       <div className="kpi-grid">
-        <Kpi label="Unidades en stock" value={r.units.toLocaleString('es-PE')} />
-        <Kpi label="Invertido en stock" value={soles(r.costValue)} sub="Valor al costo de compra" />
-        <Kpi label="Valor a precio de venta" value={soles(r.retailValue)} />
         <Kpi
-          label="Ganancia si vendes todo"
-          value={soles(r.sellOut.profit)}
-          sub={`Ya sin la comisión de la vendedora (${r.sellOut.commissionPercent}%)`}
-          tone="good"
+          label="Frascos en stock"
+          value={r.units.toLocaleString('es-PE')}
+          sub={`${r.items.length} perfume${r.items.length === 1 ? '' : 's'}`}
         />
+        <Kpi
+          label="Te costaron"
+          value={soles(r.costValue)}
+          sub={r.decantValue > 0 ? `incluye ${round(r.decantValue)} en decants` : null}
+        />
+        <Kpi label="Valen" value={soles(r.retailValue)} sub="a precio de venta" />
+        <Kpi label="Ganarías" value={soles(s.profit)} sub={`margen ${s.marginPercent}%`} tone="good" />
       </div>
-      {r.withoutCost > 0 ? (
-        <p className="hint">
-          {r.withoutCost} perfume{r.withoutCost === 1 ? '' : 's'} con stock no tiene{r.withoutCost === 1 ? '' : 'n'} compra
-          registrada: no suman al costo ni a la ganancia potencial.
-        </p>
+
+      {partsTotal > 0 ? (
+        <div className="split stock-split" role="img" aria-label={parts.map((p) => `${p.label} ${share(p.value)}%`).join(', ')}>
+          <div className="split-bar">
+            {parts.map((p) =>
+              p.value > 0 ? (
+                <span key={p.key} className={`split-${p.key}`} style={{ width: `${(p.value / partsTotal) * 100}%` }} />
+              ) : null,
+            )}
+          </div>
+          <ul className="split-legend" aria-hidden="true">
+            {parts.map((p) => (
+              <li key={p.key}>
+                <span className={`split-dot split-${p.key}`} />
+                {p.label} <strong>{share(p.value)}%</strong>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
+
+      <div className="chart-card">
+        <h3 className="chart-title">Tu stock</h3>
+        <StockTable items={r.items} />
+      </div>
 
       <div className="chart-grid">
         <div className="chart-card">
-          <h3 className="chart-title">Sin vender hace más de {r.dormantDays} días</h3>
-          {r.dormant.length === 0 ? (
-            <p className="hint">Todo tu stock se está moviendo.</p>
+          <div className="stock-side-head">
+            <h3 className="chart-title">Por reponer</h3>
+            <Link href="/admin/plan#comprar" className="btn-secondary">
+              Qué comprar →
+            </Link>
+          </div>
+          {r.restock.length === 0 ? (
+            <p className="stock-empty">✓ Todo bien por ahora</p>
           ) : (
-            <div className="pivot-scroll report-scroll-sm">
-              <table className="report-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Perfume</th>
-                    <th scope="col" className="num">
-                      Stock
-                    </th>
-                    <th scope="col" className="num">
-                      Sin venta
-                    </th>
-                    <th scope="col" className="num">
-                      Dinero parado
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.dormant.map((d) => (
-                    <tr key={d.name}>
-                      <th scope="row">{d.name}</th>
-                      <td className="num">{d.stock}</td>
-                      <td className="num">{d.idleDays == null ? 'Nunca' : `${d.idleDays} días`}</td>
-                      <td className="num">{d.tied == null ? '—' : soles(d.tied)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <p className="hint">Considera una promoción o destacarlos en la portada.</p>
-        </div>
-
-        <div className="chart-card">
-          <h3 className="chart-title">Reponer</h3>
-          <h4 className="report-subtitle">Quedan 3 o menos ({r.low.length})</h4>
-          {r.low.length === 0 ? (
-            <p className="hint">Ninguno.</p>
-          ) : (
-            <ul className="report-chips">
-              {r.low.map((p) => (
-                <li key={p.name}>
-                  {p.name} <strong>{p.stock}</strong>
+            <ul className="stock-mini-list">
+              {r.restock.map((p) => (
+                <li key={p.id}>
+                  <span className="stock-mini-name">{p.name}</span>
+                  <span className={`stock-mini-tag ${p.stock === 0 ? 'is-out' : 'is-low'}`}>
+                    {p.stock === 0 ? 'Agotado' : `Quedan ${p.stock}`}
+                  </span>
+                  <span className="stock-mini-note">{p.sold30} vendidos/mes</span>
                 </li>
               ))}
             </ul>
           )}
-          <h4 className="report-subtitle">Agotados ({r.out.length})</h4>
-          {r.out.length === 0 ? (
-            <p className="hint">Ninguno.</p>
+        </div>
+
+        <div className="chart-card">
+          <div className="stock-side-head">
+            <h3 className="chart-title">Sin stock</h3>
+            <Link href="/admin/proveedores" className="btn-secondary">
+              Proveedores →
+            </Link>
+          </div>
+          {r.outIdle.length === 0 && r.neverBought.length === 0 ? (
+            <p className="stock-empty">✓ Nada sin stock</p>
           ) : (
-            <ul className="report-chips">
-              {r.out.map((p) => (
-                <li key={p.name}>{p.name}</li>
-              ))}
-            </ul>
+            <div className="stock-out-groups">
+              {r.outIdle.length ? (
+                <details className="stock-out">
+                  <summary>
+                    <span>Ya no se piden</span>
+                    <strong>{r.outIdle.length}</strong>
+                  </summary>
+                  <ul className="report-chips">
+                    {r.outIdle.map((p) => (
+                      <li key={p.id}>{p.name}</li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+              {r.neverBought.length ? (
+                <details className="stock-out">
+                  <summary>
+                    <span>Nunca comprados</span>
+                    <strong>{r.neverBought.length}</strong>
+                  </summary>
+                  <ul className="report-chips">
+                    {r.neverBought.map((p) => (
+                      <li key={p.id}>{p.name}</li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+              <p className="stock-mini-note">Se siguen vendiendo en la tienda.</p>
+            </div>
           )}
-          <p className="hint">
-            La tienda los sigue vendiendo como disponibles: si entra un pedido, compra al proveedor.
-          </p>
-          <Link href="/admin/proveedores" className="chart-footnote">
-            Ver dónde conviene comprar →
-          </Link>
         </div>
       </div>
     </>
