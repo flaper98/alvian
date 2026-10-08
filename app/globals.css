@@ -5704,3 +5704,81 @@ select:focus {
   font-size: 0.72rem;
   color: var(--ink-soft);
 }
+
+/* ---------- Distribución: detalle de cada sobre ---------- */
+
+.envelope-card-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.envelope-card-link:hover,
+.envelope-card-link:focus-visible {
+  box-shadow: 0 6px 18px rgba(14, 43, 33, 0.12);
+  transform: translateY(-1px);
+}
+
+.envelope-card-link.is-open {
+  outline: 2px solid var(--green-800);
+  outline-offset: -2px;
+}
+
+.envelope-more {
+  margin-top: auto;
+  padding-top: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--green-800);
+}
+
+.envelope-detail {
+  scroll-margin-top: 1rem;
+}
+
+.envelope-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.envelope-detail-head .btn-secondary {
+  text-decoration: none;
+}
+
+.envelope-detail-totals {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+}
+
+.envelope-detail-side h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: var(--green-900);
+}
+
+.envelope-detail-side > .hint {
+  margin: 0 0 0.6rem;
+}
+
+.envelope-detail-link {
+  color: var(--green-900);
+}
+
+.envelope-adjustment th,
+.envelope-adjustment td {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.envelope-detail-warn {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+  font-size: 0.88rem;
+}

@@ -5,6 +5,7 @@ import {
   getCommissionPercent,
   getDistributionConfig,
   getDistributionReport,
+  getEnvelopeDetail,
   getEnvelopes,
 } from '@/lib/db';
 import { REPORT_PRESETS, resolveReportRange, toDayString } from '@/lib/reports';
@@ -19,6 +20,118 @@ const soles = (value) => {
 const pct = (value) => `${Number(value).toLocaleString('es-PE', { maximumFractionDigits: 1 })}%`;
 const dateFmt = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' });
 const PAYMENT_LABELS = { contado: 'Contado', credito: 'Crédito', pandero: 'Pandero' };
+
+/** Tabla de movimientos de un lado del sobre (lo que entró o lo que salió). */
+function EnvelopeRows({ title, total, explain, rows, adjustments = [], showCollected = false, sign }) {
+  return (
+    <div className="envelope-detail-side">
+      <h4>
+        {title} <span className={sign === '+' ? 'text-good' : 'text-critical'}>{soles(total)}</span>
+      </h4>
+      <p className="hint">{explain}</p>
+      {rows.length === 0 && adjustments.length === 0 ? (
+        <p className="hint">Nada todavía.</p>
+      ) : (
+        <div className="pivot-scroll report-scroll-sm">
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Qué fue</th>
+                <th scope="col" className="num">
+                  Monto
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i}>
+                  <td className="ledger-date">{dateFmt.format(new Date(r.date))}</td>
+                  <th scope="row">
+                    <Link href={r.href} className="envelope-detail-link">
+                      {r.concept}
+                    </Link>
+                    <span className="report-sub">{r.detail}</span>
+                    {showCollected && r.collectedPercent < 100 ? (
+                      <span className="report-sub">
+                        Le toca {soles(r.full)} · cobrado {r.collectedPercent}%: el resto entra cuando te paguen
+                      </span>
+                    ) : null}
+                  </th>
+                  <td className="num">{soles(r.amount)}</td>
+                </tr>
+              ))}
+              {adjustments.map((a) => (
+                <tr key={a.label} className="envelope-adjustment">
+                  <td />
+                  <th scope="row">{a.label}</th>
+                  <td className="num">{soles(a.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colSpan={2}>
+                  Total
+                </th>
+                <td className="num">
+                  <strong>{soles(total)}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Lo que pasó dentro de un sobre: de dónde vino cada sol y en qué se fue. */
+function EnvelopeDetail({ detail, closeHref }) {
+  return (
+    <div className="chart-card envelope-detail" id="detalle-sobre">
+      <div className="envelope-detail-head">
+        <div>
+          <span className="kpi-label">Detalle del sobre</span>
+          <h3 className="chart-title">{detail.label}</h3>
+          <p className="envelope-detail-totals">
+            Entró <span className="text-good">{soles(detail.in)}</span> − salió{' '}
+            <span className="text-critical">{soles(detail.out)}</span> = queda{' '}
+            <strong className={detail.balance < 0 ? 'text-critical' : 'text-good'}>{soles(detail.balance)}</strong>
+          </p>
+        </div>
+        <Link href={closeHref} scroll={false} className="btn-secondary">
+          Cerrar ×
+        </Link>
+      </div>
+      <div className="chart-grid">
+        <EnvelopeRows
+          title="Entró"
+          total={detail.in}
+          explain={detail.explain.in}
+          rows={detail.inRows}
+          showCollected
+          sign="+"
+        />
+        <EnvelopeRows
+          title="Salió"
+          total={detail.out}
+          explain={detail.explain.out}
+          rows={detail.outRows}
+          adjustments={detail.adjustments}
+          sign="−"
+        />
+      </div>
+      {detail.balance < 0 ? (
+        <p className="envelope-detail-warn">
+          Salió más de lo que entró. Revisa la lista de «Salió»: si algo está repetido o mal anotado, toca la fila y
+          corrígelo o bórralo en su sección (las salidas antiguas del Reparto se borran en Caja → Movimientos con la ×).
+          Si todo está bien, el faltante se cubrió con plata de otros sobres.
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 function rangeLabel(range) {
   if (!range.start && !range.end) return 'Desde el inicio';
@@ -39,14 +152,17 @@ export default async function DistribucionPage({ searchParams }) {
   let commissionPercent;
   let envelopes;
   let report;
+  let detail = null;
   try {
     // Las ventas anteriores al módulo se calculan una sola vez con los % de hoy.
     await backfillBreakdowns();
-    [config, commissionPercent, envelopes, report] = await Promise.all([
+    [config, commissionPercent, envelopes, report, detail] = await Promise.all([
       getDistributionConfig(),
       getCommissionPercent(),
       getEnvelopes(),
       getDistributionReport(range),
+      // Sobre abierto (?sobre=reserva): cada movimiento que forma su "Entró" y su "Salió".
+      params.sobre ? getEnvelopeDetail(String(params.sobre)) : Promise.resolve(null),
     ]);
   } catch (error) {
     return (
@@ -56,6 +172,21 @@ export default async function DistribucionPage({ searchParams }) {
       </section>
     );
   }
+
+  // Enlaces que conservan el período elegido abajo y cambian solo el sobre abierto.
+  const hrefWith = (changes) => {
+    const next = new URLSearchParams(
+      Object.entries({ periodo: params.periodo, desde: params.desde, hasta: params.hasta, sobre: params.sobre }).filter(
+        ([, v]) => v,
+      ),
+    );
+    for (const [k, v] of Object.entries(changes)) {
+      if (v) next.set(k, v);
+      else next.delete(k);
+    }
+    const query = next.toString();
+    return `/admin/distribucion${query ? `?${query}` : ''}`;
+  };
 
   const t = report.totals;
   const costs = t.cost + t.commission + t.logistics + t.otherCosts + t.tax;
@@ -77,18 +208,29 @@ export default async function DistribucionPage({ searchParams }) {
 
       <h2 className="dashboard-heading">Tus sobres hoy</h2>
       <div className="envelope-grid">
-        {envelopes.envelopes.map((e) => (
-          <div key={e.key} className={`envelope-card${e.balance < 0 ? ' is-negative' : ''}`}>
-            <span className="envelope-label">{e.label}</span>
-            <strong className="envelope-balance">{soles(e.balance)}</strong>
-            <span className="envelope-flow">
-              Entró {soles(e.in)} · salió {soles(e.out)}
-            </span>
-            <span className="hint">{e.hint}</span>
-            {e.balance < 0 ? <span className="envelope-warn">Gastaste más de lo apartado</span> : null}
-          </div>
-        ))}
+        {envelopes.envelopes.map((e) => {
+          const open = detail?.key === e.key;
+          return (
+            <Link
+              key={e.key}
+              href={open ? hrefWith({ sobre: null }) : `${hrefWith({ sobre: e.key })}#detalle-sobre`}
+              scroll={!open}
+              className={`envelope-card envelope-card-link${e.balance < 0 ? ' is-negative' : ''}${open ? ' is-open' : ''}`}
+              aria-expanded={open}
+            >
+              <span className="envelope-label">{e.label}</span>
+              <strong className="envelope-balance">{soles(e.balance)}</strong>
+              <span className="envelope-flow">
+                Entró {soles(e.in)} · salió {soles(e.out)}
+              </span>
+              <span className="hint">{e.hint}</span>
+              {e.balance < 0 ? <span className="envelope-warn">Gastaste más de lo apartado</span> : null}
+              <span className="envelope-more">{open ? 'Ocultar detalle ↑' : 'Ver qué entró y qué salió →'}</span>
+            </Link>
+          );
+        })}
       </div>
+      {detail ? <EnvelopeDetail detail={detail} closeHref={hrefWith({ sobre: null })} /> : null}
       <p className="hint no-print">
         Para sacar dinero de un sobre usa <Link href="/admin/caja">Caja → Registrar salida</Link>: pago a la
         vendedora, saqué para mí (sueldo), pagué impuestos, usé la reserva o compra de perfumes.
@@ -100,7 +242,7 @@ export default async function DistribucionPage({ searchParams }) {
           {Object.entries(REPORT_PRESETS).map(([key, label]) => (
             <Link
               key={key}
-              href={`/admin/distribucion?periodo=${key}`}
+              href={hrefWith({ periodo: key, desde: null, hasta: null })}
               className={`filter-chip${range.preset === key ? ' active' : ''}`}
               aria-current={range.preset === key ? 'page' : undefined}
             >
@@ -109,6 +251,7 @@ export default async function DistribucionPage({ searchParams }) {
           ))}
         </nav>
         <form className="report-range-form" method="get" action="/admin/distribucion">
+          {params.sobre ? <input type="hidden" name="sobre" value={params.sobre} /> : null}
           <label>
             Desde
             <input type="date" name="desde" defaultValue={params.desde || desde} />
