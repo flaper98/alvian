@@ -5,6 +5,7 @@ import { REPORT_PRESETS, getLedger, getPaymentsSummary, resolveReportRange, toDa
 import { expenseCategoryLabel } from '@/lib/expense-categories';
 import LedgerTable from '../reportes/LedgerTable';
 import CajaActions from './CajaActions';
+import { sectionOfSrc } from '@/lib/ledger-types';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export default async function CajaPage({ searchParams }) {
   const entered = flow.incomeTotal;
   const put = flow.capitalPut;
   const out = summary.total;
-  const rows = ledger.map((r) => ({ ...r, dateLabel: dateTimeFmt.format(new Date(r.t)) }));
+  const rows = ledger.map((r) => ({ ...r, dateLabel: dateTimeFmt.format(new Date(r.t)), href: sectionOfSrc(r.src) }));
   const from = range.start ? toDayString(range.start) : 'inicio';
   const to = range.end ? toDayString(new Date(range.end.getTime() - 1)) : 'hoy';
   const periodLabel = REPORT_PRESETS[range.preset].toLowerCase();

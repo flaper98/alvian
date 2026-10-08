@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { deleteCashEntryAction } from '@/lib/actions';
 
 const PAGE_SIZE = 25;
@@ -175,7 +176,15 @@ export default function LedgerTable({ rows, fileName, truncated, hideKindFilter 
                   <span className={`ledger-kind ledger-kind-${r.kind}`} aria-hidden="true" />
                   {r.category}
                 </td>
-                <td className="ledger-detail">{r.detail}</td>
+                <td className="ledger-detail">
+                  {r.href ? (
+                    <Link href={r.href} title="Ver en su sección">
+                      {r.detail}
+                    </Link>
+                  ) : (
+                    r.detail
+                  )}
+                </td>
                 <td className={`num ${isIn(r.kind) ? 'text-good' : 'text-critical'}`}>
                   {isIn(r.kind) ? '+' : '−'} {soles(r.amount)}
                 </td>

@@ -10,6 +10,7 @@ import {
   getReceivablesReport,
   getInventoryReport,
 } from '@/lib/reports';
+import { LEDGER_GROUPS, movementsHref, sectionOfSrc } from '@/lib/ledger-types';
 import TrendChart from './TrendChart';
 import LedgerTable from './LedgerTable';
 
@@ -84,23 +85,38 @@ function BarList({ title, items, color, footer }) {
         <p className="hint">Sin movimientos en este período.</p>
       ) : (
         <ul className="bar-list">
-          {items.map((item) => (
-            <li key={item.label}>
-              <div className="bar-list-head">
-                <span>{item.label}</span>
-                <strong>{soles(item.value)}</strong>
-              </div>
-              <div className="bar-list-track" title={`${item.label}: ${soles(item.value)}`}>
-                <span
-                  style={{
-                    width: `${max > 0 ? Math.max((item.value / max) * 100, item.value > 0 ? 1.5 : 0) : 0}%`,
-                    background: item.color || color,
-                  }}
-                />
-              </div>
-              {item.sub ? <span className="bar-list-sub">{item.sub}</span> : null}
-            </li>
-          ))}
+          {items.map((item) => {
+            const body = (
+              <>
+                <div className="bar-list-head">
+                  <span>{item.label}</span>
+                  <strong>{soles(item.value)}</strong>
+                </div>
+                <div className="bar-list-track" title={`${item.label}: ${soles(item.value)}`}>
+                  <span
+                    style={{
+                      width: `${max > 0 ? Math.max((item.value / max) * 100, item.value > 0 ? 1.5 : 0) : 0}%`,
+                      background: item.color || color,
+                    }}
+                  />
+                </div>
+                {item.sub ? <span className="bar-list-sub">{item.sub}</span> : null}
+              </>
+            );
+            // Con monto, la fila lleva al detalle: los movimientos que forman ese número.
+            return (
+              <li key={item.label}>
+                {item.href && item.value > 0 ? (
+                  <Link href={item.href} className="bar-list-link" aria-label={`Ver el detalle de ${item.label}`}>
+                    {body}
+                    <span className="bar-list-more">Ver detalle →</span>
+                  </Link>
+                ) : (
+                  body
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
       {footer ? <p className="hint">{footer}</p> : null}
@@ -111,13 +127,15 @@ function BarList({ title, items, color, footer }) {
 function RangeFilters({ tab, range, params }) {
   const desde = range.start ? toDayString(range.start) : '';
   const hasta = range.end ? toDayString(new Date(range.end.getTime() - 1)) : '';
+  // Si estás viendo el detalle de un tipo de movimiento, cambiar el período lo conserva.
+  const tipo = tab === 'movimientos' && LEDGER_GROUPS[params.tipo] ? params.tipo : null;
   return (
     <div className="report-filters">
       <nav className="filter-chips" aria-label="Período">
         {Object.entries(REPORT_PRESETS).map(([key, label]) => (
           <Link
             key={key}
-            href={`/admin/reportes?vista=${tab}&periodo=${key}`}
+            href={`/admin/reportes?vista=${tab}${tipo ? `&tipo=${tipo}` : ''}&periodo=${key}`}
             className={`filter-chip${range.preset === key ? ' active' : ''}`}
             aria-current={range.preset === key ? 'page' : undefined}
           >
@@ -127,6 +145,7 @@ function RangeFilters({ tab, range, params }) {
       </nav>
       <form className="report-range-form" method="get" action="/admin/reportes">
         <input type="hidden" name="vista" value={tab} />
+        {tipo ? <input type="hidden" name="tipo" value={tipo} /> : null}
         <label>
           Desde
           <input type="date" name="desde" defaultValue={params.desde || desde} />
@@ -152,9 +171,10 @@ function rangeLabel(range) {
 
 // ---------- Pestañas ----------
 
-async function GeneralTab({ range }) {
+async function GeneralTab({ range, period }) {
   const r = await getOverviewReport(range);
   const buckets = labelBuckets(r.buckets, r.granularity);
+  const withDetail = (items) => items.map((i) => ({ ...i, href: movementsHref(i.type, period) }));
   return (
     <>
       <div className="kpi-grid">
@@ -171,14 +191,14 @@ async function GeneralTab({ range }) {
 
       <div className="chart-card">
         <h3 className="chart-title">Ingresos y salidas {r.granularity === 'day' ? 'por día' : 'por mes'}</h3>
-        <TrendChart buckets={buckets} granularity={r.granularity} />
+        <TrendChart buckets={buckets} granularity={r.granularity} drillHref={movementsHref(null)} />
       </div>
 
       <div className="chart-grid">
-        <BarList title="¿De dónde entró el dinero?" items={r.incomeBySource} color="var(--series-in)" />
+        <BarList title="¿De dónde entró el dinero?" items={withDetail(r.incomeBySource)} color="var(--series-in)" />
         <BarList
           title="¿En qué se fue el dinero?"
-          items={r.outflowByType.map((i) => ({
+          items={withDetail(r.outflowByType).map((i) => ({
             ...i,
             sub: i.capital > 0 ? `${soles(i.capital)} pagado con capital (tu bolsillo)` : null,
           }))}
@@ -191,8 +211,9 @@ async function GeneralTab({ range }) {
         />
       </div>
       <p className="hint">
-        Las cuotas de pandero de la semana en curso cuentan en los ingresos, pero no aparecen en el
-        gráfico hasta que se entrega el número (todavía no tienen fecha de cierre).
+        Toca una fila o una barra del gráfico para ver los movimientos que forman ese monto. Las cuotas de
+        pandero de la semana en curso cuentan en los ingresos, pero no aparecen en el gráfico hasta que se
+        entrega el número (todavía no tienen fecha de cierre).
       </p>
     </>
   );
@@ -321,18 +342,77 @@ async function SalesTab({ range }) {
   );
 }
 
-async function MovementsTab({ range }) {
-  const rows = await getLedger(range);
+// Además de la sección del tipo, un atajo útil según lo que estás mirando.
+const RELATED_LINKS = {
+  venta: { label: 'Ver qué perfumes se vendieron', view: 'ventas', dated: true },
+  abono: { label: 'Ver quién te debe todavía', view: 'cobrar', dated: false },
+  compra: { label: 'Ver la mercadería que tienes', view: 'inventario', dated: false },
+};
+
+/** Encabezado del detalle de un tipo: cuánto suma, cuántos movimientos y a dónde ir. */
+function MovementsFocus({ group, rows, period }) {
+  const info = LEDGER_GROUPS[group];
+  const total = rows.reduce((sum, r) => sum + Number(r.amount), 0);
+  const related = RELATED_LINKS[group];
+  const query = new URLSearchParams(Object.entries(period).filter(([, v]) => v)).toString();
+  return (
+    <div className="movements-focus">
+      <div>
+        <span className="kpi-label">Detalle de</span>
+        <strong className="movements-focus-title">{info.label}</strong>
+        <span className="hint">
+          {rows.length} movimiento{rows.length === 1 ? '' : 's'} · {soles(total)}
+        </span>
+      </div>
+      <div className="movements-focus-links">
+        {related ? (
+          <Link
+            className="btn-primary"
+            href={`/admin/reportes?vista=${related.view}${related.dated && query ? `&${query}` : ''}`}
+          >
+            {related.label} →
+          </Link>
+        ) : null}
+        <Link className="btn-secondary" href={info.section}>
+          Ir a {info.sectionLabel} →
+        </Link>
+        <Link className="btn-secondary" href={movementsHref(null, period)}>
+          Ver todos los movimientos
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+async function MovementsTab({ range, tipo, period }) {
+  const group = LEDGER_GROUPS[tipo] ? tipo : null;
+  const rows = await getLedger(range, 3000, {
+    includeCapital: group === 'aporte',
+    srcs: group ? LEDGER_GROUPS[group].srcs : null,
+  });
   const data = rows.map((r) => ({
     kind: r.kind,
     category: r.category,
     detail: r.detail,
     amount: r.amount,
     dateLabel: dateTimeFmt.format(new Date(r.t)),
+    src: r.src,
+    ref: r.ref,
+    // Cada movimiento lleva a su sección (la venta, el crédito, la compra…).
+    href: sectionOfSrc(r.src),
   }));
   const from = range.start ? toDayString(range.start) : 'inicio';
   const to = range.end ? toDayString(new Date(range.end.getTime() - 1)) : 'hoy';
-  return <LedgerTable rows={data} fileName={`movimientos-${from}-a-${to}.csv`} truncated={rows.length >= 3000} />;
+  return (
+    <>
+      {group ? <MovementsFocus group={group} rows={rows} period={period} /> : null}
+      <LedgerTable
+        rows={data}
+        fileName={`movimientos-${group ? `${group}-` : ''}${from}-a-${to}.csv`}
+        truncated={rows.length >= 3000}
+      />
+    </>
+  );
 }
 
 async function ReceivablesTab() {
@@ -504,15 +584,15 @@ export default async function ReportesPage({ searchParams }) {
   const params = await searchParams;
   const tab = TABS.find((t) => t.key === params.vista) || TABS[0];
   const range = resolveReportRange(params);
-  const query = new URLSearchParams(
-    Object.entries({ periodo: params.periodo, desde: params.desde, hasta: params.hasta }).filter(([, v]) => v),
-  ).toString();
+  // El período elegido viaja a los enlaces de detalle para ver los mismos movimientos.
+  const period = { periodo: params.periodo, desde: params.desde, hasta: params.hasta };
+  const query = new URLSearchParams(Object.entries(period).filter(([, v]) => v)).toString();
 
   let content;
   try {
-    if (tab.key === 'general') content = await GeneralTab({ range });
+    if (tab.key === 'general') content = await GeneralTab({ range, period });
     else if (tab.key === 'ventas') content = await SalesTab({ range });
-    else if (tab.key === 'movimientos') content = await MovementsTab({ range });
+    else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
     else if (tab.key === 'cobrar') content = await ReceivablesTab();
     else content = await InventoryTab();
   } catch (error) {

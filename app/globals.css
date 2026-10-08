@@ -5625,3 +5625,82 @@ select:focus {
   justify-content: space-between;
   gap: 0.5rem;
 }
+
+.purchase-row-lost td {
+  opacity: 0.75;
+}
+
+/* ---------- Reportes: detalle al tocar una fila ---------- */
+
+.bar-list-link {
+  display: block;
+  margin: -0.4rem -0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.bar-list-link:hover,
+.bar-list-link:focus-visible {
+  background: rgba(21, 57, 44, 0.06);
+}
+
+.bar-list-more {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--green-800);
+}
+
+.movements-focus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--green-800);
+  border-radius: var(--radius);
+  background: var(--cream-soft);
+}
+
+.movements-focus > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.movements-focus-title {
+  font-size: 1.15rem;
+  color: var(--green-900);
+}
+
+.movements-focus-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.movements-focus-links a {
+  text-decoration: none;
+}
+
+.ledger-detail a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.ledger-detail a:hover {
+  text-decoration-color: currentColor;
+}
+
+.chart-tooltip-hint {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}

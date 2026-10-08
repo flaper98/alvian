@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const SERIES = [
   { key: 'income', label: 'Ingresos', color: 'var(--series-in)' },
@@ -30,7 +32,20 @@ function barPath(x, y, w, h) {
   return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
 }
 
-export default function TrendChart({ buckets, granularity }) {
+/** Días que abarca una barra: el día, o el mes completo ('2026-09' → 1 al 30). */
+function bucketDays(key, granularity) {
+  if (granularity === 'day') return [key, key];
+  const [y, m] = key.split('-').map(Number);
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  return [`${key}-01`, `${key}-${String(last).padStart(2, '0')}`];
+}
+
+/**
+ * Barras de ingresos y salidas. Con `drillHref` (la lista de movimientos de
+ * Reportes), tocar una barra muestra los movimientos de ese día o mes.
+ */
+export default function TrendChart({ buckets, granularity, drillHref = null }) {
+  const router = useRouter();
   const wrapRef = useRef(null);
   const [width, setWidth] = useState(720);
   const [active, setActive] = useState(null);
@@ -58,6 +73,10 @@ export default function TrendChart({ buckets, granularity }) {
   const labelEvery = Math.max(1, Math.ceil((granularity === 'day' ? 26 : 56) / groupW));
 
   const activeBucket = active != null ? buckets[active] : null;
+  const detailHref = (b) => {
+    const [desde, hasta] = bucketDays(b.key, granularity);
+    return `${drillHref}&desde=${desde}&hasta=${hasta}`;
+  };
   const tooltipLeft =
     active != null ? Math.min(Math.max(MARGIN.left + groupW * (active + 0.5), 90), svgWidth - 90) : 0;
 
@@ -112,7 +131,20 @@ export default function TrendChart({ buckets, granularity }) {
                       width={groupW}
                       height={PLOT_HEIGHT}
                       tabIndex={0}
-                      aria-label={`${b.fullLabel}: ingresos ${soles(b.income)}, salidas ${soles(b.outflow)}`}
+                      role={drillHref ? 'link' : undefined}
+                      style={drillHref ? { cursor: 'pointer' } : undefined}
+                      onClick={drillHref ? () => router.push(detailHref(b)) : undefined}
+                      onKeyDown={
+                        drillHref
+                          ? (event) => {
+                              if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                router.push(detailHref(b));
+                              }
+                            }
+                          : undefined
+                      }
+                      aria-label={`${b.fullLabel}: ingresos ${soles(b.income)}, salidas ${soles(b.outflow)}${drillHref ? '. Ver movimientos' : ''}`}
                       onMouseEnter={() => setActive(i)}
                       onMouseLeave={() => setActive(null)}
                       onFocus={() => setActive(i)}
@@ -138,6 +170,7 @@ export default function TrendChart({ buckets, granularity }) {
                   <strong>{soles(activeBucket.income - activeBucket.outflow)}</strong>
                   <span>Resultado</span>
                 </span>
+                {drillHref ? <span className="chart-tooltip-hint">Toca para ver los movimientos</span> : null}
               </div>
             ) : null}
           </div>
@@ -160,7 +193,7 @@ export default function TrendChart({ buckets, granularity }) {
               <tbody>
                 {buckets.map((b) => (
                   <tr key={b.key}>
-                    <th scope="row">{b.fullLabel}</th>
+                    <th scope="row">{drillHref ? <Link href={detailHref(b)}>{b.fullLabel}</Link> : b.fullLabel}</th>
                     <td>{soles(b.income)}</td>
                     <td>{soles(b.outflow)}</td>
                     <td className={b.income - b.outflow < 0 ? 'text-critical' : ''}>{soles(b.income - b.outflow)}</td>

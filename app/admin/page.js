@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { backfillBreakdowns, getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
 import { getBusinessPlan } from '@/lib/reports';
+import { movementsHref } from '@/lib/ledger-types';
 import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import PendingDeliveryRow from './PendingDeliveryRow';
 
@@ -334,6 +335,8 @@ export default async function ResumenPage({ searchParams }) {
   const { flow } = summary;
   const periodLabel = PERIODS[period].toLowerCase();
   const periodPhrase = { mes: 'este mes', 'mes-pasado': 'el mes pasado', todo: 'desde el inicio' }[period] || periodLabel;
+  // Cada línea de la Caja lleva a sus movimientos del mismo período (Reportes → Movimientos).
+  const detail = (type) => movementsHref(type, { periodo: period });
   // Una sola caja: todo lo que salió, sin importar con qué dinero se pagó.
   const outflow =
     flow.purchases + flow.expenses + flow.commissionsPaid + flow.withdrawals + flow.debtPayments + flow.pfOutflows;
@@ -399,39 +402,39 @@ export default async function ResumenPage({ searchParams }) {
               label={`Ventas al contado (${flow.contadoCount})`}
               value={flow.contado}
               sign="+"
-              href="/admin/ventas"
+              href={detail("venta")}
             />
-            <MoneyLine label="Abonos de crédito" value={flow.creditPayments} sign="+" href="/admin/creditos" />
+            <MoneyLine label="Abonos de crédito" value={flow.creditPayments} sign="+" href={detail("abono")} />
             <MoneyLine
               label="Cuotas de pandero"
               value={flow.panderoClosed + flow.panderoThisWeek}
               sign="+"
-              href="/admin/panderos"
+              href={detail("pandero")}
               hidden={flow.panderoClosed + flow.panderoThisWeek === 0}
             />
             <MoneyLine
               label="Pusiste tú"
               value={flow.capitalPut}
               sign="+"
-              href="/admin/caja"
+              href="/admin/tu-dinero"
               hidden={flow.capitalPut === 0}
             />
-            <MoneyLine label="Compra de perfumes" value={flow.purchases} sign="−" href="/admin/compras" hidden={flow.purchases === 0} />
-            <MoneyLine label="Gastos del negocio" value={flow.expenses} sign="−" href="/admin/gastos" hidden={flow.expenses === 0} />
+            <MoneyLine label="Compra de perfumes" value={flow.purchases} sign="−" href={detail("compra")} hidden={flow.purchases === 0} />
+            <MoneyLine label="Gastos del negocio" value={flow.expenses} sign="−" href={detail("gasto")} hidden={flow.expenses === 0} />
             <MoneyLine
               label="Pago a la vendedora"
               value={flow.commissionsPaid}
               sign="−"
-              href="/admin/comisiones"
+              href={detail("comision")}
               hidden={flow.commissionsPaid === 0}
             />
-            <MoneyLine label="Saqué para mí" value={flow.withdrawals} sign="−" href="/admin/caja" hidden={flow.withdrawals === 0} />
-            <MoneyLine label="Pago de deudas" value={flow.debtPayments} sign="−" href="/admin/deudas" hidden={flow.debtPayments === 0} />
+            <MoneyLine label="Saqué para mí" value={flow.withdrawals} sign="−" href={detail("retiro")} hidden={flow.withdrawals === 0} />
+            <MoneyLine label="Pago de deudas" value={flow.debtPayments} sign="−" href={detail("deuda")} hidden={flow.debtPayments === 0} />
             <MoneyLine
               label="Impuestos, reserva y otras salidas"
               value={flow.pfOutflows}
               sign="−"
-              href="/admin/caja"
+              href={detail("otras")}
               hidden={flow.pfOutflows === 0}
             />
             <li className={`flow-total${difference < 0 ? ' flow-total-negative' : ''}`}>

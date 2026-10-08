@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { deletePurchaseAction } from '@/lib/actions';
+import { deletePurchaseAction, setPurchaseNotReceivedAction } from '@/lib/actions';
 import { PaidWithBadge } from '../PaidWithField';
 import EditPurchaseModal from './EditPurchaseModal';
 
@@ -28,12 +28,18 @@ const ORIGINS = [
   { key: 'all', label: 'Todas' },
   { key: 'reinversion', label: 'Reinversión' },
   { key: 'capital', label: 'De tu bolsillo' },
+  { key: 'no-llego', label: 'No llegó' },
 ];
 const isCapital = (purchase) => purchase.paid_with === 'capital';
 
-/** Totales de las compras filtradas: cuánto, de tu bolsillo y reinvertido, y en qué perfumes. */
-function PurchaseSummary({ rows }) {
+/**
+ * Totales de las compras filtradas: cuánto, de tu bolsillo y reinvertido, y en
+ * qué perfumes. Las que no llegaron (estafa) no son mercadería: van aparte.
+ */
+function PurchaseSummary({ rows: allRows }) {
   const sum = (list) => list.reduce((total, p) => total + Number(p.total_cost), 0);
+  const lostRows = allRows.filter((p) => p.not_received);
+  const rows = allRows.filter((p) => !p.not_received);
   const units = rows.reduce((total, p) => total + Number(p.quantity), 0);
   const capital = sum(rows.filter(isCapital));
   const reinvestedRows = rows.filter((p) => !isCapital(p));
@@ -54,7 +60,7 @@ function PurchaseSummary({ rows }) {
     <div className="purchase-summary">
       <div className="kpi-grid">
         <div className="kpi-tile">
-          <span className="kpi-label">Total en compras</span>
+          <span className="kpi-label">Mercadería comprada</span>
           <strong className="kpi-value">{soles(total)}</strong>
           <span className="kpi-sub">
             {rows.length} compra{rows.length === 1 ? '' : 's'} · {units} unidad{units === 1 ? '' : 'es'}
@@ -75,6 +81,16 @@ function PurchaseSummary({ rows }) {
           <strong className="kpi-value">{units > 0 ? soles(total / units) : '—'}</strong>
           <span className="kpi-sub">Con flete incluido</span>
         </div>
+        {lostRows.length ? (
+          <div className="kpi-tile kpi-tile-bad">
+            <span className="kpi-label">No llegó (pérdida)</span>
+            <strong className="kpi-value">{soles(sum(lostRows))}</strong>
+            <span className="kpi-sub">
+              {lostRows.length} compra{lostRows.length === 1 ? '' : 's'} pagada{lostRows.length === 1 ? '' : 's'} que nunca
+              llegó · cuenta como pérdida, no como mercadería
+            </span>
+          </div>
+        ) : null}
       </div>
       {reinvestDetail.length ? (
         <details className="purchase-reinvest">
@@ -115,9 +131,67 @@ function PurchaseSummary({ rows }) {
   );
 }
 
+/** Confirmación para marcar una compra como "No llegó", con la opción de sacarla del stock. */
+function NotReceivedModal({ purchase, onClose }) {
+  const [removeStock, setRemoveStock] = useState(true);
+  const [error, setError] = useState('');
+  const [isPending, startTransition] = useTransition();
+
+  function confirm() {
+    setError('');
+    startTransition(async () => {
+      const result = await setPurchaseNotReceivedAction(purchase.id, true, removeStock);
+      if (result?.error) setError(result.error);
+      else onClose();
+    });
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-dialog" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
+          ×
+        </button>
+        <div className="perfume-form">
+          <h2>¿Esta compra no llegó?</h2>
+          <p className="hint">
+            {purchase.perfume_name} × {purchase.quantity} · {soles(purchase.total_cost)}. Úsalo si pagaste y nunca te
+            llegó (estafa o pedido perdido). El dinero sigue contando como salido (en la caja o en «Tu dinero»), pero
+            deja de ser mercadería: no cuenta en el costo de tus perfumes y se suma a tus pérdidas.
+          </p>
+          <label className="checkbox-field">
+            <input type="checkbox" checked={removeStock} onChange={(event) => setRemoveStock(event.target.checked)} />
+            Sacar {purchase.quantity} del stock
+          </label>
+          <p className="hint">Desmárcalo si ya bajaste el stock a mano en el Catálogo.</p>
+          {error ? <p className="form-error">{error}</p> : null}
+          <div className="form-actions">
+            <button type="button" className="btn-primary" disabled={isPending} onClick={confirm}>
+              {isPending ? 'Guardando…' : 'Sí, no llegó'}
+            </button>
+            <button type="button" className="btn-secondary" onClick={onClose}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PurchaseTableRow({ purchase }) {
   const [editing, setEditing] = useState(false);
+  const [markingLost, setMarkingLost] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  function handleReceived() {
+    const back = purchase.not_received_stock ? ` Se devuelven ${purchase.quantity} al stock.` : '';
+    if (!confirm(`¿Esta compra sí llegó? Vuelve a contar como mercadería.${back}`)) return;
+    startTransition(async () => {
+      const result = await setPurchaseNotReceivedAction(purchase.id, false);
+      if (result?.error) alert(result.error);
+    });
+  }
 
   function handleDelete() {
     if (!confirm(`¿Eliminar la compra de "${purchase.perfume_name}"?`)) return;
@@ -133,14 +207,15 @@ function PurchaseTableRow({ purchase }) {
 
   return (
     <>
-      <tr className="perfume-table-row">
+      <tr className={`perfume-table-row${purchase.not_received ? ' purchase-row-lost' : ''}`}>
         <td className="table-cards-title">
           <strong>{purchase.perfume_name}</strong>{' '}
           {isCapital(purchase) ? (
             <PaidWithBadge value={purchase.paid_with} />
           ) : (
             <span className="badge badge-paid">Reinversión</span>
-          )}
+          )}{' '}
+          {purchase.not_received ? <span className="badge badge-debt">No llegó · pérdida</span> : null}
           {purchase.note ? <p className="perfume-table-description">{purchase.note}</p> : null}
         </td>
         <td className="perfume-table-stock-cell" data-label="Cantidad">{purchase.quantity}</td>
@@ -163,12 +238,22 @@ function PurchaseTableRow({ purchase }) {
           <button type="button" className="btn-secondary" onClick={() => setEditing(true)}>
             Editar
           </button>
+          {purchase.not_received ? (
+            <button type="button" className="btn-secondary" onClick={handleReceived} disabled={isPending}>
+              Sí llegó
+            </button>
+          ) : (
+            <button type="button" className="btn-secondary" onClick={() => setMarkingLost(true)} disabled={isPending}>
+              No llegó
+            </button>
+          )}
           <button type="button" className="btn-danger" onClick={handleDelete} disabled={isPending}>
             {isPending ? 'Eliminando...' : 'Eliminar'}
           </button>
         </td>
       </tr>
       {editing ? <EditPurchaseModal purchase={purchase} onClose={() => setEditing(false)} /> : null}
+      {markingLost ? <NotReceivedModal purchase={purchase} onClose={() => setMarkingLost(false)} /> : null}
     </>
   );
 }
@@ -186,7 +271,10 @@ export default function PurchaseHistoryList({ purchases }) {
       (p) =>
         (!term || p.perfume_name.toLowerCase().includes(term)) &&
         (period === 'todo' || monthOf(p.created_at) === (period === 'mes' ? thisMonth : lastMonth)) &&
-        (origin === 'all' || (origin === 'capital' ? isCapital(p) : !isCapital(p))),
+        (origin === 'all' ||
+          (origin === 'no-llego'
+            ? p.not_received
+            : !p.not_received && (origin === 'capital' ? isCapital(p) : !isCapital(p)))),
     );
 
     return [...filtered].sort((a, b) => {
