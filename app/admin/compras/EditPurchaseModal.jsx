@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { editPurchaseAction } from '@/lib/actions';
-import PaidWithField from '../PaidWithField';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -114,7 +113,17 @@ function EditPurchaseForm({ purchase, onClose }) {
         Nota (opcional)
         <input name="note" type="text" defaultValue={purchase.note || ''} />
       </label>
-      <PaidWithField defaultValue={purchase.paid_with} />
+      <label>
+        ¿Con qué dinero la pagaste?
+        <select name="paidWith" defaultValue={purchase.paid_with === 'capital' ? 'capital' : 'ganancias'}>
+          <option value="ganancias">Con la caja (reinversión de lo que vendiste)</option>
+          <option value="capital">De mi bolsillo (dinero mío o prestado)</option>
+        </select>
+        <span className="hint">
+          «De mi bolsillo» la suma a «Tu dinero» y no la descuenta de la caja. Si ya registraste ese mismo dinero
+          con «Puse dinero», deja «Con la caja» para no contarlo dos veces.
+        </span>
+      </label>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />
