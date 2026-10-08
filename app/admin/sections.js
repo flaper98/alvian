@@ -68,6 +68,7 @@ export const SECTIONS = [
     tabs: [
       { href: '/admin/caja', label: 'Caja' },
       { href: '/admin/plan', label: 'Plan' },
+      { href: '/admin/tu-dinero', label: 'Tu dinero' },
       { href: '/admin/distribucion', label: 'Distribución' },
       { href: '/admin/deudas', label: 'Deudas' },
       { href: '/admin/gastos', label: 'Gastos' },

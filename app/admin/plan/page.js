@@ -273,7 +273,8 @@ export default async function PlanPage() {
           </ul>
           <p className="hint">
             Fecha estimada = lo que falta ÷ tu ritmo de los últimos {Math.min(r.activeDays, 90)} días. Vendiendo
-            más, cobrando a tiempo y cuidando el margen, llega antes.
+            más, cobrando a tiempo y cuidando el margen, llega antes.{' '}
+            <Link href="/admin/tu-dinero">Ver el detalle de lo que pusiste →</Link>
           </p>
         </div>
 
