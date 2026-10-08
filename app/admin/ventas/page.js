@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listCustomerNames, listDecantCatalog, listPerfumes, listSales, listUsers } from '@/lib/db';
+import { listCustomerNames, listDecantCatalog, listPerfumes, listPurchaseCosts, listSales, listUsers } from '@/lib/db';
 import SaleFormModal from './SaleFormModal';
 import SalesList from './SalesList';
 
@@ -16,6 +16,7 @@ export default async function VentasPage() {
   let users = [];
   let customers = [];
   let decants = {};
+  let costs = {};
   try {
     let catalog;
     [perfumes, sales, customers, catalog] = await Promise.all([
@@ -30,7 +31,8 @@ export default async function VentasPage() {
       if (sizes.length && (item.poolMl > 0 || item.enabled)) decants[item.id] = { poolMl: item.poolMl, sizes };
     }
     if (role === 'admin') {
-      users = await listUsers();
+      // Precio de compra de cada perfume: solo para el admin, nunca para la vendedora.
+      [users, costs] = await Promise.all([listUsers(), listPurchaseCosts()]);
     }
   } catch (error) {
     return (
@@ -46,7 +48,7 @@ export default async function VentasPage() {
     <section className="admin-section">
       <div className="admin-header">
         <h1>Ventas</h1>
-        <SaleFormModal perfumes={perfumes} customers={customers} decants={decants} />
+        <SaleFormModal perfumes={perfumes} customers={customers} decants={decants} costs={costs} />
       </div>
 
       <div>

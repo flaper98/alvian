@@ -6,8 +6,9 @@ import { deletePerfumeAction, editPerfumeAction } from '@/lib/actions';
 import { SubmitButton, ImageField, VideoField, StoreFields } from './AddPerfumeForm';
 import BulkDescriptionModal from './BulkDescriptionModal';
 import PerfumeFormModal from './PerfumeFormModal';
+import PurchaseCost from '../PurchaseCost';
 
-function EditPerfumeForm({ perfume, onCancel, onSaved }) {
+function EditPerfumeForm({ perfume, cost, onCancel, onSaved }) {
   const boundAction = editPerfumeAction.bind(null, perfume.id);
   const [state, formAction] = useActionState(boundAction, { error: null });
 
@@ -26,6 +27,10 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
         Precio de venta (S/)
         <input name="price" type="number" step="0.01" min="0" defaultValue={perfume.price} />
       </label>
+      <div className="purchase-cost-box">
+        <span>Precio de compra (promedio con flete)</span>
+        <PurchaseCost cost={cost} />
+      </div>
       <label>
         Stock
         <input name="stock" type="number" min="0" step="1" defaultValue={perfume.stock} required />
@@ -61,20 +66,20 @@ function EditPerfumeForm({ perfume, onCancel, onSaved }) {
   );
 }
 
-function EditPerfumeModal({ perfume, onClose }) {
+function EditPerfumeModal({ perfume, cost, onClose }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
           ×
         </button>
-        <EditPerfumeForm perfume={perfume} onCancel={onClose} onSaved={onClose} />
+        <EditPerfumeForm perfume={perfume} cost={cost} onCancel={onClose} onSaved={onClose} />
       </div>
     </div>
   );
 }
 
-function PerfumeTableRow({ perfume }) {
+function PerfumeTableRow({ perfume, cost }) {
   const [editing, setEditing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const lowStock = Number(perfume.stock) <= 3;
@@ -121,6 +126,9 @@ function PerfumeTableRow({ perfume }) {
             <span className="badge badge-pending">Pendiente</span>
           )}
         </td>
+        <td className="perfume-table-price-cell" data-label="Compra">
+          <PurchaseCost cost={cost} compact />
+        </td>
         <td className={`perfume-table-stock-cell${lowStock ? ' text-critical' : ''}`} data-label="Stock">
           {perfume.stock}
         </td>
@@ -142,7 +150,7 @@ function PerfumeTableRow({ perfume }) {
           </button>
         </td>
       </tr>
-      {editing ? <EditPerfumeModal perfume={perfume} onClose={() => setEditing(false)} /> : null}
+      {editing ? <EditPerfumeModal perfume={perfume} cost={cost} onClose={() => setEditing(false)} /> : null}
     </>
   );
 }
@@ -165,7 +173,7 @@ const FILTERS = [
   { value: 'no-image', label: 'Sin imagen' },
 ];
 
-export default function CatalogDashboard({ perfumes, prefillName, initialFilter = 'all' }) {
+export default function CatalogDashboard({ perfumes, costs = {}, prefillName, initialFilter = 'all' }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState(initialFilter === 'no-image' ? 'recent' : 'name');
   const [filterBy, setFilterBy] = useState(initialFilter);
@@ -267,6 +275,7 @@ export default function CatalogDashboard({ perfumes, prefillName, initialFilter 
                     <th scope="col">Imagen</th>
                     <th scope="col">Nombre</th>
                     <th scope="col">Precio</th>
+                    <th scope="col">Compra</th>
                     <th scope="col">Stock</th>
                     <th scope="col">Registrado</th>
                     <th scope="col">Acciones</th>
@@ -274,7 +283,7 @@ export default function CatalogDashboard({ perfumes, prefillName, initialFilter 
                 </thead>
                 <tbody>
                   {rows.map((perfume) => (
-                    <PerfumeTableRow key={perfume.id} perfume={perfume} />
+                    <PerfumeTableRow key={perfume.id} perfume={perfume} cost={costs[perfume.id]} />
                   ))}
                 </tbody>
               </table>

@@ -6,6 +6,7 @@ import { useFormStatus } from 'react-dom';
 import { registerPurchaseAction } from '@/lib/actions';
 import { suggestPrice } from '@/lib/pricing.mjs';
 import PaidWithField from '../PaidWithField';
+import PurchaseCost from '../PurchaseCost';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -16,7 +17,7 @@ function SubmitButton() {
   );
 }
 
-export default function PurchaseForm({ perfumes, prefill, pricing, onSaved }) {
+export default function PurchaseForm({ perfumes, prefill, pricing, costs = {}, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <PurchaseFormFields
@@ -24,6 +25,7 @@ export default function PurchaseForm({ perfumes, prefill, pricing, onSaved }) {
       perfumes={perfumes}
       prefill={prefill}
       pricing={pricing}
+      costs={costs}
       onSaved={() => {
         setFormKey((key) => key + 1);
         onSaved?.();
@@ -34,7 +36,7 @@ export default function PurchaseForm({ perfumes, prefill, pricing, onSaved }) {
 
 const soles = (value) => `S/ ${Number(value).toFixed(2)}`;
 
-function PurchaseFormFields({ perfumes, prefill, pricing, onSaved }) {
+function PurchaseFormFields({ perfumes, prefill, pricing, costs, onSaved }) {
   const [state, formAction] = useActionState(registerPurchaseAction, { error: null });
   const [perfumeId, setPerfumeId] = useState(String(prefill?.perfumeId || ''));
   const [quantity, setQuantity] = useState('');
@@ -106,6 +108,12 @@ function PurchaseFormFields({ perfumes, prefill, pricing, onSaved }) {
           ))}
         </select>
       </label>
+      {perfumeId ? (
+        <div className="purchase-cost-box">
+          <span>Lo compraste antes a (promedio con flete)</span>
+          <PurchaseCost cost={costs[perfumeId]} />
+        </div>
+      ) : null}
       <label>
         Cantidad comprada
         <input

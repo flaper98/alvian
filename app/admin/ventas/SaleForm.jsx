@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerQuickSaleAction } from '@/lib/actions';
+import { purchaseCostLabel } from '../PurchaseCost';
 
 const soles = (value) =>
   `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -24,7 +25,7 @@ function SubmitButton({ total, disabled }) {
 }
 
 /** Buscador de perfumes: toca uno para agregarlo a la venta. */
-function PerfumePicker({ perfumes, decants = {}, onPick }) {
+function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick }) {
   const [search, setSearch] = useState('');
   const results = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -70,6 +71,7 @@ function PerfumePicker({ perfumes, decants = {}, onPick }) {
                   {Number(p.price) > 0 ? soles(p.price) : 'Sin precio'} ·{' '}
                   <span className={noStock ? 'text-critical' : ''}>{noStock ? 'Sin stock' : `Stock ${p.stock}`}</span>
                   {poolMl > 0 ? ` · ${poolMl} ml para decants` : ''}
+                  {costs[p.id] ? ` · ${purchaseCostLabel(costs[p.id])}` : ''}
                 </span>
                 {!noStock ? <span className="sale-result-add" aria-hidden="true">+</span> : null}
               </button>
@@ -85,7 +87,7 @@ function PerfumePicker({ perfumes, decants = {}, onPick }) {
 /** Cada línea: un perfume y su tamaño (frasco, o decant de N ml). */
 const lineKey = (perfumeId, decantMl) => `${perfumeId}:${decantMl ?? ''}`;
 
-function SaleFormFields({ perfumes, customers, decants, onSaved }) {
+function SaleFormFields({ perfumes, customers, decants, costs = {}, onSaved }) {
   const [state, formAction] = useActionState(registerQuickSaleAction, { error: null });
   const [lines, setLines] = useState([]);
   const [paymentType, setPaymentType] = useState('contado');
@@ -143,13 +145,16 @@ function SaleFormFields({ perfumes, customers, decants, onSaved }) {
         <h3>
           <span>1</span> ¿Qué perfumes vendiste?
         </h3>
-        <PerfumePicker perfumes={perfumes} decants={decants} onPick={addPerfume} />
+        <PerfumePicker perfumes={perfumes} decants={decants} costs={costs} onPick={addPerfume} />
         {lines.length ? (
           <ul className="sale-lines">
             {lines.map((l) => (
               <li key={l.key}>
                 <span className="sale-line-name">
                   {l.name}
+                  {!l.decantMl && costs[l.perfumeId] ? (
+                    <small className="sale-line-cost">{purchaseCostLabel(costs[l.perfumeId])}</small>
+                  ) : null}
                   {decants[l.perfumeId] ? (
                     <select
                       className="sale-line-size"
@@ -298,7 +303,7 @@ function SaleFormFields({ perfumes, customers, decants, onSaved }) {
   );
 }
 
-export default function SaleForm({ perfumes, customers = [], decants = {}, onSaved }) {
+export default function SaleForm({ perfumes, customers = [], decants = {}, costs = {}, onSaved }) {
   const [formKey, setFormKey] = useState(0);
   return (
     <SaleFormFields
@@ -306,6 +311,7 @@ export default function SaleForm({ perfumes, customers = [], decants = {}, onSav
       perfumes={perfumes}
       customers={customers}
       decants={decants}
+      costs={costs}
       onSaved={() => {
         setFormKey((key) => key + 1);
         onSaved?.();

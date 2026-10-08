@@ -1,5 +1,5 @@
 import { getCurrentRole } from '@/lib/session';
-import { listPerfumes } from '@/lib/db';
+import { listPerfumes, listPurchaseCosts } from '@/lib/db';
 import CatalogDashboard from './CatalogDashboard';
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +14,9 @@ export default async function CatalogoPage({ searchParams }) {
   const prefillName = typeof params?.name === 'string' ? params.name : '';
 
   let perfumes;
+  let costs = {};
   try {
-    perfumes = await listPerfumes();
+    [perfumes, costs] = await Promise.all([listPerfumes(), listPurchaseCosts()]);
   } catch (error) {
     return (
       <section className="admin-section">
@@ -30,6 +31,7 @@ export default async function CatalogoPage({ searchParams }) {
       <h1>Catálogo</h1>
       <CatalogDashboard
         perfumes={perfumes}
+        costs={costs}
         prefillName={prefillName}
         initialFilter={params?.filtro === 'sin-imagen' ? 'no-image' : 'all'}
       />
