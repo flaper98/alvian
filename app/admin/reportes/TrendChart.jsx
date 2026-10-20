@@ -32,19 +32,37 @@ function barPath(x, y, w, h) {
   return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
 }
 
-/** Días que abarca una barra: el día, o el mes completo ('2026-09' → 1 al 30). */
+/** Días que abarca una barra: el día, su semana, el mes completo ('2026-09' → 1 al 30) o el año. */
 function bucketDays(key, granularity) {
-  if (granularity === 'day') return [key, key];
+  if (granularity === 'day' || granularity === 'dia') return [key, key];
+  if (granularity === 'anio') return [`${key}-01-01`, `${key}-12-31`];
+  if (granularity === 'semana') {
+    const [y, m, d] = key.split('-').map(Number);
+    return [key, new Date(Date.UTC(y, m - 1, d + 6)).toISOString().slice(0, 10)];
+  }
   const [y, m] = key.split('-').map(Number);
   const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
   return [`${key}-01`, `${key}-${String(last).padStart(2, '0')}`];
 }
 
 /**
- * Barras de ingresos y salidas. Con `drillHref` (la lista de movimientos de
- * Reportes), tocar una barra muestra los movimientos de ese día o mes.
+ * Barras de ingresos y salidas (o las series que se pasen). Con `drillHref`,
+ * tocar una barra abre el detalle de ese día, semana, mes o año. `countKey`
+ * suma al tooltip un conteo (ej. pedidos) y `totalLabel` la resta de las dos series.
  */
-export default function TrendChart({ buckets, granularity, drillHref = null }) {
+export default function TrendChart({
+  buckets,
+  granularity,
+  drillHref = null,
+  series = SERIES,
+  countKey = null,
+  countLabel = '',
+  totalLabel = 'Resultado',
+  emptyText = 'No hubo ingresos ni salidas con fecha en este período.',
+  detailText = 'Toca para ver los movimientos',
+}) {
+  const [first, second] = series;
+  const isDaily = granularity === 'day' || granularity === 'dia';
   const router = useRouter();
   const wrapRef = useRef(null);
   const [width, setWidth] = useState(720);
@@ -58,24 +76,29 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
     return () => ro.disconnect();
   }, []);
 
-  const hasData = buckets.some((b) => b.income > 0 || b.outflow > 0);
+  const hasData = buckets.some((b) => series.some((s) => b[s.key] > 0));
   const n = buckets.length;
-  const minGroup = granularity === 'day' ? 20 : 52;
+  const minGroup = isDaily ? 20 : 52;
   const plotWidth = Math.max(width - MARGIN.left - MARGIN.right, n * minGroup);
   const svgWidth = plotWidth + MARGIN.left + MARGIN.right;
   const svgHeight = PLOT_HEIGHT + MARGIN.top + MARGIN.bottom;
   const groupW = n > 0 ? plotWidth / n : plotWidth;
   const barW = Math.min(24, Math.max(3, (groupW - 12) / 2));
-  const { top, step } = niceScale(Math.max(...buckets.map((b) => Math.max(b.income, b.outflow)), 0));
+  const { top, step } = niceScale(Math.max(...buckets.map((b) => Math.max(...series.map((s) => b[s.key]))), 0));
   const y = (value) => MARGIN.top + PLOT_HEIGHT - (value / top) * PLOT_HEIGHT;
   const ticks = [];
   for (let v = 0; v <= top + 1e-9; v += step) ticks.push(v);
-  const labelEvery = Math.max(1, Math.ceil((granularity === 'day' ? 26 : 56) / groupW));
+  const labelEvery = Math.max(1, Math.ceil((isDaily ? 26 : 56) / groupW));
 
   const activeBucket = active != null ? buckets[active] : null;
   const detailHref = (b) => {
     const [desde, hasta] = bucketDays(b.key, granularity);
     return `${drillHref}&desde=${desde}&hasta=${hasta}`;
+  };
+  const describe = (b) => {
+    const parts = series.map((s) => `${s.label.toLowerCase()} ${soles(b[s.key])}`);
+    if (countKey) parts.push(`${b[countKey]} ${countLabel}`);
+    return parts.join(', ');
   };
   const tooltipLeft =
     active != null ? Math.min(Math.max(MARGIN.left + groupW * (active + 0.5), 90), svgWidth - 90) : 0;
@@ -83,7 +106,7 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
   return (
     <div className="trend-chart">
       <ul className="chart-legend" aria-label="Leyenda">
-        {SERIES.map((s) => (
+        {series.map((s) => (
           <li key={s.key}>
             <span className="chart-legend-swatch" style={{ background: s.color }} />
             {s.label}
@@ -92,11 +115,11 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
       </ul>
 
       {!hasData ? (
-        <p className="hint">No hubo ingresos ni salidas con fecha en este período.</p>
+        <p className="hint">{emptyText}</p>
       ) : (
         <div className="trend-chart-scroll" ref={wrapRef}>
           <div className="trend-chart-canvas" style={{ width: svgWidth }}>
-            <svg width={svgWidth} height={svgHeight} role="img" aria-label="Ingresos y salidas por período">
+            <svg width={svgWidth} height={svgHeight} role="img" aria-label={`${series.map((s) => s.label).join(' y ')} por período`}>
               {ticks.map((v) => (
                 <g key={v}>
                   <line className="chart-grid-line" x1={MARGIN.left} x2={svgWidth - MARGIN.right} y1={y(v)} y2={y(v)} />
@@ -114,7 +137,7 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
                     {active === i ? (
                       <rect className="chart-hover-wash" x={gx} y={MARGIN.top} width={groupW} height={PLOT_HEIGHT} />
                     ) : null}
-                    {SERIES.map((s, si) => {
+                    {series.map((s, si) => {
                       const value = b[s.key];
                       const d = barPath(pairX + si * (barW + 2), y(value), barW, y(0) - y(value));
                       return d ? <path key={s.key} d={d} fill={s.color} /> : null;
@@ -144,7 +167,7 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
                             }
                           : undefined
                       }
-                      aria-label={`${b.fullLabel}: ingresos ${soles(b.income)}, salidas ${soles(b.outflow)}${drillHref ? '. Ver movimientos' : ''}`}
+                      aria-label={`${b.fullLabel}: ${describe(b)}${drillHref ? '. Ver detalle' : ''}`}
                       onMouseEnter={() => setActive(i)}
                       onMouseLeave={() => setActive(null)}
                       onFocus={() => setActive(i)}
@@ -159,18 +182,26 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
             {activeBucket ? (
               <div className="chart-tooltip" style={{ left: tooltipLeft }} role="status">
                 <span className="chart-tooltip-title">{activeBucket.fullLabel}</span>
-                {SERIES.map((s) => (
+                {series.map((s) => (
                   <span key={s.key} className="chart-tooltip-row">
                     <span className="chart-tooltip-key" style={{ background: s.color }} />
                     <strong>{soles(activeBucket[s.key])}</strong>
                     <span>{s.label}</span>
                   </span>
                 ))}
-                <span className="chart-tooltip-row chart-tooltip-total">
-                  <strong>{soles(activeBucket.income - activeBucket.outflow)}</strong>
-                  <span>Resultado</span>
-                </span>
-                {drillHref ? <span className="chart-tooltip-hint">Toca para ver los movimientos</span> : null}
+                {countKey ? (
+                  <span className="chart-tooltip-row chart-tooltip-total">
+                    <strong>{activeBucket[countKey]}</strong>
+                    <span>{countLabel}</span>
+                  </span>
+                ) : null}
+                {totalLabel ? (
+                  <span className="chart-tooltip-row chart-tooltip-total">
+                    <strong>{soles(activeBucket[first.key] - activeBucket[second.key])}</strong>
+                    <span>{totalLabel}</span>
+                  </span>
+                ) : null}
+                {drillHref ? <span className="chart-tooltip-hint">{detailText}</span> : null}
               </div>
             ) : null}
           </div>
@@ -184,19 +215,31 @@ export default function TrendChart({ buckets, granularity, drillHref = null }) {
             <table>
               <thead>
                 <tr>
-                  <th scope="col">{granularity === 'day' ? 'Día' : 'Mes'}</th>
-                  <th scope="col">Ingresos</th>
-                  <th scope="col">Salidas</th>
-                  <th scope="col">Resultado</th>
+                  <th scope="col">{{ day: 'Día', dia: 'Día', semana: 'Semana', anio: 'Año' }[granularity] || 'Mes'}</th>
+                  {series.map((s) => (
+                    <th scope="col" key={s.key}>
+                      {s.label}
+                    </th>
+                  ))}
+                  {countKey ? <th scope="col">{countLabel}</th> : null}
+                  {totalLabel ? <th scope="col">{totalLabel}</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {buckets.map((b) => (
                   <tr key={b.key}>
                     <th scope="row">{drillHref ? <Link href={detailHref(b)}>{b.fullLabel}</Link> : b.fullLabel}</th>
-                    <td>{soles(b.income)}</td>
-                    <td>{soles(b.outflow)}</td>
-                    <td className={b.income - b.outflow < 0 ? 'text-critical' : ''}>{soles(b.income - b.outflow)}</td>
+                    {series.map((s) => (
+                      <td key={s.key} className={b[s.key] < 0 ? 'text-critical' : ''}>
+                        {soles(b[s.key])}
+                      </td>
+                    ))}
+                    {countKey ? <td>{b[countKey]}</td> : null}
+                    {totalLabel ? (
+                      <td className={b[first.key] - b[second.key] < 0 ? 'text-critical' : ''}>
+                        {soles(b[first.key] - b[second.key])}
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>

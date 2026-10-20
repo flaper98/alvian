@@ -9,12 +9,16 @@ import {
   getLedger,
   getReceivablesReport,
   getInventoryReport,
+  parseSalesFilters,
 } from '@/lib/reports';
+import { CATEGORY_LABELS, GRANULARITIES, change } from '@/lib/sales-report.mjs';
+import { ORDER_STATUSES, PAYMENT_METHODS } from '@/lib/store-config';
 import { listPurchaseCosts } from '@/lib/db';
 import { LEDGER_GROUPS, movementsHref, sectionOfSrc } from '@/lib/ledger-types';
 import TrendChart from './TrendChart';
 import LedgerTable from './LedgerTable';
 import StockTable from './StockTable';
+import { CustomersTable, ProductRanking, ProfitTable, SalesExport } from './SalesTables';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,11 +31,6 @@ const TABS = [
 ];
 
 const PAYMENT_LABELS = { contado: 'Contado', credito: 'Crédito', pandero: 'Pandero' };
-const PAYMENT_COLORS = {
-  contado: 'var(--series-contado)',
-  credito: 'var(--series-credito)',
-  pandero: 'var(--series-pandero)',
-};
 
 const soles = (value) => {
   const n = Number(value) || 0;
@@ -221,124 +220,423 @@ async function GeneralTab({ range, period }) {
   );
 }
 
-async function SalesTab({ range }) {
-  const r = await getSalesReport(range);
-  const maxTop = Math.max(...r.top.map((t) => t.revenue), 0);
+const SALES_SERIES = [
+  { key: 'revenue', label: 'Ventas', color: 'var(--series-in)' },
+  { key: 'profit', label: 'Ganancia', color: 'var(--series-contado)' },
+];
+const CATEGORY_COLORS = ['var(--series-in)', 'var(--series-pandero)', 'var(--series-credito)', 'var(--series-out)'];
+const STATUS_TONES = { pendiente: 'attention', cancelado: 'critical', entregado: 'good' };
+
+/** "+12,5% vs. el mes anterior" (verde si sube, rojo si baja). */
+function Delta({ current, previous, label }) {
+  if (previous == null || !label) return null;
+  const c = change(current, previous);
+  if (c == null) return <span className="kpi-delta">{current > 0 ? `Nuevo frente a ${label}` : `Sin datos en ${label}`}</span>;
+  const sign = c > 0 ? '+' : c < 0 ? '−' : '';
+  const value = Math.abs(c * 100).toLocaleString('es-PE', { maximumFractionDigits: 1 });
+  return (
+    <span className={`kpi-delta${c > 0 ? ' is-up' : c < 0 ? ' is-down' : ''}`}>
+      {sign}
+      {value}% respecto a {label}
+    </span>
+  );
+}
+
+function SalesKpi({ label, value, sub, current, previous, compare, tone }) {
+  return (
+    <div className={`kpi-tile${tone ? ` kpi-tile-${tone}` : ''}`}>
+      <span className="kpi-label">{label}</span>
+      <strong className="kpi-value">{value}</strong>
+      {sub ? <span className="kpi-sub">{sub}</span> : null}
+      <Delta current={current} previous={previous} label={compare} />
+    </div>
+  );
+}
+
+/** Etiquetas del eje para día / semana / mes / año. */
+function labelSalesBuckets(buckets, granularity) {
+  return buckets.map((b) => {
+    const [y, m = 1, d = 1] = b.key.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d, 12));
+    const opts = { timeZone: 'UTC' };
+    if (granularity === 'anio') return { ...b, label: String(y), fullLabel: `Año ${y}` };
+    if (granularity === 'mes') {
+      return {
+        ...b,
+        label: date.toLocaleDateString('es-PE', { ...opts, month: 'short' }).replace('.', '') + ` ${String(y).slice(2)}`,
+        fullLabel: date.toLocaleDateString('es-PE', { ...opts, month: 'long', year: 'numeric' }),
+      };
+    }
+    if (granularity === 'semana') {
+      const short = date.toLocaleDateString('es-PE', { ...opts, day: 'numeric', month: 'short' }).replace('.', '');
+      return { ...b, label: short, fullLabel: `Semana del ${short} ${y}` };
+    }
+    return {
+      ...b,
+      label: String(d),
+      fullLabel: date.toLocaleDateString('es-PE', { ...opts, weekday: 'short', day: 'numeric', month: 'short' }),
+    };
+  });
+}
+
+/** Filtros del reporte: período, fechas y los datos que existen en cada venta. */
+function SalesFilters({ range, params, filters, options }) {
+  const desde = range.start ? toDayString(range.start) : '';
+  const hasta = range.end ? toDayString(new Date(range.end.getTime() - 1)) : '';
+  // Cambiar de período conserva los demás filtros.
+  const keep = new URLSearchParams(
+    Object.entries({ ...filters, agrupar: params.agrupar }).filter(([, v]) => v),
+  ).toString();
+  return (
+    <div className="report-filters sales-filters no-print">
+      <nav className="filter-chips" aria-label="Período">
+        {Object.entries(REPORT_PRESETS).map(([key, label]) => (
+          <Link
+            key={key}
+            href={`/admin/reportes?vista=ventas&periodo=${key}${keep ? `&${keep}` : ''}`}
+            className={`filter-chip${range.preset === key ? ' active' : ''}`}
+            aria-current={range.preset === key ? 'page' : undefined}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <form className="sales-filter-form" method="get" action="/admin/reportes">
+        <input type="hidden" name="vista" value="ventas" />
+        {params.agrupar ? <input type="hidden" name="agrupar" value={params.agrupar} /> : null}
+        {range.preset !== 'custom' ? <input type="hidden" name="periodo" value={range.preset} /> : null}
+        <label>
+          Desde
+          <input type="date" name="desde" defaultValue={params.desde || (range.preset === 'custom' ? desde : '')} />
+        </label>
+        <label>
+          Hasta
+          <input type="date" name="hasta" defaultValue={params.hasta || (range.preset === 'custom' ? hasta : '')} />
+        </label>
+        <label>
+          Categoría
+          <select name="categoria" defaultValue={filters.categoria}>
+            <option value="">Todas</option>
+            {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Producto
+          <select name="producto" defaultValue={filters.producto}>
+            <option value="">Todos</option>
+            {options.products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Cliente
+          <input type="search" name="cliente" list="sales-customers" placeholder="Nombre" defaultValue={filters.cliente} />
+          <datalist id="sales-customers">
+            {options.customers.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+        </label>
+        <label>
+          Método de pago
+          <select name="metodo" defaultValue={filters.metodo}>
+            <option value="">Todos</option>
+            <option value="directa">Venta directa (en persona)</option>
+            {Object.entries(PAYMENT_METHODS).map(([key, label]) => (
+              <option key={key} value={key}>
+                Web · {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Forma de pago
+          <select name="pago" defaultValue={filters.pago}>
+            <option value="">Todas</option>
+            {Object.entries(PAYMENT_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Estado del pedido
+          <select name="estado" defaultValue={filters.estado}>
+            <option value="">Todos</option>
+            {Object.entries(ORDER_STATUSES).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="sales-filter-actions">
+          <button type="submit" className="btn-primary">
+            Aplicar filtros
+          </button>
+          <Link href="/admin/reportes?vista=ventas" className="btn-secondary">
+            Limpiar filtros
+          </Link>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+async function SalesTab({ range, params }) {
+  const filters = parseSalesFilters(params);
+  const r = await getSalesReport(range, filters, params.agrupar);
+  const t = r.totals;
+  const p = r.previous;
+  const cmp = r.previousLabel;
+  const buckets = labelSalesBuckets(r.trend, r.granularity);
+  const filterQuery = new URLSearchParams(Object.entries(filters).filter(([, v]) => v)).toString();
+  const periodQuery = new URLSearchParams(
+    Object.entries({ periodo: params.periodo, desde: params.desde, hasta: params.hasta }).filter(([, v]) => v),
+  ).toString();
+  const groupHref = (key) =>
+    `/admin/reportes?vista=ventas&agrupar=${key}${periodQuery ? `&${periodQuery}` : ''}${filterQuery ? `&${filterQuery}` : ''}`;
+  const activeFilters = Object.values(filters).filter(Boolean).length;
+  const salesExpenses = t.commission + t.logistics + t.otherCosts;
+  const ordersTotal = r.orderStatuses.reduce((sum, o) => sum + o.count, 0);
+  const summary = [
+    { label: 'Ingresos por ventas', value: t.revenue },
+    { label: 'Costo de los productos', value: -t.cost },
+    { label: 'Descuentos (no se registran)', value: 0 },
+    { label: 'Devoluciones (no se aceptan)', value: 0 },
+    { label: 'Comisiones', value: -t.commission },
+    { label: 'Envío / logística', value: -t.logistics },
+    { label: 'Otros costos de venta', value: -t.otherCosts },
+    { label: 'Ganancia neta de ventas', value: t.profit },
+  ];
+
   return (
     <>
-      <div className="kpi-grid">
-        <Kpi label="Ventas" value={soles(r.revenue)} sub={`${r.count} ventas · ${r.units} unidades`} />
-        <Kpi
-          label="Ganancia bruta"
-          value={soles(r.grossProfit)}
-          sub={`Margen ${percent(r.margin)} · ventas − costo − comisiones`}
-          tone={r.grossProfit >= 0 ? 'good' : 'bad'}
-        />
-        <Kpi label="Ticket promedio" value={soles(r.averageTicket)} sub="Por venta" />
-        <Kpi label="Comisiones generadas" value={soles(r.commissions)} sub="Pagadas o por pagar" />
+      <SalesFilters range={range} params={params} filters={filters} options={r.options} />
+      <div className="sales-toolbar">
+        <p className="report-range-label">
+          {rangeLabel(range)}
+          {activeFilters ? ` · ${activeFilters} filtro${activeFilters === 1 ? '' : 's'}` : ''}
+        </p>
+        <div className="sales-toolbar-actions no-print">
+          <SalesExport
+            report={{ ...r, summary }}
+            fileName={`ventas-${range.start ? toDayString(range.start) : 'inicio'}.csv`}
+          />
+        </div>
       </div>
-      {r.withoutCost > 0 ? (
+
+      <div className="kpi-grid sales-kpis">
+        <SalesKpi
+          label="Ventas de hoy"
+          value={soles(r.today.revenue)}
+          sub={`${r.today.orders} pedido${r.today.orders === 1 ? '' : 's'}`}
+          current={r.today.revenue}
+          previous={r.yesterday.revenue}
+          compare="ayer"
+        />
+        <SalesKpi label="Ventas del período" value={soles(t.revenue)} current={t.revenue} previous={p?.revenue} compare={cmp} />
+        <SalesKpi
+          label="Ganancia"
+          value={soles(t.profit)}
+          sub={`Margen ${percent(t.margin)}`}
+          current={t.profit}
+          previous={p?.profit}
+          compare={cmp}
+          tone={t.profit >= 0 ? 'good' : 'bad'}
+        />
+        <SalesKpi label="Pedidos" value={t.orders} current={t.orders} previous={p?.orders} compare={cmp} />
+        <SalesKpi
+          label="Ticket promedio"
+          value={soles(t.averageTicket)}
+          sub="Por pedido"
+          current={t.averageTicket}
+          previous={p?.averageTicket}
+          compare={cmp}
+        />
+        <SalesKpi
+          label="Más vendido"
+          value={t.topProduct ? t.topProduct.name : '—'}
+          sub={t.topProduct ? `${t.topProduct.units} unidades` : 'Sin ventas'}
+        />
+        <SalesKpi label="Unidades vendidas" value={t.units} current={t.units} previous={p?.units} compare={cmp} />
+        <SalesKpi
+          label="Clientes"
+          value={t.customers}
+          sub="Con nombre registrado"
+          current={t.customers}
+          previous={p?.customers}
+          compare={cmp}
+        />
+      </div>
+      {t.withoutCost > 0 ? (
         <p className="hint">
-          {r.withoutCost} venta{r.withoutCost === 1 ? '' : 's'} de perfumes sin ninguna compra registrada: su
-          costo cuenta como 0, así que la ganancia real es menor. Registra esas compras en «Compras».
+          {t.withoutCost} venta{t.withoutCost === 1 ? '' : 's'} de perfumes sin ninguna compra registrada: su costo
+          cuenta como 0, así que la ganancia real es menor. Registra esas compras en «Compras».
         </p>
       ) : null}
 
       <div className="chart-card">
-        <h3 className="chart-title">Perfumes más vendidos</h3>
-        {r.top.length === 0 ? (
-          <p className="hint">No hubo ventas en este período.</p>
-        ) : (
-          <div className="pivot-scroll">
-            <table className="report-table">
-              <thead>
-                <tr>
-                  <th scope="col">Perfume</th>
-                  <th scope="col" className="num">
-                    Unid.
-                  </th>
-                  <th scope="col">Ventas</th>
-                  <th scope="col" className="num">
-                    Ganancia
-                  </th>
-                  <th scope="col" className="num">
-                    Margen
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {r.top.map((t) => (
-                  <tr key={t.id}>
-                    <th scope="row">{t.name}</th>
-                    <td className="num">{t.units}</td>
-                    <td>
-                      <div className="inline-bar">
-                        <span style={{ width: `${maxTop > 0 ? (t.revenue / maxTop) * 100 : 0}%` }} />
-                        <strong>{soles(t.revenue)}</strong>
-                      </div>
-                    </td>
-                    <td className="num">{t.profit == null ? <span className="hint">Sin costo</span> : soles(t.profit)}</td>
-                    <td className="num">
-                      {t.margin == null ? '—' : (
-                        <span className={t.margin < 0.2 ? 'text-critical' : ''}>{percent(t.margin)}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="sales-chart-head">
+          <h3 className="chart-title">Evolución de ventas, ganancia y pedidos</h3>
+          <nav className="filter-chips no-print" aria-label="Agrupar por">
+            {Object.entries(GRANULARITIES).map(([key, label]) => (
+              <Link
+                key={key}
+                href={groupHref(key)}
+                className={`filter-chip${r.granularity === key ? ' active' : ''}`}
+                aria-current={r.granularity === key ? 'page' : undefined}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <TrendChart
+          buckets={buckets}
+          granularity={r.granularity}
+          series={SALES_SERIES}
+          countKey="orders"
+          countLabel="Pedidos"
+          totalLabel={null}
+          emptyText="No hubo ventas en este período."
+          drillHref={`/admin/reportes?vista=ventas&agrupar=dia${filterQuery ? `&${filterQuery}` : ''}`}
+          detailText="Toca para ver ese período"
+        />
+      </div>
+
+      <div className="chart-card">
+        <h3 className="chart-title">Ranking de productos</h3>
+        <ProductRanking products={r.products} />
+      </div>
+
+      <div className="chart-card">
+        <h3 className="chart-title">Rentabilidad por producto</h3>
+        <ProfitTable products={r.products} />
+        <p className="hint">
+          Costo = lo que te costó cada frasco al venderlo (o el promedio de tus compras). Ganancia = ingreso − costo −
+          comisión − envío y otros costos de esa venta.
+        </p>
       </div>
 
       <div className="chart-grid">
         <BarList
-          title="Por forma de pago"
-          items={r.payments.map((p) => ({
-            label: `${PAYMENT_LABELS[p.key] || p.key} · ${p.count}`,
-            value: p.revenue,
-            color: PAYMENT_COLORS[p.key],
+          title="Ventas por categoría"
+          items={r.categories.map((c, i) => ({
+            label: `${c.label} · ${percent(c.share)}`,
+            value: c.revenue,
+            color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
+            sub: `${c.units} unidades · ganancia ${soles(c.profit)}`,
           }))}
         />
+        <div className="chart-card">
+          <h3 className="chart-title">Métodos de pago</h3>
+          {r.methods.length === 0 ? (
+            <p className="hint">Sin ventas en este período.</p>
+          ) : (
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th scope="col">Método</th>
+                  <th scope="col" className="num">
+                    Operaciones
+                  </th>
+                  <th scope="col" className="num">
+                    Monto
+                  </th>
+                  <th scope="col" className="num">
+                    %
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {r.methods.map((m) => (
+                  <tr key={m.label}>
+                    <th scope="row">{m.label}</th>
+                    <td className="num">{m.count}</td>
+                    <td className="num">{soles(m.revenue)}</td>
+                    <td className="num">{percent(m.share)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="hint">En las ventas en persona solo se guarda si fue contado, crédito o pandero.</p>
+        </div>
+      </div>
+
+      <div className="chart-card">
+        <h3 className="chart-title">Clientes</h3>
+        <CustomersTable customers={r.customers} />
+        <p className="hint">
+          Mejor cliente: los 3 que más te compraron. Nuevo: su primera compra fue en este período. Recurrente: ya te
+          había comprado o compró más de una vez.
+        </p>
+      </div>
+
+      <div className="chart-grid">
+        <div className="chart-card">
+          <h3 className="chart-title">Pedidos web por estado</h3>
+          {ordersTotal === 0 ? (
+            <p className="hint">No hubo pedidos de la tienda web en este período.</p>
+          ) : (
+            <ul className="order-status-list">
+              {r.orderStatuses.map((o) => (
+                <li key={o.key} className={`order-status-${STATUS_TONES[o.key] || 'neutral'}`}>
+                  <span>{o.label}</span>
+                  <strong>{o.count}</strong>
+                  <span className="hint">{soles(o.total)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="hint">Solo los pedidos de la tienda web tienen estado; las ventas en persona no.</p>
+        </div>
+
+        <div className="chart-card">
+          <h3 className="chart-title">Resumen financiero</h3>
+          <table className="report-table sales-summary">
+            <tbody>
+              {summary.map((s, i) => (
+                <tr key={s.label} className={i === summary.length - 1 ? 'is-total' : undefined}>
+                  <th scope="row">{s.label}</th>
+                  <td className={`num${s.value < 0 || (i === summary.length - 1 && s.value < 0) ? ' text-critical' : ''}`}>
+                    {soles(s.value)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="hint">
+            Gastos de venta: {soles(salesExpenses)}. El sistema no registra descuentos y no aceptas devoluciones, por eso
+            van en 0.
+          </p>
+        </div>
+      </div>
+
+      <div className="chart-grid">
         <BarList
           title="Por canal"
           items={r.channels.map((c) => ({ label: `${c.label} · ${c.count}`, value: c.revenue }))}
           color="var(--series-in)"
         />
-      </div>
-
-      <div className="chart-card">
-        <h3 className="chart-title">Por quién vendió</h3>
-        {r.sellers.length === 0 ? (
-          <p className="hint">No hubo ventas en este período.</p>
-        ) : (
-          <table className="report-table">
-            <thead>
-              <tr>
-                <th scope="col">Vendió</th>
-                <th scope="col" className="num">
-                  Ventas
-                </th>
-                <th scope="col" className="num">
-                  Monto
-                </th>
-                <th scope="col" className="num">
-                  Comisión
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {r.sellers.map((s) => (
-                <tr key={s.label}>
-                  <th scope="row">{s.label}</th>
-                  <td className="num">{s.count}</td>
-                  <td className="num">{soles(s.revenue)}</td>
-                  <td className="num">{s.commissions > 0 ? soles(s.commissions) : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <BarList
+          title="Por quién vendió"
+          items={r.sellers.map((s) => ({
+            label: `${s.label} · ${s.count}`,
+            value: s.revenue,
+            sub: s.commission > 0 ? `Comisión ${soles(s.commission)}` : null,
+          }))}
+          color="var(--series-credito)"
+        />
       </div>
     </>
   );
@@ -651,7 +949,7 @@ export default async function ReportesPage({ searchParams }) {
   let content;
   try {
     if (tab.key === 'general') content = await GeneralTab({ range, period });
-    else if (tab.key === 'ventas') content = await SalesTab({ range });
+    else if (tab.key === 'ventas') content = await SalesTab({ range, params });
     else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
     else if (tab.key === 'cobrar') content = await ReceivablesTab();
     else content = await InventoryTab();
@@ -678,7 +976,7 @@ export default async function ReportesPage({ searchParams }) {
         ))}
       </nav>
 
-      {tab.dated ? (
+      {tab.key === 'ventas' ? null : tab.dated ? (
         <>
           <RangeFilters tab={tab.key} range={range} params={params} />
           <p className="report-range-label">{rangeLabel(range)}</p>
