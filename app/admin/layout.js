@@ -13,6 +13,18 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+/** Firma del sistema: quién lo desarrolló y cómo contactarlo. */
+function AdminFooter() {
+  return (
+    <footer className="admin-footer no-print">
+      Desarrollado por <strong>Flaper</strong> · Sistemas de gestión ·{' '}
+      <a href="https://wa.me/51921590084" target="_blank" rel="noopener noreferrer">
+        +51 921 590 084
+      </a>
+    </footer>
+  );
+}
+
 export default async function AdminLayout({ children }) {
   const cookieStore = await cookies();
   const session = cookieStore.get(COOKIE_NAME)?.value;
@@ -41,6 +53,7 @@ export default async function AdminLayout({ children }) {
     return (
       <main className="admin-shell">
         <LoginForm />
+        <AdminFooter />
       </main>
     );
   }
@@ -55,6 +68,7 @@ export default async function AdminLayout({ children }) {
       <main className="admin-content">
         <SectionTabs role={user.role} pendingWebOrders={counts.pendiente || 0} />
         {children}
+        <AdminFooter />
       </main>
       <OrderAlerts initialLatestId={latest?.id || 0} />
     </div>
