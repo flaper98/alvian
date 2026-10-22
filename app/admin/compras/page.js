@@ -1,5 +1,12 @@
 import { getCurrentRole } from '@/lib/session';
-import { getPricingPlan, listPerfumes, listPurchaseCosts, listPurchases } from '@/lib/db';
+import {
+  getPricingPlan,
+  listPerfumes,
+  listPurchaseCosts,
+  listPurchases,
+  listSupplierPriceMap,
+  listSuppliers,
+} from '@/lib/db';
 import PurchaseFormModal from './PurchaseFormModal';
 import PurchaseHistoryList from './PurchaseHistoryList';
 
@@ -22,13 +29,17 @@ export default async function ComprasPage({ searchParams }) {
   let purchases;
   let pricing = null;
   let costs = {};
+  let suppliers = [];
+  let supplierPrices = {};
   try {
     let plan;
-    [perfumes, purchases, plan, costs] = await Promise.all([
+    [perfumes, purchases, plan, costs, suppliers, supplierPrices] = await Promise.all([
       listPerfumes(),
       listPurchases(),
       getPricingPlan(),
       listPurchaseCosts(),
+      listSuppliers(),
+      listSupplierPriceMap(),
     ]);
     // Para mostrar en el formulario a cuánto quedará el precio con tu regla automática.
     pricing = {
@@ -51,12 +62,15 @@ export default async function ComprasPage({ searchParams }) {
     <section className="admin-section">
       <div className="admin-header">
         <h1>Compras</h1>
-        <PurchaseFormModal perfumes={perfumes} prefill={prefill} pricing={pricing} costs={costs} />
+        <PurchaseFormModal perfumes={perfumes} prefill={prefill} pricing={pricing} costs={costs}
+          suppliers={suppliers.map((x) => ({ id: x.id, name: x.name }))}
+          supplierPrices={supplierPrices}
+        />
       </div>
 
       <div>
         <h2>Historial de compras ({purchases.length})</h2>
-        <PurchaseHistoryList purchases={purchases} />
+        <PurchaseHistoryList purchases={purchases} suppliers={suppliers.map((x) => ({ id: x.id, name: x.name }))} />
       </div>
     </section>
   );

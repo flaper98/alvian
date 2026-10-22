@@ -179,7 +179,55 @@ function NotReceivedModal({ purchase, onClose }) {
   );
 }
 
-function PurchaseTableRow({ purchase }) {
+const NO_SUPPLIER = 'none';
+
+/** Cuánto le compraste a cada proveedor (toca uno para ver solo sus compras). */
+function SupplierSummary({ rows, active, onPick }) {
+  const map = new Map();
+  for (const p of rows) {
+    if (p.not_received) continue;
+    const key = p.supplier_id ? String(p.supplier_id) : NO_SUPPLIER;
+    const item = map.get(key) || { key, name: p.supplier_name || 'Sin proveedor', orders: new Set(), units: 0, total: 0 };
+    item.orders.add(p.batch_id || `p${p.id}`);
+    item.units += Number(p.quantity);
+    item.total += Number(p.total_cost);
+    map.set(key, item);
+  }
+  const list = [...map.values()].sort((a, b) => b.total - a.total);
+  if (list.length === 0) return null;
+  const max = Math.max(...list.map((i) => i.total));
+  return (
+    <div className="chart-card supplier-summary">
+      <h3 className="chart-title">Compras por proveedor</h3>
+      <ul className="bar-list">
+        {list.map((item) => (
+          <li key={item.key}>
+            <button
+              type="button"
+              className={`bar-list-link supplier-pick${active === item.key ? ' is-on' : ''}`}
+              aria-pressed={active === item.key}
+              onClick={() => onPick(active === item.key ? 'all' : item.key)}
+            >
+              <div className="bar-list-head">
+                <span>{item.name}</span>
+                <strong>{soles(item.total)}</strong>
+              </div>
+              <div className="bar-list-track">
+                <span style={{ width: `${max > 0 ? (item.total / max) * 100 : 0}%`, background: 'var(--series-in)' }} />
+              </div>
+              <span className="bar-list-sub">
+                {item.orders.size} pedido{item.orders.size === 1 ? '' : 's'} · {item.units} unidades
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="hint">Toca un proveedor para ver solo sus compras. Las antiguas sin proveedor se asignan con «Editar».</p>
+    </div>
+  );
+}
+
+function PurchaseTableRow({ purchase, suppliers }) {
   const [editing, setEditing] = useState(false);
   const [markingLost, setMarkingLost] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -216,6 +264,7 @@ function PurchaseTableRow({ purchase }) {
             <span className="badge badge-paid">Reinversión</span>
           )}{' '}
           {purchase.not_received ? <span className="badge badge-debt">No llegó · pérdida</span> : null}
+          {purchase.supplier_name ? <span className="purchase-supplier">{purchase.supplier_name}</span> : null}
           {purchase.note ? <p className="perfume-table-description">{purchase.note}</p> : null}
         </td>
         <td className="perfume-table-stock-cell" data-label="Cantidad">{purchase.quantity}</td>
@@ -252,13 +301,14 @@ function PurchaseTableRow({ purchase }) {
           </button>
         </td>
       </tr>
-      {editing ? <EditPurchaseModal purchase={purchase} onClose={() => setEditing(false)} /> : null}
+      {editing ? <EditPurchaseModal purchase={purchase} suppliers={suppliers} onClose={() => setEditing(false)} /> : null}
       {markingLost ? <NotReceivedModal purchase={purchase} onClose={() => setMarkingLost(false)} /> : null}
     </>
   );
 }
 
-export default function PurchaseHistoryList({ purchases }) {
+export default function PurchaseHistoryList({ purchases, suppliers = [] }) {
+  const [supplier, setSupplier] = useState('all');
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [period, setPeriod] = useState('todo');
@@ -269,8 +319,11 @@ export default function PurchaseHistoryList({ purchases }) {
     const term = search.trim().toLowerCase();
     const filtered = purchases.filter(
       (p) =>
-        (!term || p.perfume_name.toLowerCase().includes(term)) &&
+        (!term ||
+          p.perfume_name.toLowerCase().includes(term) ||
+          (p.supplier_name || '').toLowerCase().includes(term)) &&
         (period === 'todo' || monthOf(p.created_at) === (period === 'mes' ? thisMonth : lastMonth)) &&
+        (supplier === 'all' || (p.supplier_id ? String(p.supplier_id) : NO_SUPPLIER) === supplier) &&
         (origin === 'all' ||
           (origin === 'no-llego'
             ? p.not_received
@@ -283,7 +336,7 @@ export default function PurchaseHistoryList({ purchases }) {
       if (sortBy === 'total') return Number(b.total_cost) - Number(a.total_cost);
       return new Date(b.created_at) - new Date(a.created_at);
     });
-  }, [purchases, search, sortBy, period, origin]);
+  }, [purchases, search, sortBy, period, origin, supplier]);
 
   if (purchases.length === 0) {
     return <p>Todavía no hay compras registradas.</p>;
@@ -318,6 +371,7 @@ export default function PurchaseHistoryList({ purchases }) {
       </div>
 
       <PurchaseSummary rows={rows} />
+      <SupplierSummary rows={rows} active={supplier} onPick={setSupplier} />
 
       <div className="list-toolbar">
         <input
@@ -326,6 +380,15 @@ export default function PurchaseHistoryList({ purchases }) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+        <select value={supplier} onChange={(event) => setSupplier(event.target.value)} aria-label="Proveedor">
+          <option value="all">Todos los proveedores</option>
+          {suppliers.map((x) => (
+            <option key={x.id} value={String(x.id)}>
+              {x.name}
+            </option>
+          ))}
+          <option value={NO_SUPPLIER}>Sin proveedor</option>
+        </select>
         <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
           <option value="recent">Ordenar: más reciente</option>
           <option value="oldest">Ordenar: más antigua</option>
@@ -356,7 +419,7 @@ export default function PurchaseHistoryList({ purchases }) {
             </thead>
             <tbody>
               {rows.map((purchase) => (
-                <PurchaseTableRow key={purchase.id} purchase={purchase} />
+                <PurchaseTableRow key={purchase.id} purchase={purchase} suppliers={suppliers} />
               ))}
             </tbody>
           </table>

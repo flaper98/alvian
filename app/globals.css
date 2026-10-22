@@ -6377,3 +6377,159 @@ select:focus {
   font-weight: 600;
   white-space: nowrap;
 }
+
+.ledger-salary {
+  margin-right: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--green-800);
+  border-radius: 999px;
+  background: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--green-800);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* ---------- Compras por proveedor ---------- */
+.modal-dialog.modal-dialog-wide {
+  max-width: 760px;
+}
+
+.batch-mode {
+  margin-bottom: 0.75rem;
+  padding-right: 2.5rem;
+}
+
+.batch-table-wrap {
+  overflow-x: auto;
+}
+
+.batch-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.batch-table th {
+  padding: 0.3rem;
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.batch-table td {
+  padding: 0.25rem;
+  vertical-align: top;
+}
+
+.batch-table td:first-child {
+  min-width: 200px;
+}
+
+.batch-table input {
+  width: 100%;
+  min-width: 0;
+}
+
+.batch-table td:nth-child(2) {
+  width: 70px;
+}
+
+.batch-table td:nth-child(3) {
+  width: 110px;
+}
+
+.batch-table .num {
+  text-align: right;
+  white-space: nowrap;
+  padding-top: 0.7rem;
+}
+
+.batch-warn {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--status-critical);
+}
+
+.batch-add {
+  justify-self: start;
+}
+
+.batch-total {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  align-items: baseline;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--status-good-bg);
+  font-size: 0.85rem;
+}
+
+.batch-total strong {
+  margin-left: auto;
+  font-size: 1.1rem;
+  color: var(--green-900);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.purchase-supplier {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(42, 120, 214, 0.12);
+  color: var(--series-in);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.supplier-pick {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.supplier-pick.is-on {
+  outline: 2px solid var(--green-800);
+  border-radius: 8px;
+}
+
+@media (max-width: 560px) {
+  .batch-table thead {
+    display: none;
+  }
+
+  .batch-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .batch-table td:first-child {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .batch-table td:nth-child(2),
+  .batch-table td:nth-child(3) {
+    width: auto;
+  }
+
+  .batch-table td:nth-child(4) {
+    display: none;
+  }
+}

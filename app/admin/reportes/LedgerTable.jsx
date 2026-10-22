@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { deleteCashEntryAction } from '@/lib/actions';
+import { convertRepartoToSalaryAction, deleteCashEntryAction } from '@/lib/actions';
 
 const PAGE_SIZE = 25;
 // "capital" = dinero tuyo que pusiste en la caja (solo aparece en la Caja).
@@ -38,6 +38,28 @@ function downloadCsv(rows, fileName) {
   link.download = fileName;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+/** Salida antigua del Reparto → "Saqué para mí · Mi sueldo". */
+function SalaryButton({ row }) {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      className="ledger-salary"
+      title="Pasarla a Saqué para mí · Mi sueldo"
+      disabled={isPending}
+      onClick={() => {
+        if (!window.confirm(`¿Pasar ${soles(row.amount)} a «Mi sueldo»? Dejará de salir de la Reserva y saldrá de tu sueldo.`)) return;
+        startTransition(async () => {
+          const result = await convertRepartoToSalaryAction(row.ref);
+          if (result?.error) window.alert(result.error);
+        });
+      }}
+    >
+      {isPending ? '…' : 'Era mi sueldo'}
+    </button>
+  );
 }
 
 function DeleteButton({ row }) {
@@ -188,7 +210,8 @@ export default function LedgerTable({ rows, fileName, truncated, hideKindFilter 
                 <td className={`num ${isIn(r.kind) ? 'text-good' : 'text-critical'}`}>
                   {isIn(r.kind) ? '+' : '−'} {soles(r.amount)}
                 </td>
-                {deletable ? <td className="num">{DELETABLE.has(r.src) ? <DeleteButton row={r} /> : null}</td> : null}
+                {deletable ? <td className="num">{r.src === 'reparto' ? <SalaryButton row={r} /> : null}
+                    {DELETABLE.has(r.src) ? <DeleteButton row={r} /> : null}</td> : null}
               </tr>
             ))}
           </tbody>

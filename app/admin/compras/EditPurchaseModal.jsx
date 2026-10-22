@@ -14,7 +14,7 @@ function SubmitButton() {
   );
 }
 
-function EditPurchaseForm({ purchase, onClose }) {
+function EditPurchaseForm({ purchase, suppliers = [], onClose }) {
   const boundAction = editPurchaseAction.bind(null, purchase.id);
   const [state, formAction] = useActionState(boundAction, { error: null });
   const [quantity, setQuantity] = useState(String(purchase.quantity));
@@ -110,6 +110,17 @@ function EditPurchaseForm({ purchase, onClose }) {
       </p>
 
       <label>
+        Proveedor
+        <select name="supplierId" defaultValue={purchase.supplier_id ? String(purchase.supplier_id) : ''}>
+          <option value="">Sin proveedor</option>
+          {suppliers.map((s) => (
+            <option key={s.id} value={String(s.id)}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
         Nota (opcional)
         <input name="note" type="text" defaultValue={purchase.note || ''} />
       </label>
@@ -135,14 +146,14 @@ function EditPurchaseForm({ purchase, onClose }) {
   );
 }
 
-export default function EditPurchaseModal({ purchase, onClose }) {
+export default function EditPurchaseModal({ purchase, suppliers = [], onClose }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-dialog" onClick={(event) => event.stopPropagation()}>
         <button type="button" className="modal-close" aria-label="Cerrar" onClick={onClose}>
           ×
         </button>
-        <EditPurchaseForm purchase={purchase} onClose={onClose} />
+        <EditPurchaseForm purchase={purchase} suppliers={suppliers} onClose={onClose} />
       </div>
     </div>
   );
