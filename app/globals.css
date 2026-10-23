@@ -6580,3 +6580,57 @@ select:focus {
   flex: 1;
   min-width: 0;
 }
+
+/* Distribución: resumen simple de la plata */
+.money-summary {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 560px;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  background: var(--surface, #fffdf8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.money-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+
+.money-summary-row strong {
+  white-space: nowrap;
+}
+
+.money-summary-total {
+  padding-top: 0.5rem;
+  border-top: 2px solid var(--green-900);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--status-good);
+}
+
+.money-summary-total.is-negative {
+  color: var(--status-critical);
+}
+
+.money-summary-msg {
+  margin: 0.25rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: var(--status-good-bg);
+  color: var(--status-good);
+  font-size: 0.85rem;
+}
+
+.money-summary-msg.is-negative {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.envelope-section-title {
+  margin: 1.5rem 0 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+}

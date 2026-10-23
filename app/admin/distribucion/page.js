@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import {
   backfillBreakdowns,
+  getCashFlow,
   getCommissionPercent,
   getDistributionConfig,
   getDistributionReport,
@@ -21,6 +22,63 @@ const soles = (value) => {
 const pct = (value) => `${Number(value).toLocaleString('es-PE', { maximumFractionDigits: 1 })}%`;
 const dateFmt = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Lima' });
 const PAYMENT_LABELS = { contado: 'Contado', credito: 'Crédito', pandero: 'Pandero' };
+
+// Primero lo que debes, luego lo del negocio y al final lo tuyo. Impuestos solo si se usa.
+const ENVELOPE_ORDER = ['comisiones', 'reserva', 'reinversion', 'reposicion', 'sueldo', 'impuestos'];
+function orderedEnvelopes(list) {
+  return ENVELOPE_ORDER.map((key) => list.find((e) => e.key === key)).filter(
+    (e) => e && !(e.key === 'impuestos' && e.in === 0 && e.balance === 0),
+  );
+}
+
+/** Una frase por sobre, sin "entró/salió": qué es y, si está en rojo, qué pasó. */
+function envelopeNote(e, config) {
+  if (e.balance < 0) {
+    return `Usaste ${soles(-e.balance)} más de lo que tenía: se repone con las próximas ventas.`;
+  }
+  if (e.key === 'sueldo' && Number(config.salaryPercent) === 0 && e.balance > 0) {
+    return 'De ventas anteriores. Si no lo vas a sacar, pásalo al Colchón (abajo).';
+  }
+  if (e.key === 'reposicion' && e.balance === 0) return 'Todo lo vendido ya se volvió a comprar.';
+  return e.hint;
+}
+
+function summaryMessage(total, free) {
+  if (total < 0) return 'La caja sale negativa: falta registrar dinero que pusiste de tu bolsillo (Caja → «Puse dinero»).';
+  if (free < 0) {
+    return `Te faltan ${soles(-free)} para pagarle toda la comisión: esa plata se fue en stock. No está perdida, está en perfumes. Con las próximas ventas, primero págale a la vendedora y no compres stock nuevo hasta que esto quede en positivo.`;
+  }
+  return 'Vas bien: después de pagar la comisión, este dinero queda libre para el negocio.';
+}
+
+/**
+ * Lo primero que hay que entender: cuánta plata deberías tener, cuánto ya es
+ * de la vendedora y cuánto queda libre para el negocio.
+ */
+function MoneySummary({ envelopes, cash }) {
+  const total = Math.round(Number(cash) * 100) / 100;
+  const owed = Math.max(envelopes.envelopes.find((e) => e.key === 'comisiones')?.balance || 0, 0);
+  const free = Math.round((total - owed) * 100) / 100;
+  return (
+    <div className="money-summary">
+      <div className="money-summary-row">
+        <span>Tienes en caja</span>
+        <strong>{soles(total)}</strong>
+      </div>
+      <div className="money-summary-row">
+        <span>De eso, es de la vendedora (comisión)</span>
+        <strong>− {soles(owed)}</strong>
+      </div>
+      <div className={`money-summary-row money-summary-total${free < 0 ? ' is-negative' : ''}`}>
+        <span>Libre para el negocio</span>
+        <strong>{soles(free)}</strong>
+      </div>
+      <p className={free < 0 ? 'money-summary-msg is-negative' : 'money-summary-msg'}>
+        {summaryMessage(total, free)}
+      </p>
+    </div>
+  );
+}
 
 /** Tabla de movimientos de un lado del sobre (lo que entró o lo que salió). */
 function EnvelopeRows({ title, total, explain, rows, adjustments = [], showCollected = false, sign }) {
@@ -155,10 +213,11 @@ export default async function DistribucionPage({ searchParams }) {
   let report;
   let detail = null;
   let transfers = [];
+  let cashFlow;
   try {
     // Las ventas anteriores al módulo se calculan una sola vez con los % de hoy.
     await backfillBreakdowns();
-    [config, commissionPercent, envelopes, report, detail, transfers] = await Promise.all([
+    [config, commissionPercent, envelopes, report, detail, transfers, cashFlow] = await Promise.all([
       getDistributionConfig(),
       getCommissionPercent(),
       getEnvelopes(),
@@ -166,6 +225,7 @@ export default async function DistribucionPage({ searchParams }) {
       // Sobre abierto (?sobre=reserva): cada movimiento que forma su "Entró" y su "Salió".
       params.sobre ? getEnvelopeDetail(String(params.sobre)) : Promise.resolve(null),
       listEnvelopeTransfers(),
+      getCashFlow(),
     ]);
   } catch (error) {
     return (
@@ -203,15 +263,12 @@ export default async function DistribucionPage({ searchParams }) {
         <h1>Distribución de ganancias</h1>
         <ExportButtons rows={rows} totals={t} fileName={`distribucion-${desde || 'inicio'}-a-${hasta || 'hoy'}.csv`} />
       </div>
-      <p className="hint">
-        Cada venta se reparte así: precio − costo − comisión − envío − otros − impuesto = utilidad neta, y la
-        utilidad va {config.reinvestPercent}% a Reinversión, {config.salaryPercent}% a tu Sueldo y {config.reservePercent}% a
-        la Reserva. Los sobres se llenan con lo ya cobrado.
-      </p>
+      <h2 className="dashboard-heading">Tu dinero hoy</h2>
+      <MoneySummary envelopes={envelopes} cash={cashFlow.net} />
 
-      <h2 className="dashboard-heading">Tus sobres hoy</h2>
+      <h3 className="envelope-section-title">¿Para qué es cada parte?</h3>
       <div className="envelope-grid">
-        {envelopes.envelopes.map((e) => {
+        {orderedEnvelopes(envelopes.envelopes).map((e) => {
           const open = detail?.key === e.key;
           return (
             <Link
@@ -223,24 +280,24 @@ export default async function DistribucionPage({ searchParams }) {
             >
               <span className="envelope-label">{e.label}</span>
               <strong className="envelope-balance">{soles(e.balance)}</strong>
-              <span className="envelope-flow">
-                Entró {soles(e.in)} · salió {soles(e.out)}
-              </span>
-              <span className="hint">{e.hint}</span>
-              {e.balance < 0 ? <span className="envelope-warn">Gastaste más de lo apartado</span> : null}
-              <span className="envelope-more">{open ? 'Ocultar detalle ↑' : 'Ver qué entró y qué salió →'}</span>
+              <span className="hint">{envelopeNote(e, config)}</span>
+              <span className="envelope-more">{open ? 'Ocultar ↑' : 'Ver detalle →'}</span>
             </Link>
           );
         })}
       </div>
+      <p className="hint">
+        Cada venta cobrada se reparte sola: lo que costó el perfume va a «Para reponer», la comisión a la vendedora y
+        la ganancia {config.reinvestPercent}% a «Para crecer», {config.salaryPercent}% a «Tu sueldo» y{' '}
+        {config.reservePercent}% al «Colchón».
+      </p>
       {detail ? <EnvelopeDetail detail={detail} closeHref={hrefWith({ sobre: null })} /> : null}
       <EnvelopeTransfer
         balances={Object.fromEntries(envelopes.envelopes.map((e) => [e.key, e.balance]))}
         transfers={transfers}
       />
       <p className="hint no-print">
-        Para sacar dinero de un sobre usa <Link href="/admin/caja">Caja → Registrar salida</Link>: pago a la
-        vendedora, saqué para mí (sueldo), pagué impuestos, usé la reserva o compra de perfumes.
+        Para pagar o sacar dinero usa <Link href="/admin/caja">Caja → Registrar salida</Link>.
       </p>
 
       <h2 className="dashboard-heading">Resultados por período</h2>

@@ -5,7 +5,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { deleteEnvelopeTransferAction, saveDistributionConfigAction, transferEnvelopeAction } from '@/lib/actions';
 
-const TRANSFER_LABELS = { sueldo: 'Sueldo', reserva: 'Reserva', reinversion: 'Reinversión', impuestos: 'Impuestos' };
+const TRANSFER_LABELS = { sueldo: 'Tu sueldo', reserva: 'Colchón', reinversion: 'Para crecer', impuestos: 'Impuestos' };
 const money = (value) =>
   `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -61,8 +61,8 @@ export function EnvelopeTransfer({ balances, transfers = [] }) {
     <div className="chart-card envelope-transfer no-print">
       <h3 className="chart-title">Pasar dinero entre sobres</h3>
       <p className="hint">
-        Para usar en otra cosa lo que ya está apartado, por ejemplo tu sueldo que no sacaste, para la Reserva o la
-        deuda. No sale dinero de la Caja: solo cambia de sobre.
+        Por ejemplo, tu sueldo que no sacaste al Colchón para pagar la deuda. No sale dinero de la Caja: solo cambia de
+        sobre.
       </p>
       <form action={formAction} className="envelope-transfer-form" onChange={() => setDone(false)}>
         <label>
