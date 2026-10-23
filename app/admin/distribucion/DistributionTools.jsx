@@ -164,8 +164,8 @@ export function DistributionConfigForm({ config, commissionPercent }) {
   };
 
   return (
-    <form action={formAction} className="prices-form distribution-config">
-      <div className="distribution-config-grid">
+    <form action={formAction} className="dist-config">
+      <div className="dist-config-grid dist-config-two">
         <label>
           Comisión vendedora %
           <input name="commissionPercent" type="number" min="0" max="100" step="0.5" defaultValue={commissionPercent} />
@@ -177,31 +177,39 @@ export function DistributionConfigForm({ config, commissionPercent }) {
           <input name="minMarginPercent" type="number" min="0" max="100" step="1" defaultValue={config.minMarginPercent} />
         </label>
       </div>
-      <p className="hint">Reparto de la utilidad neta (debe sumar 100%):</p>
-      <div className="distribution-config-grid">
+      <p className="dist-config-caption">
+        Reparto de la utilidad neta <span>(debe sumar 100%)</span>
+      </p>
+      <div className="dist-config-grid dist-config-three">
         <label>
-          Reinversión %
+          <span>Reinversión %</span>
           <input name="reinvestPercent" type="number" min="0" max="100" step="1" value={values.reinvestPercent} onChange={set('reinvestPercent')} />
         </label>
         <label>
-          Sueldo %
+          <span>Sueldo %</span>
           <input name="salaryPercent" type="number" min="0" max="100" step="1" value={values.salaryPercent} onChange={set('salaryPercent')} />
         </label>
         <label>
-          Reserva %
+          <span>Reserva %</span>
           <input name="reservePercent" type="number" min="0" max="100" step="1" value={values.reservePercent} onChange={set('reservePercent')} />
         </label>
+      </div>
+      <div className="dist-config-bar" aria-hidden="true">
+        <span style={{ flexGrow: Number(values.reinvestPercent) || 0, background: 'var(--green-900)' }} />
+        <span style={{ flexGrow: Number(values.salaryPercent) || 0, background: 'var(--dist-salary)' }} />
+        <span style={{ flexGrow: Number(values.reservePercent) || 0, background: 'var(--dist-reserve)' }} />
+        {sum < 100 ? <span style={{ flexGrow: 100 - sum, background: 'transparent' }} /> : null}
       </div>
       <p className={Math.abs(sum - 100) < 0.001 ? 'form-ok' : 'form-error'}>
         Suma: {sum}% {Math.abs(sum - 100) < 0.001 ? '✓' : '— debe ser 100%'}
       </p>
-      <p className="hint">
-        Los cambios se aplican solo a las ventas nuevas: las ventas ya registradas conservan los
-        porcentajes con que se calcularon.
-      </p>
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       {saved ? <p className="form-ok">Porcentajes guardados.</p> : null}
-      <div className="prices-form-actions">
+      <div className="dist-config-foot">
+        <p className="hint">
+          Los cambios se aplican solo a las ventas nuevas: las ventas ya registradas conservan los porcentajes con que se
+          calcularon.
+        </p>
         <SaveButton />
       </div>
     </form>

@@ -6700,3 +6700,580 @@ select:focus {
 .spending-steps strong {
   white-space: nowrap;
 }
+
+/* ---------- Distribución (diseño 2026-10) ---------- */
+.distribution {
+  --dist-cost: #cfc3a0;
+  --dist-commission: #a67c2c;
+  --dist-extra: #e8e0cb;
+  --dist-salary: #4f8a6b;
+  --dist-reserve: #c9dcd0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.distribution .admin-header {
+  align-items: flex-start;
+}
+
+.dist-lead {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.dist-card {
+  background: var(--cream-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(14, 43, 33, 0.05);
+}
+
+.dist-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.dist-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--green-900);
+}
+
+.dist-head > span {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.dist-head-inline {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.dist-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--green-900);
+}
+
+.dist-card-sub {
+  margin: 0.2rem 0 1rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.dist-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.dist-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+/* Tu dinero */
+.dist-money-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.dist-money-row small {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.dist-money-row strong {
+  white-space: nowrap;
+}
+
+.dist-money-cash {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--green-900);
+}
+
+.dist-money-cash strong {
+  font-size: clamp(1.8rem, 5vw, 2.3rem);
+  line-height: 1.1;
+}
+
+.dist-note {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+/* En qué usar esta plata */
+.dist-steps {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.75rem;
+  list-style: none;
+}
+
+.dist-step {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.dist-step.is-missing {
+  border-color: rgba(178, 59, 59, 0.25);
+  background: #fbe9e9;
+}
+
+.dist-step.is-ok {
+  border-color: rgba(10, 125, 46, 0.25);
+  background: #e9f5ec;
+}
+
+.dist-step.is-wait {
+  background: #fdf7e8;
+}
+
+.dist-step.is-off {
+  background: #f3f1ea;
+}
+
+.dist-step-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--green-900);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dist-step.is-wait .dist-step-num,
+.dist-step.is-off .dist-step-num {
+  background: #5b6560;
+}
+
+.dist-step-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dist-step-text a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.dist-step-text a:hover {
+  text-decoration: underline;
+}
+
+.dist-step-text small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.dist-step.is-missing small {
+  color: var(--status-critical);
+}
+
+.dist-step.is-ok small {
+  color: var(--status-good);
+}
+
+.dist-step > strong {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.dist-foot {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.dist-divider {
+  margin: 0.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* Filtros del período */
+.dist-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dist-filters .filter-chips {
+  margin: 0;
+}
+
+/* KPIs */
+.dist-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 1rem;
+}
+
+.dist-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.dist-kpi strong {
+  font-size: clamp(1.4rem, 4vw, 1.75rem);
+  color: var(--green-900);
+  white-space: nowrap;
+}
+
+.dist-kpi small {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.dist-kpi.is-dark {
+  background: var(--green-900);
+  border-color: var(--green-900);
+}
+
+.dist-kpi.is-dark .dist-eyebrow,
+.dist-kpi.is-dark small {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.dist-kpi.is-dark strong {
+  color: #fff;
+}
+
+.dist-kpi.is-dark.is-negative {
+  background: var(--status-critical);
+  border-color: var(--status-critical);
+}
+
+.dist-kpi strong.text-good {
+  color: var(--status-good);
+}
+
+.dist-kpi strong.text-critical {
+  color: var(--status-critical);
+}
+
+.dist-meter {
+  position: relative;
+  display: block;
+  height: 6px;
+  margin: 0.2rem 0;
+  border-radius: 999px;
+  background: var(--dist-extra);
+}
+
+.dist-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.dist-meter > span.is-good {
+  background: var(--status-good);
+}
+
+.dist-meter > span.is-bad {
+  background: var(--status-critical);
+}
+
+.dist-meter > i {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 12px;
+  background: var(--green-900);
+}
+
+/* Tarjetas de reparto */
+.dist-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: 1rem;
+}
+
+.dist-split-bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--dist-extra);
+}
+
+.dist-split-bar > span {
+  flex-basis: 0;
+  min-width: 2px;
+}
+
+.dist-split-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dist-split-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.dist-swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+}
+
+.dist-split-pct {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+.dist-split-list strong {
+  min-width: 6.5rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dist-split-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.7rem;
+  border-top: 2px solid var(--green-900);
+  font-weight: 700;
+}
+
+.dist-split-total strong {
+  font-size: 1.15rem;
+  color: var(--status-good);
+}
+
+.dist-split-total.is-negative strong {
+  color: var(--status-critical);
+}
+
+.dist-tip {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: #f1ece0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+/* Tabla */
+.distribution .distribution-table thead th {
+  background: #f1ece0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.distribution .distribution-table tfoot th,
+.distribution .distribution-table tfoot td {
+  border-top: 2px solid var(--green-900);
+  background: #f1ece0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dist-profit {
+  font-weight: 700;
+  color: var(--status-good);
+}
+
+.dist-pill {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dist-pill-contado {
+  background: rgba(14, 143, 118, 0.14);
+  color: #0b6f5c;
+}
+
+.dist-pill-credito {
+  background: rgba(42, 120, 214, 0.14);
+  color: #1f5ea8;
+}
+
+.dist-pill-pandero {
+  background: rgba(166, 124, 44, 0.18);
+  color: #7d5c1d;
+}
+
+.dist-pill-good {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.dist-pill-bad {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+/* Porcentajes */
+.dist-config {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dist-config-grid {
+  display: grid;
+  gap: 0.75rem 1rem;
+}
+
+.dist-config-two {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.dist-config-three {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+
+.dist-config label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dist-config-three label span {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.dist-config input {
+  width: 100%;
+}
+
+.dist-config-caption {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.dist-config-caption span {
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.dist-config-bar {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5ecdf;
+}
+
+.dist-config-bar > span {
+  flex-basis: 0;
+}
+
+.dist-config .form-ok,
+.dist-config .form-error {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.dist-config-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.dist-config-foot .hint {
+  flex: 1 1 280px;
+  max-width: 520px;
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .dist-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .dist-card {
+    padding: 1rem;
+  }
+
+  .dist-step {
+    gap: 0.6rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .dist-split-list strong {
+    min-width: 0;
+  }
+}
+
+@media print {
+  .dist-kpi.is-dark {
+    background: #fff;
+    border-color: var(--border);
+  }
+
+  .dist-kpi.is-dark strong,
+  .dist-kpi.is-dark .dist-eyebrow,
+  .dist-kpi.is-dark small {
+    color: var(--ink);
+  }
+}

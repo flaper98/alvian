@@ -76,67 +76,99 @@ function spendingPlan(cash, commissionDue, debts) {
 }
 
 /** Ingresos, egresos y lo que queda en caja, desde que empezaste. */
-function MoneyFlow({ flow }) {
+function MoneyFlow({ flow, plan }) {
   const income = flow.incomeTotal + flow.capitalIn;
   const out = income - flow.net;
+  const first = plan.steps[0];
+  let note;
+  if (flow.net < 0) note = 'Sale negativo: falta registrar dinero que pusiste de tu bolsillo (Caja → «Puse dinero»).';
+  else if (first && first.missing > 0) note = `Alcanza para ${soles(first.covered)} de los ${soles(first.need)} del primer paso.`;
+  else if (plan.steps.some((s) => s.missing > 0)) note = 'Cubre los primeros pasos; mira abajo lo que falta.';
+  else note = 'Cubre todos los pagos pendientes.';
   return (
-    <div className="money-summary">
-      <div className="money-summary-row">
+    <div className="dist-card dist-money">
+      <div className="dist-money-row">
         <span>
-          Ingresos <small className="hint">(ventas cobradas y lo que pusiste)</small>
+          Ingresos <small>ventas cobradas y lo que pusiste</small>
         </span>
         <strong className="text-good">{soles(income)}</strong>
       </div>
-      <div className="money-summary-row">
+      <div className="dist-money-row">
         <span>
-          Egresos <small className="hint">(compras, gastos, comisiones, deudas)</small>
+          Egresos <small>compras, gastos, comisiones, deudas</small>
         </span>
         <strong className="text-critical">− {soles(out)}</strong>
       </div>
-      <div className={`money-summary-row money-summary-total${flow.net < 0 ? ' is-negative' : ''}`}>
-        <span>Tienes en caja</span>
-        <strong>{soles(flow.net)}</strong>
+      <div className="dist-money-cash">
+        <span className="dist-eyebrow">Tienes en caja</span>
+        <strong className={flow.net < 0 ? 'text-critical' : 'text-good'}>{soles(flow.net)}</strong>
+        <span className="dist-note">{note}</span>
       </div>
-      {flow.net < 0 ? (
-        <p className="money-summary-msg is-negative">
-          Sale negativo: falta registrar dinero que pusiste de tu bolsillo (Caja → «Puse dinero»).
-        </p>
-      ) : null}
     </div>
   );
 }
 
 function SpendingPlan({ plan }) {
+  const rows = [
+    ...plan.steps.map((s) => ({
+      ...s,
+      tone: s.missing > 0 ? 'missing' : 'ok',
+      sub: s.missing > 0 ? `Te faltan ${soles(s.missing)}` : 'Cubierto ✓',
+      amount: s.need,
+    })),
+    {
+      key: 'stock',
+      label: 'Comprar stock',
+      tone: plan.rest > 0 ? 'ok' : 'wait',
+      sub: plan.rest > 0 ? 'Solo de los perfumes que se venden' : 'Todavía no: primero lo de arriba',
+      amount: plan.rest,
+    },
+    { key: 'sueldo', label: 'Tu sueldo', tone: 'off', sub: 'Por ahora no: decidiste mantener el negocio', amount: 0 },
+  ];
   return (
-    <div className="money-summary spending-plan">
-      <ol className="spending-steps">
-        {plan.steps.map((s, i) => (
-          <li key={s.key} className={s.missing > 0 ? 'is-missing' : 'is-ok'}>
-            <span className="spending-num">{i + 1}</span>
-            <span className="spending-label">
-              {s.href ? <Link href={s.href}>{s.label}</Link> : s.label}
-              <small>{s.missing > 0 ? `Te faltan ${soles(s.missing)}` : 'Cubierto ✓'}</small>
-            </span>
-            <strong>{soles(s.need)}</strong>
+    <ol className="dist-card dist-steps">
+      {rows.map((s, i) => (
+        <li key={s.key} className={`dist-step is-${s.tone}`}>
+          <span className="dist-step-num">{i + 1}</span>
+          <span className="dist-step-text">
+            {s.href ? <Link href={s.href}>{s.label}</Link> : s.label}
+            <small>{s.sub}</small>
+          </span>
+          <strong>{soles(s.amount)}</strong>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** Barra apilada + filas con color, % y monto. */
+function SplitCard({ title, subtitle, parts, total, footer, children }) {
+  const positive = parts.filter((p) => p.value > 0);
+  const sum = positive.reduce((s, p) => s + p.value, 0);
+  return (
+    <div className="dist-card">
+      <h3 className="dist-card-title">{title}</h3>
+      <p className="dist-card-sub">{subtitle}</p>
+      <div className="dist-split-bar" aria-hidden="true">
+        {positive.map((p) => (
+          <span key={p.label} style={{ flexGrow: p.value / (sum || 1), background: p.color }} />
+        ))}
+      </div>
+      <ul className="dist-split-list">
+        {children}
+        {parts.filter((p) => !p.barOnly).map((p) => (
+          <li key={p.label}>
+            <span className="dist-swatch" style={{ background: p.color }} />
+            <span className="dist-split-label">{p.label}</span>
+            <span className="dist-split-pct">{total > 0 ? pct((p.value / total) * 100) : '—'}</span>
+            <strong className={p.sign === '-' ? 'text-critical' : undefined}>
+              {p.sign === '-' ? '− ' : ''}
+              {soles(p.value)}
+            </strong>
           </li>
         ))}
-        <li className={plan.rest > 0 ? 'is-ok' : 'is-missing'}>
-          <span className="spending-num">{plan.steps.length + 1}</span>
-          <span className="spending-label">
-            Comprar stock
-            <small>{plan.rest > 0 ? 'Solo de los perfumes que se venden' : 'Todavía no: primero lo de arriba'}</small>
-          </span>
-          <strong>{soles(plan.rest)}</strong>
-        </li>
-        <li className="is-off">
-          <span className="spending-num">{plan.steps.length + 2}</span>
-          <span className="spending-label">
-            Tu sueldo
-            <small>Por ahora no: decidiste mantener el negocio</small>
-          </span>
-          <strong>{soles(0)}</strong>
-        </li>
-      </ol>
+      </ul>
+      {footer}
     </div>
   );
 }
@@ -182,10 +214,10 @@ export default async function DistribucionPage({ searchParams }) {
     );
   }
 
-  // Enlaces que conservan el período elegido abajo y cambian solo el sobre abierto.
+  // Enlaces que conservan el período y el filtro de pago.
   const hrefWith = (changes) => {
     const next = new URLSearchParams(
-      Object.entries({ periodo: params.periodo, desde: params.desde, hasta: params.hasta, sobre: params.sobre }).filter(
+      Object.entries({ periodo: params.periodo, desde: params.desde, hasta: params.hasta, pago: params.pago }).filter(
         ([, v]) => v,
       ),
     );
@@ -198,35 +230,70 @@ export default async function DistribucionPage({ searchParams }) {
   };
 
   const t = report.totals;
-  const costs = t.cost + t.commission + t.logistics + t.otherCosts + t.tax;
-  const rows = report.sales.map((r) => ({ ...r, dateLabel: dateFmt.format(new Date(r.created_at)) }));
+  const costs = t.cost + t.commission + t.logistics + t.otherCosts;
+  const allRows = report.sales.map((r) => ({ ...r, dateLabel: dateFmt.format(new Date(r.created_at)) }));
+  const pago = PAYMENT_LABELS[params.pago] ? params.pago : null;
+  const rows = pago ? allRows.filter((r) => r.payment_type === pago) : allRows;
+  const sumOf = (key) => rows.reduce((s, r) => s + Number(r[key] || 0), 0);
+  const shown = {
+    price: sumOf('price'),
+    cost: sumOf('cost'),
+    commission: sumOf('commission'),
+    extra: sumOf('logistics') + sumOf('other_costs'),
+    profit: sumOf('net_profit'),
+    reinvest: sumOf('reinvest'),
+    salary: sumOf('salary'),
+    reserve: sumOf('reserve'),
+  };
   const desde = range.start ? toDayString(range.start) : '';
   const hasta = range.end ? toDayString(new Date(range.end.getTime() - 1)) : '';
+  const plan = spendingPlan(
+    cashFlow.net,
+    Math.max(envelopes.envelopes.find((e) => e.key === 'comisiones')?.balance || 0, 0),
+    debts,
+  );
+  // Barra del margen: la meta queda a mitad de camino para que se vea si la pasas.
+  const marginScale = Math.max(t.margin, config.minMarginPercent * 2, 1);
+  const profitPer100 = t.price > 0 ? (t.netProfit / t.price) * 100 : 0;
 
   return (
     <section className="admin-section reports distribution">
       <div className="admin-header">
-        <h1>Distribución de ganancias</h1>
-        <ExportButtons rows={rows} totals={t} fileName={`distribucion-${desde || 'inicio'}-a-${hasta || 'hoy'}.csv`} />
+        <div>
+          <h1>Distribución de ganancias</h1>
+          <p className="dist-lead">Primero ve cuánta plata tienes y en qué usarla; abajo, cómo te fue en el período.</p>
+        </div>
+        <ExportButtons rows={allRows} totals={t} fileName={`distribucion-${desde || 'inicio'}-a-${hasta || 'hoy'}.csv`} />
       </div>
-      <h2 className="dashboard-heading">Tu dinero</h2>
-      <MoneyFlow flow={cashFlow} />
 
-      <h2 className="dashboard-heading">¿En qué usar esta plata?</h2>
-      <p className="hint">En este orden. Cada paso se paga con lo que quedó del anterior.</p>
-      <SpendingPlan
-        plan={spendingPlan(
-          cashFlow.net,
-          Math.max(envelopes.envelopes.find((e) => e.key === 'comisiones')?.balance || 0, 0),
-          debts,
-        )}
-      />
-      <p className="hint no-print">
-        Para pagar o sacar dinero usa <Link href="/admin/caja">Caja → Registrar salida</Link>.
-      </p>
+      <div className="dist-top">
+        <div>
+          <div className="dist-head">
+            <h2>Tu dinero</h2>
+          </div>
+          <MoneyFlow flow={cashFlow} plan={plan} />
+        </div>
+        <div>
+          <div className="dist-head">
+            <h2>¿En qué usar esta plata?</h2>
+            <span>En este orden. Cada paso se paga con lo que quedó del anterior.</span>
+          </div>
+          <SpendingPlan plan={plan} />
+          <p className="dist-foot no-print">
+            Para pagar o sacar dinero usa <Link href="/admin/caja">Caja → Registrar salida</Link>.
+          </p>
+        </div>
+      </div>
 
-      <h2 className="dashboard-heading">Resultados por período</h2>
-      <div className="report-filters no-print">
+      <hr className="dist-divider" />
+
+      <div className="dist-head">
+        <h2>Resultados por período</h2>
+        <span>
+          {rangeLabel(range)} · {t.count} venta{t.count === 1 ? '' : 's'}
+        </span>
+      </div>
+      <div className="dist-card dist-filters no-print">
         <nav className="filter-chips" aria-label="Período">
           {Object.entries(REPORT_PRESETS).map(([key, label]) => (
             <Link
@@ -240,7 +307,7 @@ export default async function DistribucionPage({ searchParams }) {
           ))}
         </nav>
         <form className="report-range-form" method="get" action="/admin/distribucion">
-          {params.sobre ? <input type="hidden" name="sobre" value={params.sobre} /> : null}
+          {pago ? <input type="hidden" name="pago" value={pago} /> : null}
           <label>
             Desde
             <input type="date" name="desde" defaultValue={params.desde || desde} />
@@ -254,82 +321,86 @@ export default async function DistribucionPage({ searchParams }) {
           </button>
         </form>
       </div>
-      <p className="report-range-label">{rangeLabel(range)}</p>
 
-      <div className="kpi-grid">
-        <div className="kpi-tile">
-          <span className="kpi-label">Ventas</span>
-          <strong className="kpi-value">{soles(t.price)}</strong>
-          <span className="kpi-sub">{t.count} venta{t.count === 1 ? '' : 's'}</span>
+      <div className="dist-kpis">
+        <div className="dist-card dist-kpi">
+          <span className="dist-eyebrow">Ventas</span>
+          <strong>{soles(t.price)}</strong>
+          <small>
+            {t.count} venta{t.count === 1 ? '' : 's'}
+          </small>
         </div>
-        <div className="kpi-tile">
-          <span className="kpi-label">Costos</span>
-          <strong className="kpi-value">{soles(costs)}</strong>
-          <span className="kpi-sub">Producto, comisión, envío y otros</span>
+        <div className="dist-card dist-kpi">
+          <span className="dist-eyebrow">Costos</span>
+          <strong>{soles(costs)}</strong>
+          <small>Producto, comisión, envío y otros</small>
         </div>
-        <div className={`kpi-tile ${t.netProfit >= 0 ? 'kpi-tile-good' : 'kpi-tile-bad'}`}>
-          <span className="kpi-label">Utilidad neta</span>
-          <strong className="kpi-value">{soles(t.netProfit)}</strong>
-          <span className="kpi-sub">Lo que se reparte</span>
+        <div className={`dist-card dist-kpi is-dark${t.netProfit < 0 ? ' is-negative' : ''}`}>
+          <span className="dist-eyebrow">Utilidad neta</span>
+          <strong>{soles(t.netProfit)}</strong>
+          <small>Lo que se reparte</small>
         </div>
-        <div className={`kpi-tile ${t.margin >= config.minMarginPercent ? 'kpi-tile-good' : 'kpi-tile-bad'}`}>
-          <span className="kpi-label">Margen</span>
-          <strong className="kpi-value">{pct(t.margin)}</strong>
-          <span className="kpi-sub">Utilidad ÷ ventas (meta ≥ {pct(config.minMarginPercent)})</span>
+        <div className="dist-card dist-kpi">
+          <span className="dist-eyebrow">Margen</span>
+          <strong className={t.margin >= config.minMarginPercent ? 'text-good' : 'text-critical'}>{pct(t.margin)}</strong>
+          <span className="dist-meter" aria-hidden="true">
+            <span
+              className={t.margin >= config.minMarginPercent ? 'is-good' : 'is-bad'}
+              style={{ width: `${Math.max(Math.min(t.margin / marginScale, 1), 0) * 100}%` }}
+            />
+            <i style={{ left: `${(config.minMarginPercent / marginScale) * 100}%` }} />
+          </span>
+          <small>Utilidad ÷ ventas · meta ≥ {pct(config.minMarginPercent)}</small>
         </div>
       </div>
 
-      <div className="chart-grid">
-        <div className="chart-card">
-          <h3 className="chart-title">Cómo se repartió cada sol vendido</h3>
-          <ul className="profit-list flow-list">
-            <li className="flow-line flow-line-in">
-              <span>Precio de venta</span>
-              <strong>+ {soles(t.price)}</strong>
-            </li>
-            {[
-              ['Costo del producto', t.cost],
-              ['Comisión de la vendedora', t.commission],
-              ['Envío que pagaste', t.logistics],
-              ['Otros gastos de las ventas', t.otherCosts],
-            ].map(([label, value]) => (
-              <li key={label} className="flow-line flow-line-out">
-                <span>{label}</span>
-                <strong>− {soles(value)}</strong>
-              </li>
-            ))}
-            <li className={`flow-total${t.netProfit < 0 ? ' flow-total-negative' : ''}`}>
+      <div className="dist-two">
+        <SplitCard
+          title="Cómo se repartió cada sol vendido"
+          subtitle={`De cada S/ 100 vendidos, ${soles(profitPer100)} se convierten en utilidad.`}
+          total={t.price}
+          parts={[
+            { label: 'Costo del producto', value: t.cost, color: 'var(--dist-cost)', sign: '-' },
+            { label: 'Comisión de la vendedora', value: t.commission, color: 'var(--dist-commission)', sign: '-' },
+            { label: 'Envío que pagaste', value: t.logistics, color: 'var(--dist-extra)', sign: '-' },
+            { label: 'Otros gastos de las ventas', value: t.otherCosts, color: 'var(--dist-extra)', sign: '-' },
+            { label: 'Utilidad neta', value: Math.max(t.netProfit, 0), color: 'var(--status-good)', barOnly: true },
+          ]}
+          footer={
+            <div className={`dist-split-total${t.netProfit < 0 ? ' is-negative' : ''}`}>
               <span>Utilidad neta</span>
               <strong>{soles(t.netProfit)}</strong>
-            </li>
-          </ul>
-        </div>
-        <div className="chart-card">
-          <h3 className="chart-title">La utilidad se repartió en</h3>
-          <ul className="profit-list">
-            <li>
-              <span>Reinversión</span>
-              <strong>{soles(t.reinvest)}</strong>
-            </li>
-            <li>
-              <span>Sueldo</span>
-              <strong>{soles(t.salary)}</strong>
-            </li>
-            <li>
-              <span>Reserva</span>
-              <strong>{soles(t.reserve)}</strong>
-            </li>
-          </ul>
-          <p className="hint">
-            Las ventas con pérdida no reparten nada. En crédito y pandero, los sobres reciben esto a medida
-            que el cliente paga.
-          </p>
-        </div>
+            </div>
+          }
+        >
+          <li>
+            <span className="dist-swatch" style={{ background: 'var(--green-900)' }} />
+            <span className="dist-split-label">Precio de venta</span>
+            <span className="dist-split-pct">100%</span>
+            <strong className="text-good">+ {soles(t.price)}</strong>
+          </li>
+        </SplitCard>
+        <SplitCard
+          title="La utilidad se repartió en"
+          subtitle={`Sobre ${soles(t.netProfit)} de utilidad neta.`}
+          total={t.reinvest + t.salary + t.reserve}
+          parts={[
+            { label: 'Reinversión', value: t.reinvest, color: 'var(--green-900)' },
+            { label: 'Sueldo', value: t.salary, color: 'var(--dist-salary)' },
+            { label: 'Reserva', value: t.reserve, color: 'var(--dist-reserve)' },
+          ]}
+          footer={
+            <p className="dist-tip">
+              Las ventas con pérdida no reparten nada. En crédito y pandero, los sobres reciben esto a medida que el
+              cliente paga.
+            </p>
+          }
+        />
       </div>
 
       {report.lowMargin.length || report.costUnknown ? (
-        <div className="chart-card distribution-alerts">
-          <h3 className="chart-title">⚠ Alertas</h3>
+        <div className="dist-card distribution-alerts">
+          <h3 className="dist-card-title">⚠ Alertas</h3>
           {report.lowMargin.length ? (
             <p>
               <strong>{report.lowMargin.length}</strong> venta{report.lowMargin.length === 1 ? '' : 's'} con margen menor
@@ -345,8 +416,26 @@ export default async function DistribucionPage({ searchParams }) {
         </div>
       ) : null}
 
-      <div className="chart-card">
-        <h3 className="chart-title">Desglose por venta</h3>
+      <div className="dist-card">
+        <div className="dist-head dist-head-inline">
+          <h3 className="dist-card-title">Desglose por venta</h3>
+          <nav className="filter-chips no-print" aria-label="Forma de pago">
+            {[[null, 'Todas'], ...Object.entries(PAYMENT_LABELS)].map(([key, label]) => {
+              const count = key ? allRows.filter((r) => r.payment_type === key).length : allRows.length;
+              return (
+                <Link
+                  key={label}
+                  href={hrefWith({ pago: key })}
+                  scroll={false}
+                  className={`filter-chip${pago === key ? ' active' : ''}`}
+                  aria-current={pago === key ? 'page' : undefined}
+                >
+                  {label} · {count}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
         {rows.length === 0 ? (
           <p className="hint">No hay ventas en este período.</p>
         ) : (
@@ -355,13 +444,16 @@ export default async function DistribucionPage({ searchParams }) {
               <thead>
                 <tr>
                   <th scope="col">Venta</th>
+                  <th scope="col">Pago</th>
                   <th scope="col" className="num">Precio</th>
                   <th scope="col" className="num">Costo</th>
                   <th scope="col" className="num">Comisión</th>
-                  <th scope="col" className="num">Envío+otros</th>
+                  <th scope="col" className="num">Envío + otros</th>
                   <th scope="col" className="num">Utilidad</th>
                   <th scope="col" className="num">Margen</th>
-                  <th scope="col" className="num">Reinv. / Sueldo / Reserva</th>
+                  <th scope="col" className="num">Reinversión</th>
+                  <th scope="col" className="num">Sueldo</th>
+                  <th scope="col" className="num">Reserva</th>
                 </tr>
               </thead>
               <tbody>
@@ -371,32 +463,63 @@ export default async function DistribucionPage({ searchParams }) {
                       {r.perfume_name}
                       {r.quantity > 1 ? ` × ${r.quantity}` : ''}
                       <span className="report-sub">
-                        {r.dateLabel} · {PAYMENT_LABELS[r.payment_type] || r.payment_type}
+                        {r.dateLabel}
                         {r.customer_name ? ` · ${r.customer_name}` : ''}
                         {r.cost_unknown ? ' · sin costo registrado' : ''}
                       </span>
                     </th>
+                    <td>
+                      <span className={`dist-pill dist-pill-${r.payment_type}`}>
+                        {PAYMENT_LABELS[r.payment_type] || r.payment_type}
+                      </span>
+                    </td>
                     <td className="num">{soles(r.price)}</td>
                     <td className="num">{soles(r.cost)}</td>
                     <td className="num">{soles(r.commission)}</td>
                     <td className="num">{soles(r.logistics + r.other_costs)}</td>
-                    <td className={`num ${r.net_profit < 0 ? 'text-critical' : ''}`}>{soles(r.net_profit)}</td>
+                    <td className={`num dist-profit${r.net_profit < 0 ? ' text-critical' : ''}`}>{soles(r.net_profit)}</td>
                     <td className="num">
-                      {r.low_margin ? <span className="badge badge-debt">⚠ {pct(r.margin_percent)}</span> : pct(r.margin_percent)}
+                      <span className={`dist-pill ${r.low_margin ? 'dist-pill-bad' : 'dist-pill-good'}`}>
+                        {r.low_margin ? '⚠ ' : ''}
+                        {pct(r.margin_percent)}
+                      </span>
                     </td>
-                    <td className="num">
-                      {soles(r.reinvest)} / {soles(r.salary)} / {soles(r.reserve)}
-                    </td>
+                    <td className="num">{soles(r.reinvest)}</td>
+                    <td className="num">{soles(r.salary)}</td>
+                    <td className="num">{soles(r.reserve)}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" colSpan={2}>
+                    Total · {rows.length} venta{rows.length === 1 ? '' : 's'}
+                  </th>
+                  <td className="num">{soles(shown.price)}</td>
+                  <td className="num">{soles(shown.cost)}</td>
+                  <td className="num">{soles(shown.commission)}</td>
+                  <td className="num">{soles(shown.extra)}</td>
+                  <td className="num dist-profit">{soles(shown.profit)}</td>
+                  <td className="num">{shown.price > 0 ? pct((shown.profit / shown.price) * 100) : '—'}</td>
+                  <td className="num">{soles(shown.reinvest)}</td>
+                  <td className="num">{soles(shown.salary)}</td>
+                  <td className="num">{soles(shown.reserve)}</td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}
+        <p className="hint">Los márgenes por debajo de tu alerta ({pct(config.minMarginPercent)}) se marcan en rojo.</p>
       </div>
 
-      <div className="chart-card no-print">
-        <h3 className="chart-title">Porcentajes</h3>
+      <div className="dist-card no-print">
+        <div className="dist-head dist-head-inline">
+          <h3 className="dist-card-title">Porcentajes</h3>
+          <span>
+            Comisión {pct(commissionPercent)} · Reparto {config.reinvestPercent} / {config.salaryPercent} /{' '}
+            {config.reservePercent}
+          </span>
+        </div>
         <DistributionConfigForm config={config} commissionPercent={commissionPercent} />
       </div>
     </section>
