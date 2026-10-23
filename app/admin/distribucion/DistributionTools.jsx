@@ -170,10 +170,8 @@ export function DistributionConfigForm({ config, commissionPercent }) {
           Comisión vendedora %
           <input name="commissionPercent" type="number" min="0" max="100" step="0.5" defaultValue={commissionPercent} />
         </label>
-        <label>
-          Impuesto estimado %
-          <input name="taxPercent" type="number" min="0" max="100" step="0.1" defaultValue={config.taxPercent} />
-        </label>
+        {/* Sin IGV: el negocio no cobra impuesto en sus precios. */}
+        <input type="hidden" name="taxPercent" value="0" />
         <label>
           Alerta si el margen es menor a %
           <input name="minMarginPercent" type="number" min="0" max="100" step="1" defaultValue={config.minMarginPercent} />

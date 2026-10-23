@@ -6634,3 +6634,69 @@ select:focus {
   font-family: var(--font-body);
   font-size: 0.95rem;
 }
+
+/* Distribución: en qué usar la plata */
+.spending-steps {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spending-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--status-good);
+  background: var(--status-good-bg);
+}
+
+.spending-steps li.is-missing {
+  border-left-color: var(--status-critical);
+  background: var(--status-critical-bg);
+}
+
+.spending-steps li.is-off {
+  border-left-color: var(--ink-soft);
+  background: rgba(0, 0, 0, 0.03);
+  opacity: 0.75;
+}
+
+.spending-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--green-900);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.spending-label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.spending-label small {
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.spending-steps li.is-missing .spending-label small {
+  color: var(--status-critical);
+  font-weight: 700;
+}
+
+.spending-steps strong {
+  white-space: nowrap;
+}
