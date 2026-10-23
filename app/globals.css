@@ -6533,3 +6533,50 @@ select:focus {
     display: none;
   }
 }
+
+/* Pasar dinero entre sobres (Distribución) */
+.envelope-transfer {
+  margin-top: 1rem;
+}
+
+.envelope-transfer-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr));
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.envelope-transfer-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.envelope-transfer-form input,
+.envelope-transfer-form select {
+  width: 100%;
+  min-width: 0;
+}
+
+.envelope-transfer-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.envelope-transfer-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.envelope-transfer-list li span {
+  flex: 1;
+  min-width: 0;
+}

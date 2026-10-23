@@ -7,9 +7,10 @@ import {
   getDistributionReport,
   getEnvelopeDetail,
   getEnvelopes,
+  listEnvelopeTransfers,
 } from '@/lib/db';
 import { REPORT_PRESETS, resolveReportRange, toDayString } from '@/lib/reports';
-import { DistributionConfigForm, ExportButtons } from './DistributionTools';
+import { DistributionConfigForm, EnvelopeTransfer, ExportButtons } from './DistributionTools';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,16 +154,18 @@ export default async function DistribucionPage({ searchParams }) {
   let envelopes;
   let report;
   let detail = null;
+  let transfers = [];
   try {
     // Las ventas anteriores al módulo se calculan una sola vez con los % de hoy.
     await backfillBreakdowns();
-    [config, commissionPercent, envelopes, report, detail] = await Promise.all([
+    [config, commissionPercent, envelopes, report, detail, transfers] = await Promise.all([
       getDistributionConfig(),
       getCommissionPercent(),
       getEnvelopes(),
       getDistributionReport(range),
       // Sobre abierto (?sobre=reserva): cada movimiento que forma su "Entró" y su "Salió".
       params.sobre ? getEnvelopeDetail(String(params.sobre)) : Promise.resolve(null),
+      listEnvelopeTransfers(),
     ]);
   } catch (error) {
     return (
@@ -231,6 +234,10 @@ export default async function DistribucionPage({ searchParams }) {
         })}
       </div>
       {detail ? <EnvelopeDetail detail={detail} closeHref={hrefWith({ sobre: null })} /> : null}
+      <EnvelopeTransfer
+        balances={Object.fromEntries(envelopes.envelopes.map((e) => [e.key, e.balance]))}
+        transfers={transfers}
+      />
       <p className="hint no-print">
         Para sacar dinero de un sobre usa <Link href="/admin/caja">Caja → Registrar salida</Link>: pago a la
         vendedora, saqué para mí (sueldo), pagué impuestos, usé la reserva o compra de perfumes.

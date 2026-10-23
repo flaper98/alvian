@@ -1,9 +1,138 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { saveDistributionConfigAction } from '@/lib/actions';
+import { deleteEnvelopeTransferAction, saveDistributionConfigAction, transferEnvelopeAction } from '@/lib/actions';
+
+const TRANSFER_LABELS = { sueldo: 'Sueldo', reserva: 'Reserva', reinversion: 'Reinversión', impuestos: 'Impuestos' };
+const money = (value) =>
+  `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+function TransferButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="btn-primary" disabled={pending}>
+      {pending ? 'Pasando…' : 'Pasar dinero'}
+    </button>
+  );
+}
+
+function UndoTransfer({ id }) {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      className="pivot-remove"
+      aria-label="Deshacer traspaso"
+      title="Deshacer"
+      disabled={isPending}
+      onClick={() => {
+        if (!window.confirm('¿Deshacer este traspaso? El dinero vuelve al sobre de origen.')) return;
+        startTransition(async () => {
+          const result = await deleteEnvelopeTransferAction(id);
+          if (result?.error) window.alert(result.error);
+        });
+      }}
+    >
+      ×
+    </button>
+  );
+}
+
+/**
+ * Pasar dinero de un sobre a otro sin tocar la Caja. Ej.: el sueldo que no
+ * sacaste se pasa a la Reserva para pagar la deuda.
+ */
+export function EnvelopeTransfer({ balances, transfers = [] }) {
+  const [state, formAction] = useActionState(transferEnvelopeAction, { error: null });
+  const [from, setFrom] = useState(balances.sueldo > 0 ? 'sueldo' : 'reinversion');
+  const [to, setTo] = useState('reserva');
+  const [amount, setAmount] = useState(balances.sueldo > 0 ? String(balances.sueldo) : '');
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (state?.success) {
+      setDone(true);
+      setAmount('');
+    }
+  }, [state]);
+
+  return (
+    <div className="chart-card envelope-transfer no-print">
+      <h3 className="chart-title">Pasar dinero entre sobres</h3>
+      <p className="hint">
+        Para usar en otra cosa lo que ya está apartado, por ejemplo tu sueldo que no sacaste, para la Reserva o la
+        deuda. No sale dinero de la Caja: solo cambia de sobre.
+      </p>
+      <form action={formAction} className="envelope-transfer-form" onChange={() => setDone(false)}>
+        <label>
+          De
+          <select
+            name="from"
+            value={from}
+            onChange={(event) => {
+              const next = event.target.value;
+              setFrom(next);
+              if (to === next) setTo(next === 'reserva' ? 'reinversion' : 'reserva');
+            }}
+          >
+            {Object.entries(TRANSFER_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label} ({money(balances[key] || 0)})
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          A
+          <select name="to" value={to} onChange={(event) => setTo(event.target.value)}>
+            {Object.entries(TRANSFER_LABELS)
+              .filter(([key]) => key !== from)
+              .map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label>
+          Monto (S/)
+          <input
+            name="amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            required
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+          />
+        </label>
+        <label>
+          Nota (opcional)
+          <input name="note" type="text" placeholder="Ej: sueldo de octubre para la deuda" />
+        </label>
+        <TransferButton />
+      </form>
+      {state?.error ? <p className="form-error">{state.error}</p> : null}
+      {done ? <p className="form-ok">Listo: el dinero cambió de sobre.</p> : null}
+      {transfers.length ? (
+        <ul className="envelope-transfer-list">
+          {transfers.map((t) => (
+            <li key={t.id}>
+              <span>
+                {new Date(t.occurred_at).toLocaleDateString('es-PE', { timeZone: 'America/Lima' })} ·{' '}
+                {TRANSFER_LABELS[t.envelope] || t.envelope} → {TRANSFER_LABELS[t.to_envelope] || t.to_envelope}
+                {t.note ? ` · ${t.note}` : ''}
+              </span>
+              <strong>{money(t.amount)}</strong>
+              <UndoTransfer id={t.id} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
 
 function SaveButton() {
   const { pending } = useFormStatus();
