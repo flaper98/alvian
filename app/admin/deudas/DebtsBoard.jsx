@@ -285,6 +285,60 @@ function PaymentForm({ debt, onClose }) {
   );
 }
 
+/** Botón que abre el pago de una deuda (lo usa también la tarjeta de "Próxima cuota"). */
+export function PayDebtButton({ debt, label, className = 'btn-primary' }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className={className} onClick={() => setOpen(true)}>
+        {label}
+      </button>
+      {open ? (
+        <Modal onClose={() => setOpen(false)}>
+          <PaymentForm debt={debt} onClose={() => setOpen(false)} />
+        </Modal>
+      ) : null}
+    </>
+  );
+}
+
+/** Una casilla por cuota: pagada, la que toca (o vencida) y las que vienen. */
+function InstallmentCalendar({ debt }) {
+  const { dueDates } = installmentPlan({
+    installments: debt.installments,
+    installmentAmount: debt.installment_amount,
+    firstDueDate: debt.first_due_date,
+  });
+  const today = todayInLima();
+  const thisYear = today.slice(0, 4);
+  return (
+    <div className="debt-calendar">
+      <h4>Calendario de cuotas</h4>
+      <ol>
+        {dueDates.map((date, index) => {
+          const number = index + 1;
+          const paid = number <= debt.loan.paidInstallments;
+          const isNext = number === debt.loan.nextNumber;
+          const overdue = !paid && date < today;
+          const d = new Date(`${date}T12:00:00Z`);
+          const label =
+            date.slice(0, 4) === thisYear ? shortDueFmt.format(d) : dueFmt.format(d).replace(/^0/, '');
+          const state = paid ? 'is-paid' : overdue ? 'is-overdue' : isNext ? 'is-next' : '';
+          return (
+            <li key={date} className={state}>
+              <span>
+                Cuota {number}
+                {paid ? ' ✓' : ''}
+              </span>
+              <strong>{label}</strong>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 function DebtCard({ debt }) {
   const [modal, setModal] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
@@ -296,6 +350,10 @@ function DebtCard({ debt }) {
   // En un préstamo lo que vence es la próxima cuota; en una deuda simple, la fecha límite.
   const nextDue = loan ? loan.nextDueDate : debt.due_date;
   const overdue = !settled && nextDue && nextDue < todayInLima();
+  const interest = loan && debt.principal ? Math.max(debt.total - debt.principal, 0) : null;
+  const summary = loan
+    ? `Préstamo de ${soles(debt.principal || debt.total)}${debt.funds_investment ? ' invertido en el negocio' : ''} · ${debt.installments} cuotas de ${soles(debt.installment_amount)}`
+    : debt.description || null;
 
   function run(action, id, confirmText) {
     if (!window.confirm(confirmText)) return;
@@ -311,7 +369,8 @@ function DebtCard({ debt }) {
       <div className="debt-card-head">
         <div>
           <h3>{debt.creditor}</h3>
-          {debt.description ? <p className="hint">{debt.description}</p> : null}
+          {summary ? <p className="debt-card-summary">{summary}</p> : null}
+          {loan && debt.description ? <p className="hint">{debt.description}</p> : null}
         </div>
         <div className="debt-badges">
           {debt.funds_investment ? <span className="badge badge-invest">Para invertir</span> : null}
@@ -353,21 +412,31 @@ function DebtCard({ debt }) {
       >
         <span style={{ width: `${percent}%` }} />
       </div>
-      <p className="hint">
-        {percent}% pagado
-        {loan
-          ? ` · ${loan.paidInstallments} de ${debt.installments} cuotas de ${soles(debt.installment_amount)} · última el ${dueFmt.format(new Date(loan.lastDueDate))}`
-          : ''}
-      </p>
-      {loan && debt.principal ? (
-        <p className="hint">
-          Te prestaron {soles(debt.principal)} · pagas {soles(Math.max(debt.total - debt.principal, 0))} de intereses
-        </p>
+      <div className="debt-progress-meta">
+        <span>
+          {percent}% pagado
+          {loan ? ` · ${loan.paidInstallments} de ${debt.installments} cuotas` : ''}
+        </span>
+        {loan ? <span>Última cuota: {dueFmt.format(new Date(`${loan.lastDueDate}T12:00:00Z`)).replace(/^0/, '')}</span> : null}
+      </div>
+
+      {loan && debt.first_due_date ? <InstallmentCalendar debt={debt} /> : null}
+
+      {interest != null ? (
+        <div className="debt-interest">
+          <div className="debt-interest-bar" aria-hidden="true">
+            <span style={{ flexGrow: debt.principal }} />
+            <span style={{ flexGrow: interest }} />
+          </div>
+          <p>
+            Te prestaron <strong>{soles(debt.principal)}</strong> y pagas <strong>{soles(interest)}</strong> de intereses.
+          </p>
+        </div>
       ) : null}
 
       <div className="debt-actions">
         {!settled ? (
-          <button type="button" className="btn-primary" onClick={() => setModal('pay')}>
+          <button type="button" className="btn-primary debt-pay" onClick={() => setModal('pay')}>
             {loan?.nextNumber ? `Registrar cuota ${loan.nextNumber} · ${soles(loan.nextAmount)}` : 'Registrar pago'}
           </button>
         ) : null}
@@ -461,23 +530,26 @@ export default function DebtsBoard({ debts }) {
   }
 
   return (
-    <>
-      <div className="filter-chips" role="group" aria-label="Filtrar deudas">
-        {[
-          ['active', 'Por pagar', active.length],
-          ['settled', 'Pagadas', settled.length],
-          ['all', 'Todas', debts.length],
-        ].map(([key, label, count]) => (
-          <button
-            key={key}
-            type="button"
-            className={`filter-chip${filter === key ? ' active' : ''}`}
-            aria-pressed={filter === key}
-            onClick={() => setFilter(key)}
-          >
-            {label} <span className="filter-chip-count">{count}</span>
-          </button>
-        ))}
+    <div className="debts-board">
+      <div className="dist-head debts-board-head">
+        <h2>Tus deudas</h2>
+        <div className="segmented" role="group" aria-label="Filtrar deudas">
+          {[
+            ['active', 'Por pagar', active.length],
+            ['settled', 'Pagadas', settled.length],
+            ['all', 'Todas', debts.length],
+          ].map(([key, label, count]) => (
+            <button
+              key={key}
+              type="button"
+              className={filter === key ? 'is-on' : undefined}
+              aria-pressed={filter === key}
+              onClick={() => setFilter(key)}
+            >
+              {label} <span className="segmented-count">{count}</span>
+            </button>
+          ))}
+        </div>
       </div>
       {visible.length === 0 ? (
         <p className="hint">{filter === 'active' ? '¡No debes nada! 🎉' : 'No hay deudas en esta vista.'}</p>
@@ -488,6 +560,6 @@ export default function DebtsBoard({ debts }) {
           ))}
         </ul>
       )}
-    </>
+    </div>
   );
 }
