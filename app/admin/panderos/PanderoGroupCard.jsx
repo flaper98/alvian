@@ -192,23 +192,22 @@ function EntryRow({ entry, perfumes, groupEntries, today, pendingByPerfume, canU
         {!entry.fulfilled ? <small>{relativeDay(turnIso, today)}</small> : null}
       </div>
       <div className="pandero-actions">
+        {/* Todos pagan su cuota cada semana, también los que ya recibieron su perfume. */}
+        <button
+          type="button"
+          className={`pandero-pill${entry.paying ? ' is-ok' : ' is-wait'}`}
+          onClick={togglePaying}
+          disabled={isPending}
+          title={entry.paying ? 'Tocar para marcar sin pagar' : 'Tocar cuando pague su cuota de esta semana'}
+        >
+          <i aria-hidden="true" />
+          Cuota: <b>{entry.paying ? `Pagó S/ ${PANDERO_CUOTA_AMOUNT}` : 'Sin pagar'}</b>
+        </button>
         {!entry.fulfilled ? (
-          <>
-            <button
-              type="button"
-              className={`pandero-pill${entry.paying ? ' is-ok' : ' is-wait'}`}
-              onClick={togglePaying}
-              disabled={isPending}
-              title={entry.paying ? 'Tocar para marcar sin pagar' : 'Tocar cuando pague su cuota'}
-            >
-              <i aria-hidden="true" />
-              Pago: <b>{entry.paying ? `Pagando S/ ${PANDERO_CUOTA_AMOUNT}` : 'Sin pagar'}</b>
-            </button>
-            <button type="button" className="pandero-pill" onClick={deliver} disabled={isPending} title="Tocar cuando le entregues el perfume">
-              <i aria-hidden="true" />
-              Entrega: <b>Pendiente</b>
-            </button>
-          </>
+          <button type="button" className="pandero-pill" onClick={deliver} disabled={isPending} title="Tocar cuando le entregues el perfume">
+            <i aria-hidden="true" />
+            Entrega: <b>Pendiente</b>
+          </button>
         ) : (
           <span className="pandero-pill is-done">
             <i aria-hidden="true" />
@@ -224,6 +223,38 @@ function EntryRow({ entry, perfumes, groupEntries, today, pendingByPerfume, canU
         <PanderoRoundPaymentsModal entry={entry} groupEntries={groupEntries} onClose={() => setShowPayments(false)} />
       ) : null}
     </li>
+  );
+}
+
+/**
+ * Cuotas de la semana en curso: cuántos ya pagaron y quiénes faltan. Al marcar
+ * la entrega del turno, esta lista se guarda (⋯ → Ver pagos) y empieza otra semana.
+ */
+function WeekPayments({ entries, next }) {
+  const paid = entries.filter((e) => e.paying);
+  const missing = entries.filter((e) => !e.paying);
+  const expected = entries.length * PANDERO_CUOTA_AMOUNT;
+  const collected = paid.length * PANDERO_CUOTA_AMOUNT;
+  const complete = missing.length === 0;
+  return (
+    <div className={`pandero-week${complete ? ' is-complete' : ''}`}>
+      <div className="pandero-week-head">
+        <strong>
+          Cuotas de esta semana · turno #{next.position} {next.customer_name}
+        </strong>
+        <span>
+          Pagaron <b>{paid.length} de {entries.length}</b> · S/ {collected} de S/ {expected}
+        </span>
+      </div>
+      <div className="pandero-progress" aria-hidden="true">
+        <span style={{ width: `${entries.length ? (paid.length / entries.length) * 100 : 0}%` }} />
+      </div>
+      <p>
+        {complete
+          ? '¡Todos pagaron! Ya puedes entregar el perfume de esta semana.'
+          : `Faltan: ${missing.map((e) => e.customer_name).join(', ')}`}
+      </p>
+    </div>
   );
 }
 
@@ -280,6 +311,8 @@ export default function PanderoGroupCard({ group, perfumes, today, pendingByPerf
           </span>
         </div>
       </div>
+
+      {next ? <WeekPayments entries={entries} next={next} /> : null}
 
       {pendingEntries.length ? (
         <ul className="pandero-rows">

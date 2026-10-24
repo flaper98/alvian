@@ -8554,3 +8554,47 @@ select:focus {
     grid-template-columns: auto minmax(0, 1fr) 9rem minmax(0, 24rem);
   }
 }
+
+.pandero-week {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.9rem 1.25rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #e3c58c;
+  border-radius: 12px;
+  background: #fdf7e8;
+  font-size: 0.85rem;
+}
+
+.pandero-week.is-complete {
+  border-color: rgba(10, 125, 46, 0.3);
+  background: var(--status-good-bg);
+}
+
+.pandero-week-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.pandero-week p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 861px) {
+  .pandero-row {
+    grid-template-columns: auto minmax(0, 1fr) 9rem minmax(0, 27rem);
+  }
+}
+
+.pandero-actions {
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 860px) {
+  .pandero-actions {
+    flex-wrap: wrap;
+  }
+}
