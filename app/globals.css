@@ -7924,3 +7924,633 @@ select:focus {
   flex-wrap: wrap;
   margin-top: auto;
 }
+
+/* ---------- Por cobrar (diseño 2026-10) ---------- */
+.credits-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.credits-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 1rem;
+}
+
+.credits-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.credits-search {
+  display: flex;
+  flex: 1 1 340px;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.credits-search input {
+  flex: 1 1 200px;
+  max-width: 360px;
+  min-width: 0;
+}
+
+.credit-row-main,
+.credit-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7.5rem 7.5rem 7.5rem 11rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.credit-columns {
+  padding: 0 1.25rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.credit-columns span:not(:first-child) {
+  text-align: right;
+}
+
+.credit-customers {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credit-customer {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--cream-soft);
+}
+
+.credit-customer-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 2px solid #efe9da;
+}
+
+.credit-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: #e3ece5;
+  color: var(--green-900);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.credit-customer-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.credit-customer-name strong {
+  font-size: 1.1rem;
+  color: var(--green-900);
+}
+
+.credit-customer-name small {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.credit-customer-debt {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.credit-customer-debt small {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.credit-customer-debt strong {
+  font-size: 1.45rem;
+  color: var(--status-critical);
+}
+
+.credit-settled,
+.credit-paid {
+  font-weight: 700;
+  color: var(--status-good);
+}
+
+.credit-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credit-row {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #efe9da;
+}
+
+.credit-row:first-child {
+  border-top: 0;
+}
+
+.credit-row.is-paid {
+  background: #f8f5ec;
+}
+
+.credit-row.is-paid .credit-row-name strong {
+  color: var(--ink-soft);
+}
+
+.credit-row-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.credit-row-name strong {
+  font-size: 0.98rem;
+}
+
+.credit-row-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.credit-row-progress small {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.credit-bar {
+  display: block;
+  width: 110px;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8e1cf;
+}
+
+.credit-bar span {
+  display: block;
+  height: 100%;
+  background: var(--status-good);
+}
+
+.credit-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.credit-balance {
+  font-weight: 700;
+}
+
+.credit-balance.is-owed {
+  color: var(--status-critical);
+}
+
+.credit-action {
+  text-align: right;
+}
+
+.credit-action .btn-secondary {
+  width: 100%;
+  max-width: 11rem;
+}
+
+.credit-row-form {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .credit-columns {
+    display: none;
+  }
+
+  .credit-row-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem 0.75rem;
+  }
+
+  .credit-row-name,
+  .credit-action {
+    grid-column: 1 / -1;
+  }
+
+  .credit-num {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .credit-num::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .credit-action {
+    text-align: left;
+  }
+
+  .credit-action .btn-secondary {
+    max-width: none;
+  }
+
+  .credit-customer-head {
+    flex-wrap: wrap;
+  }
+
+  .credits-search {
+    flex-basis: 100%;
+    justify-content: stretch;
+  }
+
+  .credits-search input {
+    max-width: none;
+  }
+}
+
+/* ---------- Panderos (diseño 2026-10) ---------- */
+.panderos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panderos-page .admin-header {
+  align-items: flex-start;
+}
+
+.pandero-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid rgba(178, 59, 59, 0.3);
+  border-radius: 12px;
+  background: #fbe9e9;
+  color: var(--status-critical);
+  font-size: 0.9rem;
+}
+
+.pandero-note {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: #f1ece0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+.pandero-card {
+  overflow: visible;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--cream-soft);
+}
+
+.pandero-card-head {
+  padding: 1.25rem 1.25rem 0.9rem;
+  border-bottom: 2px solid #efe9da;
+}
+
+.pandero-card-head .dist-head {
+  margin-bottom: 0.75rem;
+}
+
+.pandero-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8e1cf;
+}
+
+.pandero-progress span {
+  display: block;
+  height: 100%;
+  background: var(--status-good);
+}
+
+.pandero-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.pandero-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pandero-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 9rem auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid #efe9da;
+}
+
+.pandero-rows .pandero-row:first-child {
+  border-top: 0;
+}
+
+.pandero-row.is-busy {
+  opacity: 0.6;
+}
+
+.pandero-row.is-done {
+  background: #f8f5ec;
+}
+
+.pandero-turn {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  background: var(--green-900);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pandero-row.is-done .pandero-turn {
+  background: var(--status-good);
+}
+
+.pandero-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pandero-who strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+}
+
+.pandero-who span {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.pandero-who small {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pandero-today {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--green-900);
+  color: #fff !important;
+  font-size: 0.7rem !important;
+  font-weight: 700;
+}
+
+.pandero-date {
+  display: flex;
+  flex-direction: column;
+}
+
+.pandero-date small {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.pandero-date small:first-child {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pandero-date strong {
+  font-size: 0.95rem;
+}
+
+.pandero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.pandero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pandero-pill i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.pandero-pill.is-wait {
+  border-color: #e3c58c;
+  background: #f5e6c8;
+  color: #7d5c1d;
+}
+
+.pandero-pill.is-ok,
+.pandero-pill.is-done {
+  border-color: rgba(10, 125, 46, 0.3);
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.pandero-pill.is-done {
+  cursor: default;
+}
+
+.pandero-menu {
+  position: relative;
+}
+
+.pandero-menu-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pandero-menu ul {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  min-width: 210px;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.pandero-menu li button {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pandero-menu li button:hover,
+.pandero-menu li button:focus-visible {
+  background: #f1ece0;
+}
+
+.pandero-menu li button.is-danger {
+  color: var(--status-critical);
+}
+
+.pandero-delivered {
+  border-top: 1px solid #efe9da;
+}
+
+.pandero-delivered summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  list-style: none;
+}
+
+.pandero-delivered summary::-webkit-details-marker {
+  display: none;
+}
+
+.pandero-delivered summary::after {
+  content: '+';
+}
+
+.pandero-delivered[open] summary::after {
+  content: '−';
+}
+
+.pandero-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #efe9da;
+  background: #f5f1e6;
+}
+
+.pandero-add label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pandero-add input,
+.pandero-add select {
+  width: 100%;
+  min-width: 0;
+}
+
+.pandero-add .form-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.pandero-card-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.6rem 1.25rem 0.9rem;
+}
+
+@media (max-width: 860px) {
+  .pandero-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem 0.85rem;
+  }
+
+  .pandero-date {
+    grid-column: 2;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .pandero-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .pandero-add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 861px) {
+  .pandero-row {
+    grid-template-columns: auto minmax(0, 1fr) 9rem minmax(0, 24rem);
+  }
+}

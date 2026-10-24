@@ -11,6 +11,54 @@ const FILTERS = [
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
+const soles = (value) =>
+  `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const initials = (name) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('') || '?';
+
+function CustomerCard({ group }) {
+  const owing = group.sales.filter((s) => Number(s.balance) > 0).length;
+  const paid = group.sales.length - owing;
+  const parts = [];
+  if (owing) parts.push(`${owing} perfume${owing === 1 ? '' : 's'} con saldo`);
+  if (paid) parts.push(`${paid} pagado${paid === 1 ? '' : 's'}`);
+  const settled = group.totalDebt <= 0;
+  return (
+    <li className={`credit-customer${settled ? ' is-settled' : ''}`}>
+      <div className="credit-customer-head">
+        <span className="credit-avatar" aria-hidden="true">
+          {initials(group.customerName)}
+        </span>
+        <div className="credit-customer-name">
+          <strong>{group.customerName}</strong>
+          <small>{parts.join(' · ')}</small>
+        </div>
+        <div className="credit-customer-debt">
+          {settled ? (
+            <span className="credit-settled">✓ Al día</span>
+          ) : (
+            <>
+              <small>Debe</small>
+              <strong>{soles(group.totalDebt)}</strong>
+            </>
+          )}
+        </div>
+      </div>
+      <ul className="credit-rows">
+        {group.sales.map((sale) => (
+          <CreditSaleRow key={sale.id} sale={sale} />
+        ))}
+      </ul>
+    </li>
+  );
+}
+
 export default function CreditosDashboard({ customerGroups }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('debt');
@@ -55,110 +103,93 @@ export default function CreditosDashboard({ customerGroups }) {
   const pageGroups = groups.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   if (customerGroups.length === 0) {
-    return <p>No hay ventas a crédito o pandero registradas.</p>;
+    return <p className="hint">No hay ventas a crédito o pandero registradas.</p>;
   }
 
   return (
-    <div>
-      <div className="list-toolbar">
-        <input
-          type="search"
-          placeholder="Buscar cliente..."
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-          <option value="debt">Ordenar: mayor deuda primero</option>
-          <option value="name">Ordenar: nombre (A-Z)</option>
-        </select>
-        <span className="list-count">
-          {groups.length} de {customerGroups.length} cliente{customerGroups.length === 1 ? '' : 's'}
-        </span>
-      </div>
-
-      <div className="filter-chips">
-        {FILTERS.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            className={`filter-chip${filterBy === filter.value ? ' active' : ''}`}
-            onClick={() => setFilterBy(filter.value)}
-          >
-            {filter.label} <span className="filter-chip-count">{filterCounts[filter.value]}</span>
-          </button>
-        ))}
+    <div className="credits-board">
+      <div className="credits-toolbar">
+        <div className="segmented" role="group" aria-label="Filtrar clientes">
+          {FILTERS.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              className={filterBy === filter.value ? 'is-on' : undefined}
+              aria-pressed={filterBy === filter.value}
+              onClick={() => setFilterBy(filter.value)}
+            >
+              {filter.label} <span className="segmented-count">{filterCounts[filter.value]}</span>
+            </button>
+          ))}
+        </div>
+        <div className="credits-search">
+          <input
+            type="search"
+            placeholder="Buscar cliente..."
+            aria-label="Buscar cliente"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label="Ordenar">
+            <option value="debt">Mayor deuda primero</option>
+            <option value="name">Nombre (A-Z)</option>
+          </select>
+        </div>
       </div>
 
       {groups.length === 0 ? (
         <p className="hint">Ningún cliente coincide con este filtro.</p>
       ) : (
         <>
-          <ul className="customer-credit-list">
+          <div className="credit-columns" aria-hidden="true">
+            <span>Perfume</span>
+            <span>Total</span>
+            <span>Pagado</span>
+            <span>Saldo</span>
+            <span />
+          </div>
+          <ul className="credit-customers">
             {pageGroups.map((group) => (
-              <li key={group.customerName} className="customer-credit-card">
-                <div className="customer-credit-header">
-                  <strong>{group.customerName}</strong>
-                  <span className={`badge ${group.totalDebt > 0 ? 'badge-pending' : 'badge-paid'}`}>
-                    Deuda total: S/ {group.totalDebt.toFixed(2)}
-                  </span>
-                </div>
-                <div className="perfume-table-wrap">
-                  <table className="perfume-table table-cards">
-                    <thead>
-                      <tr>
-                        <th scope="col">Perfume</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Pagado</th>
-                        <th scope="col">Saldo</th>
-                        <th scope="col">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {group.sales.map((sale) => (
-                        <CreditSaleRow key={sale.id} sale={sale} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </li>
+              <CustomerCard key={group.customerName} group={group} />
             ))}
           </ul>
 
-          <div className="pagination-bar">
-            <label className="pagination-size">
-              Mostrar
-              <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
-                {PAGE_SIZE_OPTIONS.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-              clientes por página
-            </label>
-            <div className="pagination-controls">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-              >
-                ← Anterior
-              </button>
-              <span className="pagination-status">
-                Página {currentPage} de {totalPages}
-              </span>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage >= totalPages}
-              >
-                Siguiente →
-              </button>
+          {groups.length > PAGE_SIZE_OPTIONS[0] ? (
+            <div className="pagination-bar">
+              <label className="pagination-size">
+                Mostrar
+                <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+                clientes por página
+              </label>
+              <div className="pagination-controls">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  ← Anterior
+                </button>
+                <span className="pagination-status">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Siguiente →
+                </button>
+              </div>
             </div>
-          </div>
+          ) : null}
         </>
       )}
     </div>
