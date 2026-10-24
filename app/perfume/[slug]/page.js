@@ -12,7 +12,7 @@ import WhatsAppFloatingButton from '../../WhatsAppFloatingButton';
 import SiteHeader from '../../_store/SiteHeader';
 import { HowToBuy, FaqSection } from '../../_store/sections';
 import { toCartProduct, discountPercent } from '../../_store/product';
-import { IconTruck, IconShield, IconLock, IconPlus } from '../../_store/icons';
+import { IconTruck, IconLock, IconPlus, IconChat } from '../../_store/icons';
 import ProductGallery from './ProductGallery';
 import ProductPurchasePanel from './ProductPurchasePanel';
 
@@ -110,6 +110,7 @@ export default async function PerfumePage({ params }) {
     ]
       .filter(Boolean)
       .join(', ') || 'WhatsApp';
+  const localFree = config.shipping.options.some((o) => o.local && !(Number(o.price) > 0));
 
   const brand = perfumeBrand(perfume);
   const categoryPage = CATEGORY_PAGES[perfume.category];
@@ -211,15 +212,33 @@ export default async function PerfumePage({ params }) {
 
           <ProductPurchasePanel product={toCartProduct(perfume)} decants={decants} bottleMl={perfume.volume_ml || null} />
 
-          <ul className="mini-trust">
+          <ul className="mini-trust" aria-label="Compra con confianza">
             <li>
-              <IconShield size={18} /> Fragancia auténtica, sellada de fábrica
+              <span className="mini-trust-ic">
+                <IconChat size={18} />
+              </span>
+              <span>
+                <strong>Atención por WhatsApp</strong>
+                Te asesoramos antes y después de comprar
+              </span>
             </li>
             <li>
-              <IconTruck size={18} /> Entrega en Pucallpa y envíos a todo el Perú
+              <span className="mini-trust-ic">
+                <IconTruck size={18} />
+              </span>
+              <span>
+                <strong>Envíos a todo el Perú</strong>
+                {localFree ? 'Entrega gratis en Pucallpa' : 'Entrega rápida en Pucallpa'}
+              </span>
             </li>
             <li>
-              <IconLock size={18} /> Paga con {paymentText}
+              <span className="mini-trust-ic">
+                <IconLock size={18} />
+              </span>
+              <span>
+                <strong>Paga con {paymentText}</strong>
+                Fragancia auténtica, sellada de fábrica
+              </span>
             </li>
           </ul>
 
@@ -267,7 +286,7 @@ export default async function PerfumePage({ params }) {
       {related.length > 0 ? (
         <section className="related-section">
           <h2 className="section-title">También te puede interesar</h2>
-          <div className="catalog-grid">
+          <div className="sf-grid related-grid">
             {related.map((p) => (
               <PerfumeCard key={p.id} perfume={p} />
             ))}

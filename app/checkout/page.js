@@ -1,8 +1,7 @@
 import { getStoreConfig } from '@/lib/store-db';
-import SiteHeader from '../_store/SiteHeader';
-import SiteFooter from '../SiteFooter';
-import CheckoutForm from './CheckoutForm';
+import CheckoutHeader, { CheckoutFooter } from '../_store/CheckoutHeader';
 import CheckoutSteps from '../_store/CheckoutSteps';
+import CheckoutForm from './CheckoutForm';
 
 export const metadata = {
   title: 'Finalizar compra',
@@ -15,17 +14,20 @@ export default async function CheckoutPage() {
   const config = await getStoreConfig();
   return (
     <>
-      <SiteHeader />
-      <section className="store-section checkout-section">
-        <div className="wrap">
-          <div className="checkout-head">
-            <h1 className="h2">Finalizar compra</h1>
-            <CheckoutSteps current={1} />
+      <CheckoutHeader backHref="/carrito" backLabel="Volver al carrito" />
+      <main className="ck-page">
+        <div className="ck-band">
+          <div className="ck-wrap">
+            <h1>Finalizar compra</h1>
+            <span className="ck-band-bar" aria-hidden="true" />
+            <CheckoutSteps current={1} tone="dark" />
           </div>
+        </div>
+        <div className="ck-wrap ck-body">
           <CheckoutForm config={config} />
         </div>
-      </section>
-      <SiteFooter />
+      </main>
+      <CheckoutFooter business={config.business} />
     </>
   );
 }

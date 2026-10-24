@@ -3,7 +3,7 @@
  * `ink` = color de la luna, `hole` = color del fondo donde se usa
  * (el centro de la luna se "recorta" pintándolo del color del fondo).
  */
-export default function BrandMark({ size = 34, ink = '#0e2b21', hole = '#ffffff', drop = '#c9993c', ...props }) {
+export default function BrandMark({ size = 34, ink = '#0b3b2d', hole = '#ffffff', drop = '#f0b429', ...props }) {
   return (
     <svg
       width={size}

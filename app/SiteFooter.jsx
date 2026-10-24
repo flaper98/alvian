@@ -44,7 +44,7 @@ export default async function SiteFooter() {
       <div className="sf-wrap sf-footer-grid">
         <div className="sf-footer-brand">
           <Link href="/" className="sf-footer-logo" aria-label="Alvian Perfumes, inicio">
-            <BrandMark size={36} ink="#f7f3e6" hole="#0e2b21" />
+            <BrandMark size={36} ink="#f0b429" hole="#0b3b2d" drop="#ffffff" />
             <span>ALVIAN</span>
           </Link>
           <h3>Nuestra promesa</h3>
@@ -90,7 +90,7 @@ export default async function SiteFooter() {
         </div>
 
         <div>
-          <h3>Enlaces</h3>
+          <h3>Alvian</h3>
           <ul>
             <li>
               <Link href="/#catalogo">Fragancias</Link>

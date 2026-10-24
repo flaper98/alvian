@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { formatMoney } from '@/lib/store-config';
+import { optimizedUrl } from '../SiteImage';
 import { cartKey, useCart } from '../_store/CartProvider';
 import { IconArrow, IconBag, IconCheck, IconLock, IconMinus, IconPlus, IconShield, IconTruck } from '../_store/icons';
 
@@ -48,7 +49,7 @@ export default function CartPage({ shipping, freeFrom, payment }) {
             <div className="cart-line" role="row" key={cartKey(item)}>
               <div className="cart-line-product" role="cell">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.image} alt="" />
+                <img src={optimizedUrl(item.image, 256)} alt="" width={72} height={72} loading="lazy" />
                 <div>
                   <Link href={`/perfume/${item.slug}`}>{item.name}</Link>
                   <small>{item.ml ? 'Frasquito de vidrio con atomizador' : 'Frasco completo'}</small>
@@ -134,7 +135,11 @@ export default function CartPage({ shipping, freeFrom, payment }) {
           {shipping.map((o) => (
             <li key={o.id}>
               <span>{o.name}</span>
-              <span>{o.price > 0 && !(freeFrom > 0 && subtotal >= freeFrom) ? formatMoney(o.price) : 'Gratis'}</span>
+              {o.price > 0 && !(freeFrom > 0 && subtotal >= freeFrom) ? (
+                <span className="pill-cost">{formatMoney(o.price)}</span>
+              ) : (
+                <span className="pill-free">Gratis</span>
+              )}
             </li>
           ))}
         </ul>
@@ -171,6 +176,17 @@ export default function CartPage({ shipping, freeFrom, payment }) {
           {payment.cod ? <span className="sf-pay-chip">Contra entrega</span> : null}
         </div>
       </aside>
+
+      {/* Celular: el total y "Continuar compra" siempre a la mano. */}
+      <div className="cart-mobile-bar">
+        <span>
+          Total productos
+          <strong>{formatMoney(subtotal)}</strong>
+        </span>
+        <Link href="/checkout" className="btn-gold">
+          Continuar compra
+        </Link>
+      </div>
     </div>
   );
 }

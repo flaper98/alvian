@@ -1,4 +1,4 @@
-import { Playfair_Display, Inter, Poppins } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 import { jsonLdHtml } from '@/lib/seo';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { WHATSAPP_NUMBER } from '@/lib/whatsapp';
@@ -11,31 +11,24 @@ import { getStoreConfig } from '@/lib/store-db';
 import './globals.css';
 import './store.css';
 import './storefront.css';
+import './theme.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 
+// Playfair Display: títulos y logo de la tienda.
 const display = Playfair_Display({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
+  weight: ['600', '700'],
   style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 });
 
-// Inter: solo lo usa el panel de administración (tablas, formularios).
+// Inter: todo el texto de la tienda y del panel de administración.
 const body = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-body',
-  display: 'swap',
-  preload: false,
-});
-
-// Poppins: tipografía principal de la tienda (títulos gruesos + texto).
-const sans = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-sans',
   display: 'swap',
 });
 
@@ -73,7 +66,7 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0e2b21',
+  themeColor: '#0b3b2d',
 };
 
 const businessJsonLd = {
@@ -109,7 +102,7 @@ const businessJsonLd = {
 export default async function RootLayout({ children }) {
   const config = await getStoreConfig();
   return (
-    <html lang="es" className={`${display.variable} ${body.variable} ${sans.variable}`}>
+    <html lang="es" className={`${display.variable} ${body.variable}`}>
       <head>
         <GoogleTagManagerHead />
       </head>

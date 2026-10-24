@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatMoney } from '@/lib/store-config';
+import { optimizedUrl } from '../SiteImage';
 import { cartKey, useCart } from './CartProvider';
 import { IconBag, IconClose, IconMinus, IconPlus, IconArrow, IconCheck } from './icons';
 
@@ -86,7 +87,7 @@ export default function CartDrawer({ freeFrom = 0 }) {
             items.map((item) => (
               <div className="ci" key={cartKey(item)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="ci-img" src={item.image} alt="" />
+                <img className="ci-img" src={optimizedUrl(item.image, 256)} alt="" width={72} height={72} loading="lazy" />
                 <div className="ci-info">
                   <Link href={`/perfume/${item.slug}`} className="ci-name">
                     {item.name}

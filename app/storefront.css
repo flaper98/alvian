@@ -7,32 +7,37 @@
    ===================================================================== */
 
 :root {
-  --sf-green: #0e2b21;
-  --sf-green-2: #1c4837;
-  --sf-gold: #c9993c;
-  --sf-gold-2: #a67c2c;
-  --sf-ink: #111a16;
-  --sf-muted: #5b6560;
-  --sf-bg: #ffffff;
-  --sf-soft: #f5f3ee;
-  --sf-line: #e8e4da;
-  --sf-radius: 20px;
+  /* Verde profundo (cabeceras, footer) y esmeralda (botones, selección, totales). */
+  --sf-green: #0b3b2d;
+  --sf-green-2: #0e7a53;
+  /* Dorado: solo acentos y fondos (sobre blanco no se usa como texto). */
+  --sf-gold: #f0b429;
+  --sf-gold-2: #0e7a53;
+  --sf-ink: #11251d;
+  --sf-muted: #5b5a52;
+  --sf-bg: #fcf7ec;
+  --sf-soft: #ffffff;
+  --sf-line: #eadfc6;
+  --sf-radius: 18px;
   --sf-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --sf-sans: var(--font-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sf-sans: var(--font-body), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --sf-serif: var(--font-display), Georgia, serif;
   --nav-h: 72px;
 }
 
-/* Base de las páginas públicas (las que tienen el menú de la tienda). */
-body:has(.sf-nav) {
+/* Base de las páginas públicas (las que tienen el menú de la tienda o el checkout). */
+body:has(.sf-nav),
+body:has(.ck-top) {
   background: var(--sf-bg);
   color: var(--sf-ink);
   font-family: var(--sf-sans);
 }
 
-body:has(.sf-nav) :is(h1, h2, h3, h4) {
-  font-family: var(--sf-sans);
-  letter-spacing: -0.02em;
+body:has(.sf-nav) :is(h1, h2, h3, h4),
+body:has(.ck-top) :is(h1, h2, h3, h4) {
+  font-family: var(--sf-serif);
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .sf-wrap {
@@ -531,7 +536,7 @@ body:has(.sf-nav) .btn-wa-outline {
 .sf-eyebrow {
   display: block;
   margin: 0 0 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -636,9 +641,7 @@ body:has(.sf-nav) .btn-wa-outline {
 
 .sf-hero-plain {
   color: #fff;
-  background:
-    radial-gradient(60% 90% at 85% 20%, rgba(201, 153, 60, 0.28), transparent 60%),
-    linear-gradient(160deg, #0e2b21, #0a211a);
+  background: var(--sf-green);
   padding: clamp(64px, 10vw, 140px) 0;
 }
 
@@ -771,10 +774,10 @@ body:has(.sf-nav) .btn-wa-outline {
     gap: 10px;
   }
   .sf-trust-list strong {
-    font-size: 12.5px;
+    font-size: 13px;
   }
   .sf-trust-list span:not(.sf-trust-ic) {
-    font-size: 11.5px;
+    font-size: 13px;
   }
 }
 
@@ -852,7 +855,7 @@ body:has(.sf-nav) .btn-wa-outline {
   padding: 6px 12px;
   border-radius: 999px;
   background: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--sf-green);
 }
@@ -919,7 +922,7 @@ body:has(.sf-nav) .btn-wa-outline {
     top: 10px;
     left: 10px;
     padding: 4px 9px;
-    font-size: 11px;
+    font-size: 13px;
   }
   .sf-cat-body {
     justify-content: center;
@@ -927,7 +930,7 @@ body:has(.sf-nav) .btn-wa-outline {
     gap: 4px;
   }
   .sf-cat-body .sf-eyebrow {
-    font-size: 10.5px;
+    font-size: 13px;
     letter-spacing: 0.14em;
   }
   .sf-cat-title {
@@ -1010,7 +1013,7 @@ body:has(.sf-nav) .btn-wa-outline {
   border-radius: 999px;
   background: var(--sf-green);
   color: #fff;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1035,7 +1038,7 @@ body:has(.sf-nav) .btn-wa-outline {
 
 .sf-card-cat {
   margin: 0 0 4px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1091,7 +1094,7 @@ body:has(.sf-nav) .btn-wa-outline {
 
 .sf-card-stock {
   margin: 6px 0 0;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #b23b3b;
 }
@@ -1124,16 +1127,16 @@ body:has(.sf-nav) .btn-wa-outline {
   }
   .sf-badge {
     padding: 4px 8px;
-    font-size: 10px;
+    font-size: 13px;
   }
   .sf-card-cat {
-    font-size: 10px;
+    font-size: 13px;
   }
   .sf-card-title {
     font-size: 15px;
   }
   .sf-card-notes {
-    font-size: 12px;
+    font-size: 13px;
   }
   .sf-card-price strong {
     font-size: 15.5px;
@@ -1252,7 +1255,7 @@ body:has(.sf-nav) .btn-wa-outline {
 }
 
 .sf-chip-count {
-  font-size: 12px;
+  font-size: 13px;
   opacity: 0.6;
 }
 
@@ -1326,15 +1329,7 @@ body:has(.sf-nav) .btn-wa-outline {
   line-height: 1.06;
   letter-spacing: -0.045em;
   text-transform: uppercase;
-  color: transparent;
-  background:
-    radial-gradient(34% 62% at 32% 64%, rgba(214, 170, 82, 0.95), transparent 72%),
-    radial-gradient(22% 45% at 74% 38%, rgba(201, 153, 60, 0.55), transparent 70%),
-    linear-gradient(115deg, #071b15 0%, #14392b 40%, #0e2b21 65%, #1f4a39 100%);
-  background-size: 220% 220%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: sf-sheen 16s ease-in-out infinite alternate;
+  color: var(--sf-green);
 }
 
 @keyframes sf-sheen {
@@ -1377,9 +1372,7 @@ body:has(.sf-nav) .btn-wa-outline {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background:
-    radial-gradient(60% 40% at 50% 45%, rgba(201, 153, 60, 0.22), transparent 70%),
-    linear-gradient(170deg, #1c3a2e, #0e2b21);
+  background: var(--sf-green);
 }
 
 .sf-split-media > .sf-video {
@@ -1571,9 +1564,7 @@ body:has(.sf-nav) .btn-wa-outline {
   height: 190px;
   overflow: hidden;
   color: var(--sf-green);
-  background:
-    radial-gradient(circle at 25% 15%, rgba(201, 153, 60, 0.25), transparent 55%),
-    linear-gradient(160deg, #eef1ec, #e2e8e1);
+  background: #e4f5ec;
 }
 
 .sf-step-art svg {
@@ -1604,7 +1595,7 @@ body:has(.sf-nav) .btn-wa-outline {
   border-radius: 999px;
   background: var(--sf-green);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -1752,7 +1743,8 @@ body:has(.sf-nav) .btn-wa-outline {
   overflow: hidden;
   aspect-ratio: 1 / 1;
   border-radius: 24px;
-  background: linear-gradient(160deg, #f1e9d8, #e6dbc3);
+  background: #fff;
+  border: 1px solid var(--sf-line);
 }
 
 .sf-gift-img {
@@ -1967,7 +1959,7 @@ body:has(.sf-nav) .btn-wa-outline {
 
 .sf-footer-grid h3 {
   margin: 0 0 16px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -2027,7 +2019,7 @@ body:has(.sf-nav) .btn-wa-outline {
 }
 
 .sf-reclamos small {
-  font-size: 12px;
+  font-size: 13px;
   color: rgba(247, 243, 230, 0.6);
 }
 
@@ -2074,7 +2066,7 @@ body:has(.sf-nav) .btn-wa-outline {
   border-radius: 6px;
   background: rgba(247, 243, 230, 0.1);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -2214,7 +2206,7 @@ body:has(.sf-nav) .btn-wa-outline {
 .product-brand {
   display: inline-block;
   margin-bottom: 4px;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2231,7 +2223,7 @@ body:has(.sf-nav) .btn-wa-outline {
   position: relative;
   padding-top: 16px;
   padding-bottom: 22px;
-  font-size: 12px;
+  font-size: 13px;
   text-align: center;
   color: rgba(247, 243, 230, 0.55);
 }

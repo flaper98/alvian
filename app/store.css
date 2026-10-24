@@ -3198,7 +3198,7 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   background: var(--border);
 }
 
-.buy-steps li > span {
+.buy-steps li .buy-step-dot {
   display: grid;
   place-items: center;
   width: 1.6rem;
@@ -3215,7 +3215,7 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   color: var(--green-900);
 }
 
-.buy-steps li.is-on > span {
+.buy-steps li.is-on .buy-step-dot {
   border-color: var(--green-900);
   background: var(--green-900);
   color: #fff;
@@ -3225,7 +3225,7 @@ body:has(.sticky-buy.show) .whatsapp-fab {
   color: var(--green-900);
 }
 
-.buy-steps li.is-done > span {
+.buy-steps li.is-done .buy-step-dot {
   border-color: var(--gold);
   background: var(--gold);
   color: #fff;
