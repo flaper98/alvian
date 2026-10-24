@@ -68,6 +68,20 @@ export default function StockPoster({ items, today, site, whatsapp }) {
   // Catálogo en PDF: con fotos, y el navegador ofrece "Guardar como PDF".
   function downloadCatalog() {
     setPhotos(true);
+    // "Guardar como PDF" usa el título de la página como nombre: Catalogo_Alvian_23102026.
+    const [{ value: day }, , { value: month }, , { value: year }] = new Intl.DateTimeFormat('es-PE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/Lima',
+    }).formatToParts(new Date());
+    const previousTitle = document.title;
+    const restore = () => {
+      document.title = previousTitle;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+    document.title = `Catalogo_Alvian_${day}${month}${year}`;
     // Espera a que se dibujen las fotos antes de abrir la ventana de imprimir.
     setTimeout(() => window.print(), 400);
   }
