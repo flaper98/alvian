@@ -7878,3 +7878,49 @@ select:focus {
     print-color-adjust: exact;
   }
 }
+
+/* Catálogo en PDF (Lista para clientes): hoja A4 con 4 perfumes por fila. */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .poster-layout {
+    display: block;
+  }
+
+  .poster {
+    max-width: none;
+    padding: 8mm;
+    border-radius: 0;
+  }
+
+  .poster-head strong {
+    font-size: 22pt;
+  }
+
+  .poster-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4mm;
+  }
+
+  .poster-grid li,
+  .poster-list li,
+  .poster-group h4 {
+    break-inside: avoid;
+  }
+
+  .poster-group h4 {
+    break-after: avoid;
+  }
+
+  .admin-footer {
+    display: none !important;
+  }
+}
+
+.poster-grid .poster-price {
+  flex-wrap: wrap;
+  margin-top: auto;
+}

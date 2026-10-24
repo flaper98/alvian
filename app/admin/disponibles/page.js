@@ -38,7 +38,7 @@ export default async function DisponiblesPage() {
 
   return (
     <section className="admin-section">
-      <div className="admin-header">
+      <div className="admin-header no-print">
         <div>
           <h1>Lista para clientes</h1>
           <p className="dist-lead">

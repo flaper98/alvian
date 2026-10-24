@@ -65,6 +65,13 @@ export default function StockPoster({ items, today, site, whatsapp }) {
       return next;
     });
 
+  // Catálogo en PDF: con fotos, y el navegador ofrece "Guardar como PDF".
+  function downloadCatalog() {
+    setPhotos(true);
+    // Espera a que se dibujen las fotos antes de abrir la ventana de imprimir.
+    setTimeout(() => window.print(), 400);
+  }
+
   async function copyText() {
     const text = whatsappText(groups, { today, site, whatsapp, showLast });
     try {
@@ -101,8 +108,12 @@ export default function StockPoster({ items, today, site, whatsapp }) {
           <button type="button" className="btn-primary poster-copy" onClick={copyText}>
             {copied ? '¡Copiado! Pégalo en WhatsApp' : 'Copiar texto para WhatsApp'}
           </button>
+          <button type="button" className="btn-secondary" onClick={downloadCatalog}>
+            Descargar catálogo en PDF
+          </button>
           <p className="hint">
             Para la captura: en el celular abre esta pantalla y captura la tarjeta. Si es larga, desmarca «Con fotos».
+            Para el PDF, elige «Guardar como PDF» en la ventana que se abre.
           </p>
         </div>
         <details className="dist-card poster-hide">
@@ -144,7 +155,7 @@ export default function StockPoster({ items, today, site, whatsapp }) {
                   {photos ? (
                     i.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={i.image} alt="" loading="lazy" />
+                      <img src={i.image} alt="" />
                     ) : (
                       <span className="poster-noimg" aria-hidden="true" />
                     )
