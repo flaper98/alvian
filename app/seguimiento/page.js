@@ -1,6 +1,7 @@
 import { findWebOrderForTracking } from '@/lib/store-db';
-import { onlyDigits, phoneError, PHONE_PATTERN, PHONE_HINT } from '@/lib/customer-validation';
+import { onlyDigits, phoneError } from '@/lib/customer-validation';
 import SiteHeader from '../_store/SiteHeader';
+import PhoneInput from './PhoneInput';
 import SiteFooter from '../SiteFooter';
 import OrderView from '../_store/OrderView';
 import { IconSearch } from '../_store/icons';
@@ -56,17 +57,7 @@ export default async function SeguimientoPage({ searchParams }) {
             </label>
             <label className="field">
               Celular
-              <input
-                name="tel"
-                type="tel"
-                inputMode="numeric"
-                pattern={PHONE_PATTERN}
-                title={PHONE_HINT}
-                maxLength={9}
-                placeholder="987654321"
-                defaultValue={phone}
-                required
-              />
+              <PhoneInput defaultValue={onlyDigits(phone).slice(0, 9)} />
             </label>
             <button className="btn-gold" type="submit">
               Buscar <IconSearch size={18} />
