@@ -23,7 +23,7 @@ import {
 /* ------------------------------------------------------------------ */
 
 const TRUST = [
-  { icon: IconShield, title: '100% originales', text: 'Sellados, de distribuidor' },
+  { icon: IconShield, title: 'Marcas exclusivas', text: 'Fragancias auténticas y selladas' },
   { icon: IconTruck, title: 'Entrega gratis en Pucallpa', text: 'Mismo día o al siguiente' },
   { icon: IconBag, title: 'Envíos a todo el Perú', text: 'Shalom u Olva, 2 a 5 días' },
   { icon: IconLock, title: 'Paga con Yape o Plin', text: 'O contra entrega en Pucallpa' },
@@ -34,7 +34,7 @@ export function TrustBadges() {
   return (
     <ul className="sf-pills">
       <li>
-        <IconShield size={16} /> 100% originales
+        <IconShield size={16} /> Marcas exclusivas
       </li>
       <li>
         <IconTruck size={16} /> Envíos a todo el Perú
@@ -96,7 +96,7 @@ export function Statement() {
         <span>sin límites</span>
       </p>
       <p className="sf-statement-sub sf-wrap reveal">
-        Perfumes árabes originales, elegidos uno a uno para acompañarte todo el día.
+        Fragancias de lujo, elegidas una a una para acompañarte todo el día.
       </p>
     </section>
   );
@@ -107,7 +107,7 @@ export function Statement() {
 /* ------------------------------------------------------------------ */
 
 const WHY = [
-  'Originales y sellados: Lattafa, Armaf, Rasasi y Afnan',
+  'Marcas exclusivas y selladas: Lattafa, Armaf, Rasasi y Afnan',
   'Fragancias intensas de 8 a 12 horas en piel',
   'Te asesoramos gratis por WhatsApp antes de comprar',
   'Paga con Yape, Plin o contra entrega en Pucallpa',
@@ -140,7 +140,7 @@ export function WhyAlvian({ perfume }) {
         <div className="sf-split-copy reveal">
           <p className="sf-eyebrow">Por qué Alvian</p>
           <h2 className="sf-h2 sf-h2-xl">
-            Lujo árabe original, <em>sin sorpresas.</em>
+            Lujo árabe auténtico, <em>sin sorpresas.</em>
           </h2>
           <ul className="sf-checks">
             {WHY.map((item) => (

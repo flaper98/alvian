@@ -61,7 +61,7 @@ export default async function BrandPage({ params }) {
     <CollectionPage
       eyebrow="Marca"
       title={`Perfumes ${brand.name} originales`}
-      intro={`Fragancias ${brand.name} 100% originales, selladas y con gran duración. Compra en minutos, paga con Yape o Plin y recíbelas en Pucallpa o en cualquier parte del Perú.`}
+      intro={`Fragancias ${brand.name} auténticas, selladas y de gran duración: alta perfumería árabe de marca exclusiva. Compra en minutos, paga con Yape o Plin y recíbelas en Pucallpa o en cualquier parte del Perú.`}
       path={`/marca/${marca}`}
       perfumes={perfumes}
       crumbs={[{ name: `Perfumes ${brand.name}`, href: `/marca/${marca}` }]}

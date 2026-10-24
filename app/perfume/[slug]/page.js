@@ -180,7 +180,7 @@ export default async function PerfumePage({ params }) {
 
         <div className="product-detail-info">
           <div className="product-badges">
-            <span className="badge badge-gold">Original</span>
+            <span className="badge badge-gold">Exclusivo</span>
             {isNew ? <span className="badge badge-gold">Nuevo</span> : null}
             {perfume.category ? (
               <span className="badge badge-gold">{CATEGORY_SHORT_LABELS[perfume.category]}</span>
@@ -213,7 +213,7 @@ export default async function PerfumePage({ params }) {
 
           <ul className="mini-trust">
             <li>
-              <IconShield size={18} /> Perfume 100% original y sellado
+              <IconShield size={18} /> Fragancia auténtica, sellada de fábrica
             </li>
             <li>
               <IconTruck size={18} /> Entrega en Pucallpa y envíos a todo el Perú

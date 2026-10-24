@@ -63,12 +63,12 @@ export default function NosotrosPage() {
         <h1 className="section-title">Quiénes somos</h1>
         <p className="about-text">
           En Alvian Perfumes creemos que un buen perfume dice mucho de ti. Somos una perfumería en
-          Pucallpa dedicada a ofrecer fragancias 100% originales, cuidadosamente seleccionadas
+          Pucallpa dedicada a la alta perfumería árabe: marcas exclusivas, cuidadosamente seleccionadas
           para dama y caballero. Te atendemos de forma personalizada por WhatsApp para ayudarte a
           encontrar el perfume ideal, con entrega rápida en Pucallpa y envíos a todo el Perú.
         </p>
         <ul className="about-features">
-          <li>Perfumes 100% originales</li>
+          <li>Marcas exclusivas, fragancias auténticas y selladas</li>
           <li>Atención personalizada por WhatsApp</li>
           <li>Entrega rápida en Pucallpa</li>
           <li>Envíos a todo el Perú</li>

@@ -1,7 +1,7 @@
 // Marcas que confirmadamente vendemos, según las líneas de perfumes del
 // catálogo (Hawas → Rasasi, Khamrah/Yara → Lattafa, 9 PM → Afnan,
 // Club de Nuit/Odyssey → Armaf). Agrega más aquí cuando sumes otras marcas.
-const BRANDS = ['Lattafa', 'Armaf', 'Rasasi', 'Afnan', '100% originales'];
+const BRANDS = ['Lattafa', 'Armaf', 'Rasasi', 'Afnan', 'Marcas exclusivas'];
 
 // El track se anima de 0% a -50%: cada "set" repite la lista varias veces para
 // ser más ancho que cualquier pantalla y que nunca se vea un hueco.

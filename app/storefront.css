@@ -303,13 +303,15 @@ body:has(.sf-nav) :is(h1, h2, h3, h4) {
     margin: 0;
     padding: 0;
   }
+  /* Menú del celular: letra serif fina, más elegante que la de títulos gruesos. */
   .sf-mobile-menu li a {
     display: block;
-    padding: 16px 0;
+    padding: 15px 0;
     border-bottom: 1px solid var(--sf-line);
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     color: var(--sf-ink);
     text-decoration: none;
   }

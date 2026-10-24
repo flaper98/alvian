@@ -17,7 +17,7 @@ export default function NotFound() {
         <h1 className="section-title">No encontramos esta página</h1>
         <p className="about-text">
           Puede que el perfume ya no esté disponible o que el enlace haya cambiado. Mira nuestro
-          catálogo de perfumes originales o vuelve al inicio.
+          colección de alta perfumería o vuelve al inicio.
         </p>
         <p>
           <Link href="/#catalogo" className="btn-outline-pill">

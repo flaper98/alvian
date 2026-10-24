@@ -49,7 +49,7 @@ export default async function SiteFooter() {
           </Link>
           <h3>Nuestra promesa</h3>
           <p>
-            Perfumes árabes 100% originales, con atención personalizada por WhatsApp, entrega en
+            Alta perfumería árabe de marcas exclusivas, con atención personalizada por WhatsApp, entrega en
             Pucallpa y envíos a todo el Perú.
           </p>
         </div>

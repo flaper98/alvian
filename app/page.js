@@ -172,8 +172,8 @@ export default async function HomePage() {
                 Fragancias que <em>se quedan</em> en la memoria.
               </h1>
               <p className="sf-lead">
-                Perfumes árabes 100% originales de Lattafa, Armaf, Rasasi y Afnan. Compra en
-                minutos, paga con Yape o Plin y recíbelo en casa.
+                Alta perfumería árabe de marcas exclusivas: Lattafa, Armaf, Rasasi y Afnan. Elige tu
+                fragancia, paga con Yape o Plin y recíbela en casa.
                 {fromPrice ? ` Desde S/ ${fromPrice.toFixed(0)}.` : ''}
               </p>
               <div className="sf-actions">
@@ -203,7 +203,7 @@ export default async function HomePage() {
             <SectionHead
               eyebrow="Encuentra tu aroma"
               title={<span id="cats-title">Perfumes árabes para cada estilo</span>}
-              text="Originales, intensos y de larga duración. Empieza por lo que te gusta."
+              text="Fragancias intensas, elegantes y de larga duración. Empieza por lo que te gusta."
             />
             <CategoryCards categories={categories} />
           </div>
@@ -233,7 +233,7 @@ export default async function HomePage() {
         <div className="sf-wrap">
           <SectionHead
             eyebrow="Nuestra colección"
-            title="Perfumes originales en Pucallpa"
+            title="Colección de alta perfumería"
             text="Entrega gratis en Pucallpa y envíos a todo el Perú."
           />
           {perfumes.length === 0 ? (

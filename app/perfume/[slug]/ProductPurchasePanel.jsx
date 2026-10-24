@@ -69,7 +69,7 @@ export default function ProductPurchasePanel({ product: bottle, decants = [], bo
         ) : null}
         {decant ? (
           <p className="size-note">
-            Decant: perfume original fraccionado en un frasquito de vidrio con atomizador. Ideal para probarlo antes
+            Decant: la misma fragancia, fraccionada en un frasquito de vidrio con atomizador. Ideal para probarlo antes
             de comprar el frasco.
           </p>
         ) : null}
