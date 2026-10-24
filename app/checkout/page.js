@@ -2,6 +2,7 @@ import { getStoreConfig } from '@/lib/store-db';
 import SiteHeader from '../_store/SiteHeader';
 import SiteFooter from '../SiteFooter';
 import CheckoutForm from './CheckoutForm';
+import CheckoutSteps from '../_store/CheckoutSteps';
 
 export const metadata = {
   title: 'Finalizar compra',
@@ -19,11 +20,7 @@ export default async function CheckoutPage() {
         <div className="wrap">
           <div className="checkout-head">
             <h1 className="h2">Finalizar compra</h1>
-            <ol className="progress">
-              <li className="done">Carrito</li>
-              <li className="on">Datos y pago</li>
-              <li>Confirmación</li>
-            </ol>
+            <CheckoutSteps current={1} />
           </div>
           <CheckoutForm config={config} />
         </div>

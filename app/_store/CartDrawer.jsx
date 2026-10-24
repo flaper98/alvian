@@ -128,6 +128,9 @@ export default function CartDrawer({ freeFrom = 0 }) {
             <Link href="/checkout" className="btn-gold btn-block btn-lg">
               Finalizar compra <IconArrow size={18} />
             </Link>
+            <Link href="/carrito" className="btn-outline btn-block">
+              Ver carrito completo
+            </Link>
             <button type="button" className="link-btn" onClick={() => setOpen(false)}>
               Seguir comprando
             </button>
