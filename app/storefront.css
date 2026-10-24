@@ -2225,3 +2225,41 @@ body:has(.sf-nav) .btn-wa-outline {
 .product-brand:hover {
   text-decoration: underline;
 }
+
+/* Firma del desarrollador, al final del pie. */
+.sf-footer-credit {
+  position: relative;
+  padding-top: 16px;
+  padding-bottom: 22px;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(247, 243, 230, 0.55);
+}
+
+.sf-footer-credit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: clamp(16px, 4vw, 44px);
+  right: clamp(16px, 4vw, 44px);
+  height: 1px;
+  background: rgba(247, 243, 230, 0.08);
+}
+
+.sf-footer-credit p {
+  margin: 0;
+}
+
+.sf-footer-credit strong {
+  color: rgba(247, 243, 230, 0.85);
+}
+
+.sf-footer-credit a {
+  color: rgba(247, 243, 230, 0.85);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sf-footer-bottom {
+  padding-bottom: 18px;
+}

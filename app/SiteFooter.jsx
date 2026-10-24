@@ -146,6 +146,15 @@ export default async function SiteFooter() {
           {payment.cashOnDeliveryEnabled ? <span className="sf-pay-chip">Contra entrega</span> : null}
         </div>
       </div>
+
+      <div className="sf-wrap sf-footer-credit">
+        <p>
+          Desarrollado por <strong>Flaper</strong> · Sistemas de gestión ·{' '}
+          <a href="https://wa.me/51921590084" target="_blank" rel="noopener noreferrer">
+            +51 921 590 084
+          </a>
+        </p>
+      </div>
     </footer>
   );
 }
