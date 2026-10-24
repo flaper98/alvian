@@ -37,6 +37,7 @@ export const SECTIONS = [
       { href: '/admin/ventas', label: 'Ventas' },
       { href: '/admin/creditos', label: 'Por cobrar' },
       { href: '/admin/comisiones', label: 'Comisiones' },
+      { href: '/admin/disponibles', label: 'Lista para clientes' },
     ],
   },
   { label: 'Panderos', icon: IconRepeat, roles: ALL, tabs: [{ href: '/admin/panderos', label: 'Panderos' }] },

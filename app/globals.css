@@ -7643,3 +7643,238 @@ select:focus {
   justify-content: flex-end;
   align-items: flex-start;
 }
+
+/* ---------- Lista para clientes (captura para WhatsApp) ---------- */
+.poster-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 460px);
+  gap: 1.5rem;
+  align-items: start;
+  justify-content: center;
+}
+
+.poster-controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.poster-controls .dist-card {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.poster-copy {
+  margin-top: 0.4rem;
+}
+
+.poster-hide summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.poster-hide ul {
+  display: grid;
+  gap: 0.3rem;
+  max-height: 320px;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: 0.88rem;
+}
+
+.poster {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem 1.25rem;
+  border-radius: 20px;
+  background: var(--green-900);
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.poster-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(201, 153, 60, 0.45);
+}
+
+.poster-head img {
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.poster-head div {
+  display: flex;
+  flex-direction: column;
+}
+
+.poster-brand {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.poster-head strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.poster-head small {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.poster-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.poster-group h4 span {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: rgba(201, 153, 60, 0.2);
+  font-size: 0.7rem;
+  letter-spacing: 0;
+}
+
+.poster-list,
+.poster-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poster-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.42rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.poster-list li:last-child {
+  border-bottom: 0;
+}
+
+.poster-name {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.4rem;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.poster-name em {
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #f5e6c8;
+  color: #7d5c1d;
+  font-size: 0.65rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.poster-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.poster-price strong {
+  font-size: 1rem;
+  color: var(--gold);
+}
+
+.poster-price s {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.poster-grid li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.poster-grid img,
+.poster-noimg {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.poster-noimg {
+  display: block;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.poster-grid .poster-name {
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.poster-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(201, 153, 60, 0.45);
+  font-size: 0.78rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.poster-foot strong {
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  .poster-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .poster {
+    order: -1;
+  }
+}
+
+@media print {
+  .poster {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
