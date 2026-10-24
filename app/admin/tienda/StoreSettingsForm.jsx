@@ -63,7 +63,7 @@ export default function StoreSettingsForm({ config }) {
         <Check
           name="cashOnDeliveryEnabled"
           label="Aceptar pago contra entrega"
-          hint="solo para envíos marcados como 'local'"
+          hint="solo en los envíos marcados «En Pucallpa · contra entrega»"
           defaultChecked={p.cashOnDeliveryEnabled}
         />
         <Check name="transferEnabled" label="Aceptar transferencia bancaria" defaultChecked={p.transferEnabled} />
@@ -101,6 +101,11 @@ export default function StoreSettingsForm({ config }) {
 
       <fieldset className="store-fields">
         <legend>Envíos</legend>
+        <p className="hint">
+          Marca «En Pucallpa · contra entrega» en las opciones dentro de la ciudad: en esas el cliente puede elegir pagar
+          al recibir (en efectivo, Yape o Plin). En los envíos a provincia déjala sin marcar: ahí se paga antes con Yape o
+          transferencia. Para que funcione, «Aceptar pago contra entrega» debe estar activado en Pagos.
+        </p>
         <input type="hidden" name="ship__count" value={ships.length} />
         {ships.map((ship, i) => (
           <div className="repeater-row repeater-ship" key={ship.id || i}>
@@ -115,8 +120,8 @@ export default function StoreSettingsForm({ config }) {
               placeholder="S/"
               defaultValue={ship.price}
             />
-            <label className="checkbox-row inline">
-              <input type="checkbox" name={`ship_${i}_local`} defaultChecked={ship.local} /> Local
+            <label className="checkbox-row inline" title="Entrega dentro de Pucallpa: el cliente puede pagar contra entrega">
+              <input type="checkbox" name={`ship_${i}_local`} defaultChecked={ship.local} /> En Pucallpa · contra entrega
             </label>
             <button type="button" className="btn-danger" onClick={() => setShips(ships.filter((_, j) => j !== i))}>
               ×
