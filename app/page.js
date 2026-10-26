@@ -57,10 +57,14 @@ export const revalidate = 3600;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 const CATEGORY_LABELS = { hombre: 'Perfumes para hombre', mujer: 'Perfumes para mujer', unisex: 'Perfumes unisex' };
 
+// Si la base de datos falla: durante el build se usa la portada vacía (para que
+// el deploy no se caiga), pero al regenerarse en producción se lanza el error
+// para que Vercel siga mostrando la última portada buena y no guarde una vacía.
 async function safe(promise, fallback) {
   try {
     return await promise;
   } catch (error) {
+    if (process.env.NEXT_PHASE !== 'phase-production-build') throw error;
     return fallback;
   }
 }
