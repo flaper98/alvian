@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-const POLL_MS = 20000;
+const POLL_MS = 60000;
 const ORDERS_HREF = '/admin/pedidos-web?estado=pendiente';
 const PROMPT_DISMISSED_KEY = 'alvian_notif_prompt_dismissed';
 
@@ -86,7 +86,11 @@ export default function OrderAlerts({ initialLatestId }) {
   }, [router]);
 
   useEffect(() => {
-    const timer = setInterval(check, POLL_MS);
+    // Solo con la pestaña a la vista: así la base de datos puede dormir cuando
+    // nadie mira el panel (cada consulta la despierta y gasta horas de cómputo).
+    const timer = setInterval(() => {
+      if (document.visibilityState === 'visible') check();
+    }, POLL_MS);
     const onVisible = () => {
       if (document.visibilityState === 'visible') check();
     };
