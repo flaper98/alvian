@@ -49,10 +49,10 @@ const CATEGORY_CARDS = [
   },
 ];
 
-// La portada se sirve desde caché y se regenera como máximo cada 60 s (o al
+// La portada se sirve desde caché y se regenera como máximo cada hora (o al
 // instante cuando el admin cambia algo, vía revalidatePath). Así carga rápido
 // aunque la base de datos esté "dormida".
-export const revalidate = 60;
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 const CATEGORY_LABELS = { hombre: 'Perfumes para hombre', mujer: 'Perfumes para mujer', unisex: 'Perfumes unisex' };

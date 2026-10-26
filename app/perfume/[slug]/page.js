@@ -18,7 +18,7 @@ import ProductPurchasePanel from './ProductPurchasePanel';
 
 // Se genera bajo demanda y se guarda en caché (máx. 60 s o hasta que el admin
 // cambie algo).
-export const revalidate = 60;
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.com';
 const CATEGORY_LABELS = { hombre: 'Perfumes para hombre', mujer: 'Perfumes para mujer', unisex: 'Perfumes unisex' };

@@ -5,7 +5,7 @@ import { CATEGORY_PAGES, brandsInStore, metaDescription, sampleNames, storePerfu
 import CollectionPage from '../../_store/CollectionPage';
 
 // Se genera bajo demanda y se guarda en caché (máx. 60 s o hasta que el admin cambie algo).
-export const revalidate = 60;
+export const revalidate = 3600;
 
 async function loadBrand(marca) {
   let all = [];
