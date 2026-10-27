@@ -8630,3 +8630,85 @@ select:focus {
   justify-content: space-between;
   gap: 0.75rem;
 }
+
+/* Plan de caja: hoja por meses con la primera columna fija */
+.plan-scroll {
+  max-height: none;
+}
+
+.cash-plan {
+  min-width: 1280px;
+}
+
+.cash-plan th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  min-width: 220px;
+  background: var(--cream-soft);
+}
+
+.cash-plan .plan-head th {
+  position: static;
+  color: #fff;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cash-plan .plan-in .plan-head th {
+  background: var(--gold-dark);
+}
+
+.cash-plan .plan-out .plan-head th {
+  background: var(--green-800);
+}
+
+.cash-plan tbody + tbody .plan-head th {
+  border-top: 14px solid var(--cream-soft);
+}
+
+.cash-plan td.num {
+  color: var(--ink);
+}
+
+.cash-plan td.num.is-neg {
+  color: var(--status-critical);
+}
+
+.cash-plan .plan-total {
+  font-weight: 700;
+  background: var(--cream);
+}
+
+.cash-plan .plan-opening th,
+.cash-plan .plan-opening td {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.cash-plan .plan-sum th,
+.cash-plan .plan-sum td {
+  font-weight: 700;
+  background: var(--cream);
+  border-top: 2px solid var(--green-900);
+}
+
+.cash-plan .plan-balance .plan-sum th,
+.cash-plan .plan-balance .plan-sum td {
+  color: #fff;
+  background: var(--green-900);
+  border-top: 14px solid var(--cream-soft);
+}
+
+.cash-plan .plan-balance .plan-sum td.is-neg {
+  color: #ffb4a8;
+}
+
+.cash-plan tbody th a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}

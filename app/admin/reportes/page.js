@@ -9,8 +9,10 @@ import {
   getLedger,
   getReceivablesReport,
   getInventoryReport,
+  getCashPlan,
   parseSalesFilters,
 } from '@/lib/reports';
+import { MONTHS } from '@/lib/cash-plan.mjs';
 import { CATEGORY_LABELS, GRANULARITIES, change } from '@/lib/sales-report.mjs';
 import { ORDER_STATUSES, PAYMENT_METHODS } from '@/lib/store-config';
 import { listPurchaseCosts } from '@/lib/db';
@@ -26,6 +28,7 @@ const TABS = [
   { key: 'general', label: 'General', dated: true },
   { key: 'ventas', label: 'Ventas', dated: true },
   { key: 'movimientos', label: 'Movimientos', dated: true },
+  { key: 'plan', label: 'Plan de caja', dated: false },
   { key: 'cobrar', label: 'Por cobrar', dated: false },
   { key: 'inventario', label: 'Inventario', dated: false },
 ];
@@ -715,6 +718,126 @@ async function MovementsTab({ range, tipo, period }) {
   );
 }
 
+/** Año del plan desde ?anio=; por defecto el año actual en Lima. */
+function planYear(value) {
+  const current = Number(new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'America/Lima' }).format(new Date()));
+  const year = Number(value);
+  return Number.isInteger(year) && year >= 2000 && year <= current ? year : current;
+}
+
+/** Una fila del plan: etiqueta, los 12 meses (vacío si el mes aún no llega) y el total. */
+function PlanRow({ label, values, total, className, href }) {
+  const cell = (v) => (v === null ? '' : money(v));
+  return (
+    <tr className={className}>
+      <th scope="row">{href ? <Link href={href}>{label}</Link> : label}</th>
+      {values.map((v, i) => (
+        <td key={i} className={`num${v !== null && v < 0 ? ' is-neg' : ''}`}>
+          {cell(v)}
+        </td>
+      ))}
+      <td className={`num plan-total${total < 0 ? ' is-neg' : ''}`}>{cell(total)}</td>
+    </tr>
+  );
+}
+
+const money = (value) =>
+  `${value < 0 ? '−' : ''}${Math.abs(Number(value) || 0).toLocaleString('es-PE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+async function CashPlanTab({ year }) {
+  const plan = await getCashPlan(year);
+  const head = (title) => (
+    <tr className="plan-head">
+      <th scope="col">{title}</th>
+      {MONTHS.map((m) => (
+        <th scope="col" className="num" key={m}>
+          {m}
+        </th>
+      ))}
+      <th scope="col" className="num">
+        Total
+      </th>
+    </tr>
+  );
+  const yearHref = (y) => `/admin/reportes?vista=plan&anio=${y}`;
+  // Cada fila de egreso abre sus movimientos en «Movimientos» (grupo de lib/ledger-types.js).
+  const typeHref = (key) => {
+    const group = key.startsWith('gasto') ? 'gasto' : ['impuestos', 'reserva'].includes(key) ? 'otras' : key;
+    return movementsHref(group, { desde: `${year}-01-01`, hasta: `${year}-12-31` });
+  };
+  return (
+    <>
+      <div className="report-filters">
+        <nav className="filter-chips" aria-label="Año">
+          {plan.years.map((y) => (
+            <Link
+              key={y}
+              href={yearHref(y)}
+              className={`filter-chip${y === year ? ' active' : ''}`}
+              aria-current={y === year ? 'page' : undefined}
+            >
+              {y}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <div className="kpi-grid">
+        <Kpi label="Caja al 1 de enero" value={soles(plan.totals.opening)} />
+        <Kpi label="Entró en el año" value={soles(plan.totals.income - plan.totals.opening)} tone="good" />
+        <Kpi label="Salió en el año" value={soles(plan.totals.outflow)} />
+        <Kpi
+          label="Saldo de caja"
+          value={soles(plan.totals.closing)}
+          sub="Al último mes del plan"
+          tone={plan.totals.closing < 0 ? 'bad' : 'good'}
+        />
+      </div>
+      <div className="pivot-scroll plan-scroll">
+        <table className="report-table cash-plan">
+          <tbody className="plan-in">
+            {head('Ingresos')}
+            <PlanRow label="Saldo del mes anterior" values={plan.opening} total={plan.totals.opening} className="plan-opening" />
+            {plan.income.map((l) => (
+              <PlanRow key={l.key} label={l.label} values={l.values} total={l.total} />
+            ))}
+            <PlanRow label="Total de ingresos" values={plan.incomeTotals} total={plan.totals.income} className="plan-sum" />
+          </tbody>
+          <tbody className="plan-out">
+            {head('Egresos')}
+            {plan.outflow.length === 0 ? (
+              <tr>
+                <td colSpan={14} className="hint">
+                  No hubo salidas en {year}.
+                </td>
+              </tr>
+            ) : (
+              plan.outflow.map((l) => (
+                <PlanRow key={l.key} label={l.label} values={l.values} total={l.total} href={typeHref(l.key)} />
+              ))
+            )}
+            <PlanRow label="Total de egresos" values={plan.outflowTotals} total={plan.totals.outflow} className="plan-sum" />
+          </tbody>
+          <tbody className="plan-balance">
+            <PlanRow
+              label="Saldo del mes (ingresos − egresos)"
+              values={plan.closing}
+              total={plan.totals.closing}
+              className="plan-sum"
+            />
+          </tbody>
+        </table>
+      </div>
+      <p className="hint">
+        Montos en soles, con lo que registraste en el sistema. El saldo de cada mes pasa como «saldo del mes anterior»
+        al siguiente. Toca una fila de egresos para ver sus movimientos.
+      </p>
+    </>
+  );
+}
+
 async function ReceivablesTab() {
   const r = await getReceivablesReport();
   const overdue = r.ages.filter((a) => a.key === '61-90' || a.key === '90+').reduce((sum, a) => sum + a.total, 0);
@@ -951,6 +1074,7 @@ export default async function ReportesPage({ searchParams }) {
     if (tab.key === 'general') content = await GeneralTab({ range, period });
     else if (tab.key === 'ventas') content = await SalesTab({ range, params });
     else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
+    else if (tab.key === 'plan') content = await CashPlanTab({ year: planYear(params.anio) });
     else if (tab.key === 'cobrar') content = await ReceivablesTab();
     else content = await InventoryTab();
   } catch (error) {
@@ -976,7 +1100,9 @@ export default async function ReportesPage({ searchParams }) {
         ))}
       </nav>
 
-      {tab.key === 'ventas' ? null : tab.dated ? (
+      {tab.key === 'ventas' ? null : tab.key === 'plan' ? (
+        <p className="report-range-label">Plan de caja por meses · elige el año</p>
+      ) : tab.dated ? (
         <>
           <RangeFilters tab={tab.key} range={range} params={params} />
           <p className="report-range-label">{rangeLabel(range)}</p>
