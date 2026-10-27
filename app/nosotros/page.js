@@ -8,12 +8,12 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://alvianfragancias.c
 export const metadata = {
   title: 'Quiénes somos',
   description:
-    'Conoce Alvian Perfumes: perfumería en Pucallpa dedicada a fragancias 100% originales, con atención personalizada por WhatsApp, entrega en Pucallpa y envíos a todo el Perú.',
+    'Conoce Alvian Perfumes: perfumería online de Pucallpa dedicada a fragancias 100% originales, con atención personalizada por WhatsApp, delivery en Pucallpa y envíos a todo el Perú.',
   alternates: { canonical: '/nosotros' },
   openGraph: {
     title: 'Quiénes somos | Alvian Perfumes',
     description:
-      'Perfumería en Pucallpa dedicada a fragancias 100% originales, con entrega en Pucallpa y envíos a todo el Perú.',
+      'Perfumería online de Pucallpa dedicada a fragancias 100% originales, con delivery en Pucallpa y envíos a todo el Perú.',
     url: '/nosotros',
     type: 'website',
   },
@@ -62,16 +62,17 @@ export default function NosotrosPage() {
       <section className="about-section">
         <h1 className="section-title">Quiénes somos</h1>
         <p className="about-text">
-          En Alvian Perfumes creemos que un buen perfume dice mucho de ti. Somos una perfumería en
-          Pucallpa dedicada a la alta perfumería árabe: marcas exclusivas, cuidadosamente seleccionadas
-          para dama y caballero. Te atendemos de forma personalizada por WhatsApp para ayudarte a
-          encontrar el perfume ideal, con entrega rápida en Pucallpa y envíos a todo el Perú.
+          En Alvian Perfumes creemos que un buen perfume dice mucho de ti. Somos una perfumería
+          online nacida en Pucallpa y dedicada a la alta perfumería árabe: marcas exclusivas,
+          cuidadosamente seleccionadas para dama y caballero. No tenemos tienda física: compras desde
+          nuestra web o por WhatsApp, te asesoramos de forma personalizada para encontrar el perfume
+          ideal y te lo llevamos a domicilio en Pucallpa o te lo enviamos a cualquier ciudad del Perú.
         </p>
         <ul className="about-features">
           <li>Marcas exclusivas, fragancias auténticas y selladas</li>
           <li>Atención personalizada por WhatsApp</li>
-          <li>Entrega rápida en Pucallpa</li>
-          <li>Envíos a todo el Perú</li>
+          <li>Delivery rápido en Pucallpa, Yarinacocha y Manantay</li>
+          <li>Envíos a todo el Perú por agencia</li>
         </ul>
       </section>
 
