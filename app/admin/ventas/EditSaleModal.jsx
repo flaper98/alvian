@@ -1,9 +1,66 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { editSaleAction } from '@/lib/actions';
+import { deleteCreditPaymentAction, editSaleAction, listSalePaymentsAction } from '@/lib/actions';
+
+const soles = (value) =>
+  `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const dateFmt = new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Lima' });
+
+/**
+ * Abonos de la venta con un botón para quitar el que se registró por error.
+ * Mientras una venta tenga abonos no se puede cambiar su precio ni eliminarla.
+ */
+function SalePayments({ saleId }) {
+  const [payments, setPayments] = useState(null);
+  const [error, setError] = useState('');
+  const [isPending, startTransition] = useTransition();
+
+  const load = useCallback(() => {
+    listSalePaymentsAction(saleId)
+      .then(setPayments)
+      .catch(() => setError('No se pudieron cargar los abonos.'));
+  }, [saleId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  if (!payments || payments.length === 0) return null;
+
+  function remove(payment) {
+    if (!window.confirm(`¿Quitar el abono de ${soles(payment.amount)}? Úsalo si el cliente en realidad no pagó.`)) return;
+    setError('');
+    startTransition(async () => {
+      const result = await deleteCreditPaymentAction(payment.id);
+      if (result?.error) setError(result.error);
+      else load();
+    });
+  }
+
+  return (
+    <div className="sale-payments-box">
+      <p className="sale-payments-title">Abonos registrados</p>
+      <ul>
+        {payments.map((p) => (
+          <li key={p.id}>
+            <span>
+              <strong>{soles(p.amount)}</strong> · {dateFmt.format(new Date(p.paidAt))}
+              {p.note ? ` · ${p.note}` : ''}
+            </span>
+            <button type="button" className="btn-link-danger" disabled={isPending} onClick={() => remove(p)}>
+              Quitar
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="hint">Si quitas todos los abonos, puedes cambiar el precio o la forma de pago, o eliminar la venta.</p>
+      {error ? <p className="form-error">{error}</p> : null}
+    </div>
+  );
+}
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -85,6 +142,7 @@ function EditSaleForm({ sale, users, onCancel, onSaved }) {
           ))}
         </select>
       </label>
+      <SalePayments saleId={sale.id} />
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       <div className="form-actions">
         <SubmitButton />
