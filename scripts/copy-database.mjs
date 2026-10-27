@@ -118,7 +118,9 @@ async function main() {
     // El destino se vacía primero (tablas creadas por el sistema, aún sin datos).
     await client.query(`TRUNCATE ${order.map(q).join(', ')} RESTART IDENTITY CASCADE`);
     for (const table of order) {
-      const [srcCols, dstCols] = await Promise.all([columns(source, table), columns(target, table)]);
+      // Las columnas del destino se leen con la misma conexión de la transacción
+      // (el pool tiene una sola: pedir otra la dejaría esperando para siempre).
+      const [srcCols, dstCols] = await Promise.all([columns(source, table), columns(client, table)]);
       const cols = srcCols.filter((c) => dstCols.includes(c));
       const { rows } = await source.query(`SELECT ${cols.map(q).join(', ')} FROM ${q(table)}`);
       for (let start = 0; start < rows.length; start += 200) {
