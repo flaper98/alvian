@@ -18,7 +18,15 @@ const ADMIN = ['admin'];
 // arriba de la página y el menú la marca activa en cualquiera de ellas.
 export const SECTIONS = [
   { label: 'Resumen', icon: IconHome, roles: ALL, tabs: [{ href: '/admin', label: 'Resumen' }] },
-  { label: 'Reportes', icon: IconChart, roles: ADMIN, tabs: [{ href: '/admin/reportes', label: 'Reportes' }] },
+  {
+    label: 'Reportes',
+    icon: IconChart,
+    roles: ADMIN,
+    tabs: [
+      { href: '/admin/reportes', label: 'Reportes' },
+      { href: '/admin/metas', label: 'Metas' },
+    ],
+  },
   {
     label: 'Pedidos',
     icon: IconClipboard,

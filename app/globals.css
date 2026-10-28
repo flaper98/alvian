@@ -8903,3 +8903,157 @@ select:focus {
     flex: 1 1 100%;
   }
 }
+
+/* ---------- Metas ---------- */
+.goals-page .dashboard-heading {
+  margin-top: 1.5rem;
+}
+
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.goal-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.goal-card-head .chart-title {
+  margin-bottom: 0.15rem;
+}
+
+.goal-status {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.goal-status-good {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.goal-status-warn {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.goal-status-bad {
+  background: var(--status-critical-bg);
+  color: var(--status-critical);
+}
+
+.goal-amount {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.goal-amount span {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.goal-tools,
+.goal-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.goal-form-inline {
+  margin: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.goal-form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.goal-form-head .chart-title {
+  margin: 0;
+}
+
+.goal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.goal-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.goal-form-grid label .hint {
+  font-weight: 400;
+}
+
+.goal-form .form-ok {
+  color: var(--status-good);
+  font-weight: 700;
+  margin: 0;
+}
+
+.goal-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.goal-month {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.goal-history td {
+  vertical-align: top;
+}
+
+.goal-history-target {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+
+@media (max-width: 900px) {
+  .goal-form-grid,
+  .goal-month-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .goal-form-grid,
+  .goal-month-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

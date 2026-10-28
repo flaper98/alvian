@@ -2,7 +2,7 @@ import { getCurrentRole } from '@/lib/session';
 import Link from 'next/link';
 import { backfillBreakdowns, getCashFlow, getSummary, listPendingDeliveries, PERIODS } from '@/lib/db';
 import { countWebOrdersByStatus } from '@/lib/store-db';
-import { getBusinessPlan } from '@/lib/reports';
+import { getBusinessPlan, getGoalsReport } from '@/lib/reports';
 import { movementsHref } from '@/lib/ledger-types';
 import { IconReceipt, IconCoin, IconClock, IconWallet } from './icons';
 import PendingDeliveryRow from './PendingDeliveryRow';
@@ -186,6 +186,41 @@ function PlanBanner({ plan }) {
   );
 }
 
+/** Acceso a Metas: la meta de dinero más próxima y la venta del mes contra su meta. */
+function GoalsBanner({ report }) {
+  if (!report) return null;
+  const goal = report.goals.find((g) => g.progress.status !== 'done') || report.goals[0];
+  const sales = report.monthly.find((m) => m.key === 'ventas');
+  if (!goal && !sales?.target) {
+    return (
+      <Link href="/admin/metas" className="web-orders-banner plan-banner">
+        <strong>Ponte metas para crecer</strong>
+        <span>Define cuánto quieres juntar y vender cada mes · crear metas →</span>
+      </Link>
+    );
+  }
+  const p = goal?.progress;
+  const headline = goal
+    ? p.status === 'done'
+      ? `Meta cumplida: ${goal.title} 🎉`
+      : `${goal.title}: ${money(p.current)} de ${money(p.target)} (${p.percent}%)`
+    : `Este mes vendiste ${money(sales.actual)} de ${money(sales.target)}`;
+  const details = [
+    goal && p.status !== 'done' && p.status !== 'overdue' ? `junta ${money(p.neededPerWeek)} por semana` : null,
+    goal && p.status === 'spend-less' ? `gasta máx. ${money(p.spendPerWeek)} por semana` : null,
+    goal && p.status === 'behind' ? 'vas atrasado' : null,
+    goal && sales?.target ? `ventas del mes: ${sales.progress.percent}% de la meta` : null,
+  ].filter(Boolean);
+  return (
+    <Link href="/admin/metas" className="web-orders-banner plan-banner goal-banner">
+      <strong>{headline}</strong>
+      <span>
+        {details.length ? `${details.join(' · ')} · ` : ''}ver tus metas →
+      </span>
+    </Link>
+  );
+}
+
 function WebOrdersBanner({ counts }) {
   const toAttend = ['pendiente', 'pagado', 'preparando'].reduce((n, s) => n + (counts[s] || 0), 0);
   if (!toAttend) return null;
@@ -284,6 +319,7 @@ export default async function ResumenPage({ searchParams }) {
   let pendingDeliveries = [];
   let cashTotal = 0;
   let plan = null;
+  let goals = null;
   const webCounts = await countWebOrdersByStatus();
   try {
     // El capital y la ganancia salen del desglose de cada venta: se completa el de ventas antiguas.
@@ -295,6 +331,7 @@ export default async function ResumenPage({ searchParams }) {
       cashTotal = (await getCashFlow()).net;
       // Resumen del plan (recuperación de la inversión y acciones pendientes).
       plan = await getBusinessPlan().catch(() => null);
+      goals = await getGoalsReport().catch(() => null);
     }
   } catch (error) {
     return (
@@ -353,6 +390,7 @@ export default async function ResumenPage({ searchParams }) {
       </div>
       <WebOrdersBanner counts={webCounts} />
       <PlanBanner plan={plan} />
+      <GoalsBanner report={goals} />
 
       <div className="kpi-grid">
         <KpiTile
