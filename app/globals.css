@@ -7886,13 +7886,24 @@ select:focus {
     margin: 10mm;
   }
 
+  @page catalogo {
+    size: A4;
+    /* Sin margen el navegador no tiene dónde poner la dirección, la fecha ni el
+       número de página: el espacio en blanco lo da el padding del catálogo. */
+    margin: 0;
+  }
+
   .poster-layout {
     display: block;
   }
 
   .poster {
+    page: catalogo;
     max-width: none;
-    padding: 8mm;
+    padding: 12mm;
+    /* El padding se repite en cada hoja, no solo en la primera y la última. */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
     border-radius: 0;
   }
 
