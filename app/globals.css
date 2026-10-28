@@ -8712,3 +8712,194 @@ select:focus {
   text-decoration-color: var(--border);
   text-underline-offset: 3px;
 }
+
+/* Lista de compras */
+.shop-add {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.shop-add-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) minmax(160px, 1.2fr) 90px 130px;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.shop-add label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.shop-add input,
+.shop-add select {
+  width: 100%;
+  min-width: 0;
+}
+
+.shop-add .btn-primary {
+  justify-self: start;
+}
+
+.shop-add-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  align-items: center;
+  min-height: 1.2rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.shop-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--green-700);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.shop-empty {
+  padding: 1.5rem 0;
+}
+
+.shop-group {
+  margin-top: 1rem;
+}
+
+.shop-group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.shop-group-head strong {
+  font-size: 1.1rem;
+  color: var(--green-900);
+}
+
+.shop-table-wrap {
+  overflow-x: auto;
+}
+
+.shop-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.shop-table th {
+  padding: 0.35rem;
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.shop-table td {
+  padding: 0.45rem 0.35rem;
+  vertical-align: top;
+  border-top: 1px solid var(--border);
+}
+
+.shop-table td:first-child {
+  min-width: 200px;
+}
+
+.shop-table td:first-child .report-sub,
+.shop-table td .report-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.shop-table select {
+  width: 160px;
+}
+
+.shop-table input {
+  width: 90px;
+}
+
+.shop-table .num {
+  text-align: right;
+  white-space: nowrap;
+  padding-top: 0.7rem;
+}
+
+.shop-table tr.is-pending {
+  opacity: 0.5;
+}
+
+.shop-group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .shop-add-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .shop-add-name {
+    grid-column: 1 / -1;
+  }
+
+  .shop-table thead {
+    display: none;
+  }
+
+  .shop-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem 0.5rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .shop-table td {
+    padding: 0;
+    border: 0;
+  }
+
+  .shop-table td:first-child {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .shop-table td[data-label]:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .shop-table select,
+  .shop-table input {
+    width: 100%;
+  }
+
+  .shop-table .num {
+    text-align: left;
+    padding-top: 0;
+  }
+
+  .shop-group-actions > * {
+    flex: 1 1 100%;
+  }
+}
