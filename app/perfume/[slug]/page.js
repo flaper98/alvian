@@ -138,7 +138,8 @@ export default async function PerfumePage({ params }) {
       '@type': 'Offer',
       priceCurrency: 'PEN',
       price: Number(perfume.price).toFixed(2),
-      availability: 'https://schema.org/InStock',
+      // Sin stock se puede pedir igual (se trae por encargo): Google lo pide como BackOrder.
+      availability: perfume.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/BackOrder',
       itemCondition: 'https://schema.org/NewCondition',
       areaServed: ['Pucallpa', 'PE'],
       url: `${SITE_URL}/perfume/${slug}`,

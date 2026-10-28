@@ -95,7 +95,14 @@ function SubmitButton({ disabled, total }) {
   );
 }
 
-function CopyButton({ value, label }) {
+/** "921590084" → "921 ••• 084": el número completo solo se copia, no queda a la vista. */
+function maskPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length < 7) return value;
+  return `${digits.slice(0, 3)} ••• ${digits.slice(-3)}`;
+}
+
+function CopyButton({ value, label, onFail }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -108,6 +115,7 @@ function CopyButton({ value, label }) {
           setTimeout(() => setCopied(false), 1800);
         } catch (error) {
           setCopied(false);
+          onFail?.();
         }
       }}
     >
@@ -273,6 +281,8 @@ export default function CheckoutForm({ config }) {
   const kind = deliveryKind(option);
   const methods = useMemo(() => availablePaymentMethods(config, option), [config, option]);
   const [method, setMethod] = useState(old.method || methods[0] || '');
+  // Si el navegador no deja copiar, se muestra el número completo para que lo escriban.
+  const [showYapeNumber, setShowYapeNumber] = useState(false);
   const [voucherUrl, setVoucherUrl] = useState(old.voucherUrl || '');
   const [department, setDepartment] = useState(old.department || (kind === 'provincia' ? '' : 'Ucayali'));
   const [errors, setErrors] = useState({});
@@ -623,8 +633,14 @@ export default function CheckoutForm({ config }) {
             <div className="ck-yape">
               <div className="ck-yape-info">
                 <p className="ck-yape-label">Yapea o plinea al número</p>
-                <p className="ck-yape-number">{config.payment.yapeNumber}</p>
-                <CopyButton value={config.payment.yapeNumber} label="Copiar número" />
+                <p className="ck-yape-number">
+                  {showYapeNumber ? config.payment.yapeNumber : maskPhone(config.payment.yapeNumber)}
+                </p>
+                <CopyButton
+                  value={config.payment.yapeNumber}
+                  label="Copiar número"
+                  onFail={() => setShowYapeNumber(true)}
+                />
                 {config.payment.yapeName ? (
                   <p className="ck-yape-holder">
                     Titular: <strong>{config.payment.yapeName}</strong>
