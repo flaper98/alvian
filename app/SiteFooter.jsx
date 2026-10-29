@@ -99,6 +99,9 @@ export default async function SiteFooter() {
               <Link href="/#como-comprar">Cómo comprar</Link>
             </li>
             <li>
+              <Link href="/guias">Guías de perfumes</Link>
+            </li>
+            <li>
               <Link href="/nosotros">Quiénes somos</Link>
             </li>
             <li>

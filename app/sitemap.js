@@ -1,6 +1,7 @@
 import { listPerfumes } from '@/lib/db';
 import { slugify } from '@/lib/slug';
 import { CATEGORY_PAGES, brandsInStore, isInStore } from '@/lib/seo';
+import { GUIDES } from '@/lib/guides';
 
 // Se regenera cada hora para incluir perfumes nuevos.
 export const revalidate = 3600;
@@ -44,6 +45,17 @@ export default async function sitemap() {
     priority: 0.9,
   }));
 
+  // Guías: responden búsquedas como "mejores perfumes árabes para hombre".
+  const guideRoutes = [
+    { url: `${SITE_URL}/guias`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    ...GUIDES.map((guide) => ({
+      url: `${SITE_URL}/guias/${guide.slug}`,
+      lastModified: new Date(`${guide.updated}T00:00:00Z`),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    })),
+  ];
+
   let perfumeRoutes = [];
   try {
     const perfumes = await listPerfumes();
@@ -67,5 +79,5 @@ export default async function sitemap() {
     perfumeRoutes = [];
   }
 
-  return [...staticRoutes, ...collectionRoutes, ...perfumeRoutes];
+  return [...staticRoutes, ...collectionRoutes, ...guideRoutes, ...perfumeRoutes];
 }

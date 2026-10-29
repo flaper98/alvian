@@ -5,6 +5,7 @@ import { getStoreConfig, listPublicFaqs } from '@/lib/store-db';
 import { formatMoney } from '@/lib/store-config';
 import { slugify } from '@/lib/slug';
 import { brandSlug, perfumeBrand } from '@/lib/brands';
+import { guidesForPerfume } from '@/lib/guides';
 import { CATEGORY_PAGES, isInStore, metaDescription, jsonLdHtml, offerShippingAndReturns } from '@/lib/seo';
 import PerfumeCard from '../../PerfumeCard';
 import SiteFooter from '../../SiteFooter';
@@ -113,6 +114,7 @@ export default async function PerfumePage({ params }) {
   const localFree = config.shipping.options.some((o) => o.local && !(Number(o.price) > 0));
 
   const brand = perfumeBrand(perfume);
+  const guides = guidesForPerfume(slug);
   const categoryPage = CATEGORY_PAGES[perfume.category];
   // Migas de pan: Inicio / Perfumes árabes para hombre / Hawas Ice.
   const crumbs = [
@@ -293,6 +295,19 @@ export default async function PerfumePage({ params }) {
             ))}
           </div>
         </section>
+      ) : null}
+
+      {guides.length > 0 ? (
+        <nav className="sf-wrap sf-collection-links guide-related" aria-label="Guías relacionadas">
+          <h2 className="sf-collection-links-title">Guías donde aparece {perfume.name}</h2>
+          <ul>
+            {guides.map((g) => (
+              <li key={g.slug}>
+                <Link href={`/guias/${g.slug}`}>{g.title}</Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       ) : null}
 
       <HowToBuy compact />

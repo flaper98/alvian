@@ -11,6 +11,7 @@ import WhatsAppIcon from './WhatsAppIcon';
 const LINKS = [
   { href: '/#catalogo', label: 'Fragancias' },
   { href: '/#como-comprar', label: 'Cómo comprar' },
+  { href: '/guias', label: 'Guías' },
   { href: '/nosotros', label: 'Nosotros' },
   { href: '/seguimiento', label: 'Mi pedido' },
   { href: '/contacto', label: 'Contacto' },
