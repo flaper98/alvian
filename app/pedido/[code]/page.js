@@ -9,6 +9,7 @@ import CheckoutSteps from '../../_store/CheckoutSteps';
 import OrderView, { orderWhatsAppMessage } from '../../_store/OrderView';
 import ClearCart from '../../_store/ClearCart';
 import MetaPixelPurchase from '../../_store/MetaPixelPurchase';
+import GooglePurchaseEvent from '../../_store/GooglePurchaseEvent';
 import { IconCheck } from '../../_store/icons';
 import WhatsAppIcon from '../../WhatsAppIcon';
 
@@ -18,6 +19,21 @@ export const metadata = {
   title: 'Tu pedido',
   robots: { index: false, follow: false },
 };
+
+/** Para el evento de compra de Google: solo montos y productos, sin datos del cliente. */
+function purchaseEventData(order) {
+  return {
+    code: order.code,
+    subtotal: Number(order.subtotal) || 0,
+    shipping: Number(order.shipping_cost) || 0,
+    items: (order.items || []).map((item) => ({
+      item_id: String(item.perfume_id || item.name),
+      item_name: item.name,
+      price: Number(item.unit_price) || 0,
+      quantity: Number(item.quantity) || 1,
+    })),
+  };
+}
 
 /** Lo que pasa después de comprar, según cómo se paga y cómo se entrega. */
 function nextSteps(order, hours) {
@@ -62,6 +78,7 @@ export default async function PedidoPage({ params, searchParams }) {
       <>
         <ClearCart />
         <MetaPixelPurchase order={order} />
+        <GooglePurchaseEvent order={purchaseEventData(order)} />
         <CheckoutHeader backHref="/" backLabel="Seguir comprando" />
         <main className="ck-page">
           <div className="ck-band">
