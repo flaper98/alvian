@@ -7,11 +7,13 @@ import { findSection, isTabActive } from './sections';
 export default function SectionTabs({ role, pendingWebOrders = 0 }) {
   const pathname = usePathname();
   const section = findSection(pathname);
-  if (!section || section.tabs.length < 2 || !section.roles.includes(role)) return null;
+  // Una pestaña puede tener sus propios roles (si no, vale la de la sección).
+  const tabs = section?.tabs.filter((tab) => !tab.roles || tab.roles.includes(role)) || [];
+  if (!section || tabs.length < 2 || !section.roles.includes(role)) return null;
 
   return (
     <nav className="section-tabs" aria-label={section.label}>
-      {section.tabs.map((tab) => {
+      {tabs.map((tab) => {
         const active = isTabActive(pathname, tab.href);
         return (
           <Link

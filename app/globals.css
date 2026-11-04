@@ -9068,3 +9068,184 @@ select:focus {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------- Boutique (consignación) ---------- */
+.boutique-page .filter-chips {
+  margin: 0.75rem 0 1rem;
+}
+
+.boutique-sim-form,
+.boutique-config {
+  margin-bottom: 1rem;
+}
+
+.boutique-sim-inputs,
+.boutique-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.boutique-sim-inputs label,
+.boutique-form-grid label,
+.boutique-row-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.boutique-form-grid label .hint {
+  font-weight: 400;
+}
+
+
+.boutique-sim-actions,
+.boutique-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.boutique-sim-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.boutique-sim-filters input[type='search'] {
+  min-width: 220px;
+}
+
+.boutique-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.boutique-sub {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.boutique-sim-table th[scope='row'],
+.boutique-stock-table th[scope='row'],
+.boutique-pending-table th[scope='row'] {
+  text-align: left;
+}
+
+.boutique-config summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.boutique-config form {
+  margin-top: 0.75rem;
+}
+
+.boutique-preview {
+  margin: 0.5rem 0;
+}
+
+.boutique-row-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.boutique-row-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.boutique-row-form input {
+  width: 9rem;
+}
+
+.boutique-row-form .form-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.boutique-settle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.boutique-settle p {
+  margin: 0;
+}
+
+.boutique-moves {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.boutique-moves li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.boutique-move {
+  flex-shrink: 0;
+  min-width: 6.5rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.boutique-move-entrega {
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+}
+
+.boutique-move-devolucion {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink-soft);
+}
+
+.boutique-move-venta {
+  background: var(--status-good-bg);
+  color: var(--status-good);
+}
+
+.boutique-move-text {
+  flex: 1;
+}
+
+.boutique-page .form-ok {
+  color: var(--status-good);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .boutique-sim-inputs,
+  .boutique-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .boutique-row-actions {
+    flex-direction: column;
+  }
+}
