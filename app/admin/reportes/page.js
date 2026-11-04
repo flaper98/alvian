@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import {
@@ -21,11 +22,15 @@ import TrendChart from './TrendChart';
 import LedgerTable from './LedgerTable';
 import StockTable from './StockTable';
 import { CustomersTable, ProductRanking, ProfitTable, SalesExport } from './SalesTables';
+import DashboardTab from './DashboardTab';
+import { ReportError, ReportSkeleton } from './ReportStates';
 
 export const dynamic = 'force-dynamic';
 
 const TABS = [
-  { key: 'general', label: 'General', dated: true },
+  // Resumen: ganancia neta (ventas − costo − gastos). "general" es el flujo de caja.
+  { key: 'resumen', label: 'Resumen', dated: true },
+  { key: 'general', label: 'Flujo de caja', dated: true },
   { key: 'ventas', label: 'Ventas', dated: true },
   { key: 'movimientos', label: 'Movimientos', dated: true },
   { key: 'plan', label: 'Plan de caja', dated: false },
@@ -1069,18 +1074,6 @@ export default async function ReportesPage({ searchParams }) {
   const period = { periodo: params.periodo, desde: params.desde, hasta: params.hasta };
   const query = new URLSearchParams(Object.entries(period).filter(([, v]) => v)).toString();
 
-  let content;
-  try {
-    if (tab.key === 'general') content = await GeneralTab({ range, period });
-    else if (tab.key === 'ventas') content = await SalesTab({ range, params });
-    else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
-    else if (tab.key === 'plan') content = await CashPlanTab({ year: planYear(params.anio) });
-    else if (tab.key === 'cobrar') content = await ReceivablesTab();
-    else content = await InventoryTab();
-  } catch (error) {
-    content = <p className="form-error">{error.message}</p>;
-  }
-
   return (
     <section className="admin-section reports">
       <div className="admin-header">
@@ -1111,7 +1104,27 @@ export default async function ReportesPage({ searchParams }) {
         <p className="report-range-label">Situación al día de hoy · no depende del período</p>
       )}
 
-      <div className="report-body">{content}</div>
+      {/* La key hace que al cambiar de pestaña o de filtros se vea el esqueleto de carga. */}
+      <Suspense key={new URLSearchParams(params).toString()} fallback={<ReportSkeleton />}>
+        <TabContent tab={tab} range={range} params={params} period={period} />
+      </Suspense>
     </section>
   );
+}
+
+/** El contenido de la pestaña elegida; si falla, el motivo y un botón para reintentar. */
+async function TabContent({ tab, range, params, period }) {
+  let content;
+  try {
+    if (tab.key === 'resumen') content = await DashboardTab({ range });
+    else if (tab.key === 'general') content = await GeneralTab({ range, period });
+    else if (tab.key === 'ventas') content = await SalesTab({ range, params });
+    else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
+    else if (tab.key === 'plan') content = await CashPlanTab({ year: planYear(params.anio) });
+    else if (tab.key === 'cobrar') content = await ReceivablesTab();
+    else content = await InventoryTab();
+  } catch (error) {
+    content = <ReportError message={error.message} />;
+  }
+  return <div className="report-body">{content}</div>;
 }
