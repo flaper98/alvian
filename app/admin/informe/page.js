@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import { getWeeklyReport, listWeeklyReports } from '@/lib/db';
-import { resendKeyStatus } from '@/lib/email';
+import { recipientStatus, resendKeyStatus } from '@/lib/email';
 import ReportTools from './ReportTools';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +15,7 @@ const weekFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long'
 function SetupChecklist() {
   // Las tres primeras son gratis y bastan; la clave de Claude es opcional y de pago.
   const key = resendKeyStatus();
+  const to = recipientStatus();
   const keyProblem = !key.present
     ? null
     : !key.startsOk
@@ -33,7 +34,15 @@ function SetupChecklist() {
           `Guardada: empieza con «re_» y tiene ${key.length} caracteres${key.hadExtra ? ' (tenía espacios o comillas de más; ya se ignoran)' : ''}.`
         : 'Clave de Resend (resend.com → API Keys) para enviar el correo. Gratis hasta 3,000 correos al mes.',
     },
-    { ok: Boolean(process.env.INFORME_EMAIL_TO), name: 'INFORME_EMAIL_TO', text: 'Tu correo (el mismo con el que creaste la cuenta de Resend).' },
+    {
+      ok: to.valid.length > 0 && to.invalid.length === 0,
+      name: 'INFORME_EMAIL_TO',
+      text: !process.env.INFORME_EMAIL_TO
+        ? 'Tu correo (el mismo con el que creaste la cuenta de Resend).'
+        : to.valid.length === 0
+          ? 'No tiene un correo válido: pon solo tu correo, por ejemplo nombre@gmail.com (sin comillas ni espacios).'
+          : `Se enviará a: ${to.valid.join(', ')}${to.invalid.length ? ` · no válido, se ignora: ${to.invalid.join(', ')}` : ''}. Debe ser el correo de tu cuenta de Resend.`,
+    },
     { ok: Boolean(process.env.CRON_SECRET), name: 'CRON_SECRET', text: 'Una clave larga inventada por ti: protege la tarea de los lunes.' },
   ];
   const missing = items.filter((i) => !i.ok);
