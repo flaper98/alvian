@@ -25,6 +25,7 @@ export const SECTIONS = [
     tabs: [
       { href: '/admin/reportes', label: 'Reportes' },
       { href: '/admin/metas', label: 'Metas' },
+      { href: '/admin/informe', label: 'Informe semanal' },
     ],
   },
   {
