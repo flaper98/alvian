@@ -36,8 +36,11 @@ test('variación frente al período anterior, sin dividir entre cero', () => {
   assert.equal(variation(3010, 3000).direction, 'flat');
   assert.deepEqual(variation(500, 0), { ratio: null, direction: 'up' });
   assert.deepEqual(variation(0, 0), { ratio: null, direction: 'flat' });
-  // De perder 100 a ganar 50: mejora.
-  assert.deepEqual(variation(50, -100), { ratio: 1.5, direction: 'up' });
+  // De perder a ganar (o al revés) no hay porcentaje: se muestran los montos.
+  assert.deepEqual(variation(50, -100), { ratio: null, direction: 'up' });
+  assert.deepEqual(variation(-213.17, 133), { ratio: null, direction: 'down' });
+  // Perder menos que antes también es mejorar.
+  assert.deepEqual(variation(-50, -100), { ratio: 0.5, direction: 'up' });
   assert.equal(variation(10, null), null);
 });
 

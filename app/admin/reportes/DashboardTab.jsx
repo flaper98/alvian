@@ -22,7 +22,7 @@ function Change({ current, previous, compare, invert = false, points = false, co
     const v = variation(current, previous);
     direction = v.direction;
     if (v.ratio == null) {
-      // Antes fue 0: no hay porcentaje posible.
+      // Antes fue 0, o se pasó de ganar a perder: se muestra el monto de antes.
       text = `desde ${count ? previous : formatSoles(previous)}`;
       vs = `en ${compare.label}`;
     } else {
@@ -54,15 +54,37 @@ function Verdict({ current, previous, compare }) {
   if (!compare || !previous) return null;
   const v = variation(current.profit, previous.profit);
   const when = `${compare.label}${compare.partial ? ' (a la misma fecha)' : ''}`;
-  const text = {
-    up: `Estás ganando más que en ${when}`,
-    down: `Estás ganando menos que en ${when}`,
-    flat: `Estás ganando casi lo mismo que en ${when}`,
-  }[v.direction];
+  const before = `${previous.profit < 0 ? 'perdías' : 'ganabas'} ${formatSoles(Math.abs(previous.profit))}`;
+  let text;
+  if (current.profit < 0) {
+    // Con pérdida, "ganando menos" confunde: se dice cuánto vas perdiendo y cuánto era antes.
+    text = `Vas perdiendo ${formatSoles(Math.abs(current.profit))}; en ${when} ${before}`;
+  } else {
+    text = {
+      up: `Estás ganando más que en ${when}`,
+      down: `Estás ganando menos que en ${when}`,
+      flat: `Estás ganando casi lo mismo que en ${when}`,
+    }[v.direction];
+    if (v.ratio != null && v.direction !== 'flat') text += ` (${v.ratio > 0 ? '+' : '−'}${formatPercent(Math.abs(v.ratio))})`;
+    else if (v.ratio == null && v.direction !== 'flat') text += `: ${before}`;
+  }
   return (
     <p className={`dash-verdict dash-verdict-${v.direction}`}>
-      <span aria-hidden="true">{v.direction === 'up' ? '↑' : v.direction === 'down' ? '↓' : '→'}</span> {text}
-      {v.ratio != null && v.direction !== 'flat' ? ` (${v.ratio > 0 ? '+' : '−'}${formatPercent(Math.abs(v.ratio))})` : ''}.
+      <span aria-hidden="true">{v.direction === 'up' ? '↑' : v.direction === 'down' ? '↓' : '→'}</span> {text}.
+    </p>
+  );
+}
+
+/**
+ * Al inicio de un período en curso, los gastos fijos del mes (internet,
+ * publicidad…) ya se registraron pero las ventas recién empiezan.
+ */
+function EarlyPeriodNote({ current, compare }) {
+  if (!compare?.partial || current.profit >= 0 || current.general <= 0 || compare.days > 10) return null;
+  return (
+    <p className="hint">
+      Llevas {compare.days} día{compare.days === 1 ? '' : 's'} del período: ya registraste {formatSoles(current.general)} de
+      gastos generales, pero las ventas recién empiezan. Mira abajo «¿En qué se fueron los gastos?».
     </p>
   );
 }
@@ -205,7 +227,8 @@ export default async function DashboardTab({ range }) {
   return (
     <>
       <Verdict current={c} previous={p} compare={r.compare} />
-      {empty ? <p className="dash-empty">No hay ventas registradas para este periodo.</p> : null}
+      <EarlyPeriodNote current={c} compare={r.compare} />
+      {empty ?<p className="dash-empty">No hay ventas registradas para este periodo.</p> : null}
 
       <div className="kpi-grid dash-kpis">
         <Kpi label="Ventas" value={formatSoles(c.revenue)} sub={plural(c.sales, 'venta', 'ventas')}>
@@ -225,7 +248,13 @@ export default async function DashboardTab({ range }) {
         <Kpi
           label="Margen"
           value={formatPercent(c.margin)}
-          sub={c.margin == null ? 'Sin ventas' : `De cada S/ 100 te quedan ${formatSoles(c.margin * 100)}`}
+          sub={
+            c.margin == null
+              ? 'Sin ventas'
+              : c.margin < 0
+                ? `De cada S/ 100 vendidos pierdes ${formatSoles(Math.abs(c.margin) * 100)}`
+                : `De cada S/ 100 vendidos te quedan ${formatSoles(c.margin * 100)}`
+          }
         >
           <Change current={c.margin} previous={p?.margin} compare={r.compare} points />
         </Kpi>
