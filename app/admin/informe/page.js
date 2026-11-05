@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getCurrentRole } from '@/lib/session';
 import { getWeeklyReport, listWeeklyReports } from '@/lib/db';
+import { resendKeyStatus } from '@/lib/email';
 import ReportTools from './ReportTools';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +14,25 @@ const weekFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long'
 /** Qué falta configurar en Vercel para que el agente funcione solo. */
 function SetupChecklist() {
   // Las tres primeras son gratis y bastan; la clave de Claude es opcional y de pago.
+  const key = resendKeyStatus();
+  const keyProblem = !key.present
+    ? null
+    : !key.startsOk
+      ? `La clave guardada no empieza con «re_» (tiene ${key.length} caracteres): no es una clave de Resend. Cópiala de nuevo al crearla.`
+      : key.innerSpace
+        ? 'La clave guardada tiene espacios en medio: pégala de nuevo, de una sola vez.'
+        : key.length < 30
+          ? `La clave guardada es muy corta (${key.length} caracteres): parece recortada. Créala de nuevo y copia la completa.`
+          : null;
   const items = [
-    { ok: Boolean(process.env.RESEND_API_KEY), name: 'RESEND_API_KEY', text: 'Clave de Resend (resend.com → API Keys) para enviar el correo. Gratis hasta 3,000 correos al mes.' },
+    {
+      ok: key.present && !keyProblem,
+      name: 'RESEND_API_KEY',
+      text: key.present
+        ? keyProblem ||
+          `Guardada: empieza con «re_» y tiene ${key.length} caracteres${key.hadExtra ? ' (tenía espacios o comillas de más; ya se ignoran)' : ''}.`
+        : 'Clave de Resend (resend.com → API Keys) para enviar el correo. Gratis hasta 3,000 correos al mes.',
+    },
     { ok: Boolean(process.env.INFORME_EMAIL_TO), name: 'INFORME_EMAIL_TO', text: 'Tu correo (el mismo con el que creaste la cuenta de Resend).' },
     { ok: Boolean(process.env.CRON_SECRET), name: 'CRON_SECRET', text: 'Una clave larga inventada por ti: protege la tarea de los lunes.' },
   ];

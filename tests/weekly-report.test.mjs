@@ -23,7 +23,7 @@ const FACTS = {
   ],
   acciones: [
     { titulo: 'Cobra S/ 300', detalle: 'Tres clientes con saldo.' },
-    { titulo: 'Repón Khamrah', detalle: 'Se vende rápido.' },
+    { clave: 'reponer', titulo: 'Repón Khamrah', detalle: 'Presupuesto para compras: S/ 980.33.' },
     { titulo: 'Mueve 2 perfumes parados', detalle: 'Haz una promoción.' },
   ],
   masVendidos: [{ nombre: 'Khamrah <Lattafa>', unidades: 3, total: 537 }],
@@ -53,14 +53,21 @@ test('análisis gratis: cómo fue la semana, la meta y 3 acciones', () => {
   // La meta va primero (hay que cuidar las compras) y se completa con el Plan.
   assert.deepEqual(a.acciones.map((x) => x.titulo), ['Cuida tus compras', 'Cobra S/ 300', 'Repón Khamrah']);
   assert.match(a.acciones[0].detalle, /máximo S\/ 120\.00 por semana/);
+  // Reponer no contradice la meta: se limita al tope semanal.
+  assert.match(a.acciones[2].detalle, /sin pasar de S\/ 120\.00 esta semana/);
   assert.equal(a.alerta, null);
 });
 
 test('alertas: préstamo, pérdida y semana sin ventas', () => {
   const loan = rulesAnalysis({ ...FACTS, prestamo: { cuota: 250, fecha: '2026-11-06', dias: 2 } });
   assert.equal(loan.alerta, 'Tu cuota del préstamo de S/ 250.00 vence el viernes, 6 de noviembre.');
-  const loss = rulesAnalysis({ ...FACTS, ganancia: { ...FACTS.ganancia, neta: -50 } });
-  assert.match(loss.alerta, /perdiste S\/ 50\.00/);
+  const loss = rulesAnalysis({
+    ...FACTS,
+    ganancia: { ...FACTS.ganancia, neta: -187.28 },
+    gastos: { ...FACTS.gastos, total: 875, principales: [{ concepto: 'Publicidad', monto: 500 }] },
+  });
+  assert.equal(loss.titular, 'Semana con pérdida: perdiste S/ 187.28.');
+  assert.match(loss.alerta, /Los gastos \(S\/ 875\.00\) superaron.*el más grande fue Publicidad: S\/ 500\.00/);
   const empty = rulesAnalysis({
     ...FACTS,
     ventas: { ...FACTS.ventas, cantidad: 0, total: 0 },
