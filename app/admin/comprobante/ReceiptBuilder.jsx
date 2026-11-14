@@ -13,6 +13,11 @@ import {
 } from '@/lib/receipt.mjs';
 import { PerfumePicker } from '../ventas/SaleForm';
 
+// La hoja del PDF: A5 sin márgenes, así el navegador no tiene dónde escribir la
+// fecha ni el nombre de la página. Va aquí (y no en globals.css) para que solo
+// cambie la hoja de esta pantalla: se quita al salir de ella.
+const PRINT_PAGE = '@media print { @page { size: A5; margin: 0; } }';
+
 const dateFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Lima' });
 
 // "Rosa Pérez" → "Rosa_Perez", para el nombre del PDF.
@@ -105,6 +110,7 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
 
   return (
     <div className="receipt-layout">
+      <style>{PRINT_PAGE}</style>
       <div className="perfume-form sale-form receipt-form no-print">
         <section className="sale-step">
           <h3>

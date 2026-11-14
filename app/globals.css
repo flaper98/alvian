@@ -9795,15 +9795,13 @@ select:focus {
   }
 }
 
-/* El PDF: solo el comprobante, en hoja A5 sin la dirección ni la fecha del navegador. */
+/* El PDF: solo el comprobante, llenando la hoja A5. La hoja sin márgenes (la
+   pone ReceiptBuilder solo en esta pantalla) deja al navegador sin espacio
+   para escribir la fecha y el nombre de la página. */
 @media print {
-  @page comprobante {
-    size: A5;
-    margin: 0;
-  }
-
   .admin-shell:has(.receipt),
   .admin-content:has(.receipt) {
+    min-height: 0 !important;
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -9814,16 +9812,95 @@ select:focus {
   }
 
   .receipt {
-    page: comprobante;
     position: static;
     max-width: none;
-    padding: 10mm;
+    /* Alto de la hoja A5 (210 mm) con 1 mm de holgura, para no crear una hoja en blanco. */
+    min-height: 209mm;
+    gap: 4mm;
+    padding: 10mm 11mm 8mm;
     border: 0;
-    border-top: 6px solid var(--green-900);
+    border-top: 8px solid var(--green-900);
     border-radius: 0;
     box-shadow: none;
+    font-size: 11pt;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* El pie queda al final de la hoja. */
+  .receipt-foot {
+    margin-top: auto;
+    font-size: 10pt;
+  }
+
+  .receipt-foot strong {
+    font-size: 13pt;
+  }
+
+  .receipt-foot small {
+    font-size: 8pt;
+  }
+
+  .receipt-head img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .receipt-brand {
+    font-size: 9pt;
+  }
+
+  .receipt-title strong {
+    font-size: 20pt;
+  }
+
+  .receipt-meta {
+    font-size: 10pt;
+  }
+
+  .receipt-customer,
+  .receipt-totals div {
+    font-size: 12pt;
+  }
+
+  .receipt-table,
+  .receipt-note {
+    font-size: 11pt;
+  }
+
+  .receipt-table th {
+    font-size: 8.5pt;
+  }
+
+  .receipt-table td {
+    padding-top: 2mm;
+    padding-bottom: 2mm;
+  }
+
+  .receipt-cell-off small {
+    font-size: 8pt;
+  }
+
+  .receipt-totals {
+    gap: 2mm;
+  }
+
+  .receipt-totals .receipt-total {
+    padding: 3mm 5mm;
+    font-size: 14pt;
+  }
+
+  .receipt-totals .receipt-total dd {
+    font-size: 18pt;
+  }
+
+  .receipt-saving {
+    padding: 3mm;
+    font-size: 13pt;
+  }
+
+  .receipt-saving strong {
+    font-size: 17pt;
   }
 
   .receipt-table tr,
