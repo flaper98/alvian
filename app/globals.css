@@ -9833,3 +9833,74 @@ select:focus {
     break-inside: avoid;
   }
 }
+
+/* Comprobante: descuento de cada perfume. */
+.receipt-discounts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.5rem 0 0;
+  border-top: 1px dashed var(--border);
+  list-style: none;
+}
+
+.receipt-discounts li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 110px;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.receipt-discount-name {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.receipt-discount-name small,
+.receipt-discount-result small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+.receipt-discount-result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-discount-result small:not(:only-child) {
+  color: var(--status-good);
+}
+
+.receipt-discount-warning {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.receipt-table .receipt-cell-off {
+  color: var(--status-good);
+  font-weight: 600;
+}
+
+.receipt-cell-off small {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+@media (max-width: 480px) {
+  .receipt-discounts li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .receipt-discount-name {
+    grid-column: 1 / -1;
+  }
+}

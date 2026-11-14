@@ -2,7 +2,15 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { formatSoles } from '@/lib/money.mjs';
-import { DISCOUNT_MODES, percentLabel, phoneLabel, receiptNumber, receiptText, receiptTotals } from '@/lib/receipt.mjs';
+import {
+  DISCOUNT_MODES,
+  percentLabel,
+  phoneLabel,
+  receiptNumber,
+  receiptText,
+  receiptTotals,
+  unitDiscount,
+} from '@/lib/receipt.mjs';
 import { PerfumePicker } from '../ventas/SaleForm';
 
 const dateFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Lima' });
@@ -15,52 +23,57 @@ const fileSafe = (text) =>
     .replace(/[^a-zA-Z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
 
-/** Arma el comprobante con descuento y lo descarga en PDF o lo copia para WhatsApp. */
+/** Arma el comprobante (cada perfume con su descuento) y lo descarga en PDF o lo copia para WhatsApp. */
 export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, site, whatsapp }) {
   const [lines, setLines] = useState([]);
   const [mode, setMode] = useState('soles');
-  const [value, setValue] = useState('');
   const [customer, setCustomer] = useState('');
   const [note, setNote] = useState('');
   const [issuedAt, setIssuedAt] = useState(initialIssuedAt);
   const [copied, setCopied] = useState(false);
   const freeLines = useRef(0);
 
-  const totals = useMemo(() => receiptTotals(lines, { mode, value }), [lines, mode, value]);
+  const totals = useMemo(() => receiptTotals(lines, mode), [lines, mode]);
   const number = receiptNumber(issuedAt);
   const dateLabel = dateFmt.format(new Date(issuedAt));
   const modeInfo = DISCOUNT_MODES.find((m) => m.key === mode);
   const ready = totals.items.length > 0;
   const client = customer.trim();
   const extra = note.trim();
+  // En la tabla: "c/u" solo si algún perfume va por más de una unidad.
+  const each = totals.items.some((i) => i.quantity > 1) ? ' c/u' : '';
 
   function addPerfume(perfume) {
     const key = `p${perfume.id}`;
     setLines((current) =>
       current.some((l) => l.key === key)
         ? current.map((l) => (l.key === key ? { ...l, quantity: l.quantity + 1 } : l))
-        : [...current, { key, name: perfume.name, quantity: 1, unitPrice: perfume.price, free: false }],
+        : [...current, { key, name: perfume.name, quantity: 1, unitPrice: perfume.price, discount: '', free: false }],
     );
   }
 
   /** Un producto escrito a mano: decant, encargo o algo que no está en el catálogo. */
   function addFreeLine() {
     freeLines.current += 1;
-    setLines((current) => [...current, { key: `f${freeLines.current}`, name: '', quantity: 1, unitPrice: '', free: true }]);
+    setLines((current) => [
+      ...current,
+      { key: `f${freeLines.current}`, name: '', quantity: 1, unitPrice: '', discount: '', free: true },
+    ]);
   }
 
   const update = (key, changes) => setLines((current) => current.map((l) => (l.key === key ? { ...l, ...changes } : l)));
   const remove = (key) => setLines((current) => current.filter((l) => l.key !== key));
 
+  // Cada forma se escribe distinto (S/, % o precio final): al cambiarla se borran los descuentos.
   function changeMode(next) {
+    if (next === mode) return;
     setMode(next);
-    setValue('');
+    setLines((current) => current.map((l) => ({ ...l, discount: '' })));
   }
 
   function reset() {
     setLines([]);
     setMode('soles');
-    setValue('');
     setCustomer('');
     setNote('');
     setIssuedAt(new Date().toISOString());
@@ -153,43 +166,83 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
 
         <section className="sale-step">
           <h3>
-            <span>2</span> Descuento
+            <span>2</span> Descuento de cada perfume
           </h3>
-          <div className="sale-payments" role="radiogroup" aria-label="Cómo das el descuento">
-            {DISCOUNT_MODES.map((m) => (
-              <button
-                key={m.key}
-                type="button"
-                role="radio"
-                aria-checked={mode === m.key}
-                className={`sale-payment${mode === m.key ? ' active' : ''}`}
-                onClick={() => changeMode(m.key)}
-              >
-                <strong>{m.label}</strong>
-                <small>{m.hint}</small>
-              </button>
-            ))}
-          </div>
-          <label className="receipt-discount-input">
-            {modeInfo.input}
-            <input
-              type="number"
-              min="0"
-              max={mode === 'percent' ? 100 : undefined}
-              step={mode === 'percent' ? '0.5' : '0.01'}
-              inputMode="decimal"
-              placeholder={mode === 'percent' ? '10' : '0.00'}
-              value={value}
-              onChange={(event) => setValue(event.target.value)}
-            />
-          </label>
-          {totals.warning ? <p className="form-error">{totals.warning}</p> : null}
-          {ready && totals.discount > 0 ? (
-            <p className="hint">
-              Precio normal {formatSoles(totals.subtotal)} → paga <strong>{formatSoles(totals.total)}</strong> y se ahorra{' '}
-              {formatSoles(totals.discount)} ({percentLabel(totals.ratio)}).
-            </p>
-          ) : null}
+          {lines.length ? (
+            <>
+              <div className="sale-payments" role="radiogroup" aria-label="Cómo escribes el descuento">
+                {DISCOUNT_MODES.map((m) => (
+                  <button
+                    key={m.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={mode === m.key}
+                    className={`sale-payment${mode === m.key ? ' active' : ''}`}
+                    onClick={() => changeMode(m.key)}
+                  >
+                    <strong>{m.label}</strong>
+                    <small>{m.hint}</small>
+                  </button>
+                ))}
+              </div>
+              <p className="hint">
+                {modeInfo.help} Va por unidad; si un perfume no tiene descuento, déjalo vacío.
+              </p>
+              <ul className="receipt-discounts">
+                {lines.map((l) => {
+                  const d = unitDiscount(l.unitPrice, l.discount, mode);
+                  const label = l.name.trim() || 'Producto';
+                  return (
+                    <li key={l.key}>
+                      <span className="receipt-discount-name">
+                        {label}
+                        {l.quantity > 1 ? ` × ${l.quantity}` : ''}
+                        <small>Normal {formatSoles(d.unitPrice)}</small>
+                      </span>
+                      <label className="sale-line-price">
+                        <span className="sr-only">
+                          {mode === 'total' ? 'Precio final' : 'Descuento'} de {label}
+                        </span>
+                        {mode === 'percent' ? null : 'S/'}
+                        <input
+                          type="number"
+                          min="0"
+                          max={mode === 'percent' ? 100 : undefined}
+                          step={mode === 'percent' ? '0.5' : '0.01'}
+                          inputMode="decimal"
+                          placeholder={mode === 'total' ? String(d.unitPrice || '0.00') : '0'}
+                          value={l.discount}
+                          onChange={(event) => update(l.key, { discount: event.target.value })}
+                        />
+                        {mode === 'percent' ? '%' : null}
+                      </label>
+                      <span className="receipt-discount-result">
+                        {d.discount > 0 ? (
+                          <>
+                            {formatSoles(d.finalPrice)}
+                            <small>
+                              {formatSoles(-d.discount)} ({percentLabel(d.ratio)})
+                            </small>
+                          </>
+                        ) : (
+                          <small>Sin descuento</small>
+                        )}
+                      </span>
+                      {d.warning ? <p className="form-error receipt-discount-warning">{d.warning}</p> : null}
+                    </li>
+                  );
+                })}
+              </ul>
+              {totals.discount > 0 ? (
+                <p className="hint">
+                  Precio normal {formatSoles(totals.subtotal)} → paga <strong>{formatSoles(totals.total)}</strong> y se
+                  ahorra {formatSoles(totals.discount)} ({percentLabel(totals.ratio)}).
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p className="hint">Primero agrega los perfumes.</p>
+          )}
         </section>
 
         <section className="sale-step">
@@ -260,7 +313,8 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
               <tr>
                 <th scope="col">Producto</th>
                 <th scope="col">Cant.</th>
-                <th scope="col">Precio normal</th>
+                <th scope="col">Precio normal{each}</th>
+                {totals.discount > 0 ? <th scope="col">Descuento{each}</th> : null}
                 <th scope="col">Importe</th>
               </tr>
             </thead>
@@ -270,6 +324,18 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
                   <td>{i.name}</td>
                   <td>{i.quantity}</td>
                   <td>{formatSoles(i.unitPrice)}</td>
+                  {totals.discount > 0 ? (
+                    <td className="receipt-cell-off">
+                      {i.unitDiscount > 0 ? (
+                        <>
+                          {formatSoles(-i.unitDiscount)}
+                          <small>{percentLabel(i.ratio)}</small>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  ) : null}
                   <td>{formatSoles(i.amount)}</td>
                 </tr>
               ))}
