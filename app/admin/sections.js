@@ -47,6 +47,7 @@ export const SECTIONS = [
       { href: '/admin/creditos', label: 'Por cobrar' },
       { href: '/admin/comisiones', label: 'Comisiones' },
       { href: '/admin/disponibles', label: 'Lista para clientes' },
+      { href: '/admin/comprobante', label: 'Comprobante' },
       // Muestra costos y márgenes: solo el admin.
       { href: '/admin/boutique', label: 'Boutique', roles: ADMIN },
     ],

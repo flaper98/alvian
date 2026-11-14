@@ -24,8 +24,11 @@ function SubmitButton({ total, disabled }) {
   );
 }
 
-/** Buscador de perfumes: toca uno para agregarlo a la venta. */
-function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick }) {
+/**
+ * Buscador de perfumes: toca uno para agregarlo a la venta. Con `allowNoStock`
+ * también se pueden elegir los que no tienen stock (por ejemplo, encargos).
+ */
+export function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick, allowNoStock = false, autoFocus = true }) {
   const [search, setSearch] = useState('');
   const results = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -42,7 +45,7 @@ function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick }) {
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         aria-label="Buscar perfume"
-        autoFocus
+        autoFocus={autoFocus}
       />
       <ul className="sale-results">
         {results.map((p) => {
@@ -54,7 +57,7 @@ function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick }) {
               <button
                 type="button"
                 className="sale-result"
-                disabled={noStock}
+                disabled={noStock && !allowNoStock}
                 onClick={() => {
                   onPick(p);
                   setSearch('');
@@ -73,7 +76,7 @@ function PerfumePicker({ perfumes, decants = {}, costs = {}, onPick }) {
                   {poolMl > 0 ? ` · ${poolMl} ml para decants` : ''}
                   {costs[p.id] ? ` · ${purchaseCostLabel(costs[p.id])}` : ''}
                 </span>
-                {!noStock ? <span className="sale-result-add" aria-hidden="true">+</span> : null}
+                {!noStock || allowNoStock ? <span className="sale-result-add" aria-hidden="true">+</span> : null}
               </button>
             </li>
           );

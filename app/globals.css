@@ -9528,3 +9528,308 @@ select:focus {
 .informe-history li.active a {
   font-weight: 700;
 }
+
+/* ---------- Comprobante con descuento (PDF para el cliente) ---------- */
+.receipt-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.receipt-form textarea {
+  width: 100%;
+  font: inherit;
+  resize: vertical;
+}
+
+.receipt-lines .receipt-line-name {
+  min-width: 0;
+}
+
+.receipt-add-free {
+  align-self: flex-start;
+  font-size: 0.85rem;
+}
+
+.receipt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.receipt-actions .btn-primary {
+  flex: 1 1 100%;
+}
+
+.receipt-actions .btn-secondary {
+  flex: 1 1 0;
+}
+
+.receipt {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.4rem 1.3rem;
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--green-900);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.receipt-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(201, 153, 60, 0.5);
+}
+
+.receipt-head img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.receipt-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-brand {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+}
+
+.receipt-title strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--green-900);
+}
+
+.receipt-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.receipt-meta div {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.receipt-meta dt {
+  color: var(--ink-soft);
+}
+
+.receipt-meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.receipt-customer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.receipt-customer span {
+  color: var(--ink-soft);
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-table th {
+  padding: 0 0 0.4rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.receipt-table td {
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.receipt-table th:first-child,
+.receipt-table td:first-child {
+  padding-right: 0.5rem;
+  text-align: left;
+  white-space: normal;
+  font-weight: 600;
+}
+
+.receipt-table th:nth-child(2),
+.receipt-table td:nth-child(2) {
+  text-align: center;
+}
+
+.receipt-table th + th,
+.receipt-table td + td {
+  padding-left: 0.5rem;
+}
+
+.receipt-empty {
+  margin: 0;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.receipt-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.receipt-totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.92rem;
+}
+
+.receipt-totals dd {
+  margin: 0;
+}
+
+.receipt-totals .receipt-off {
+  color: var(--status-good);
+  font-weight: 600;
+}
+
+.receipt-totals .receipt-total {
+  margin-top: 0.3rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  background: var(--green-900);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.receipt-totals .receipt-total dd {
+  color: var(--gold);
+  font-size: 1.2rem;
+}
+
+.receipt-saving {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px dashed var(--gold);
+  border-radius: 10px;
+  background: #fbf3e0;
+  color: #7d5c1d;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.receipt-saving strong {
+  font-size: 1.15rem;
+}
+
+.receipt-note {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--gold);
+  background: var(--cream-soft);
+  font-size: 0.88rem;
+  white-space: pre-line;
+}
+
+.receipt-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(201, 153, 60, 0.5);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.receipt-foot strong {
+  font-size: 0.95rem;
+  color: var(--green-900);
+}
+
+.receipt-foot small {
+  font-size: 0.7rem;
+}
+
+@media (max-width: 860px) {
+  .receipt-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .receipt {
+    position: static;
+  }
+}
+
+/* El PDF: solo el comprobante, en hoja A5 sin la dirección ni la fecha del navegador. */
+@media print {
+  @page comprobante {
+    size: A5;
+    margin: 0;
+  }
+
+  .admin-shell:has(.receipt),
+  .admin-content:has(.receipt) {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .receipt-layout {
+    display: block;
+  }
+
+  .receipt {
+    page: comprobante;
+    position: static;
+    max-width: none;
+    padding: 10mm;
+    border: 0;
+    border-top: 6px solid var(--green-900);
+    border-radius: 0;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .receipt-table tr,
+  .receipt-totals,
+  .receipt-saving,
+  .receipt-foot {
+    break-inside: avoid;
+  }
+}

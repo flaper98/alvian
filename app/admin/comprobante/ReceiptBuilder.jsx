@@ -1,0 +1,319 @@
+'use client';
+
+import { useMemo, useRef, useState } from 'react';
+import { formatSoles } from '@/lib/money.mjs';
+import { DISCOUNT_MODES, percentLabel, phoneLabel, receiptNumber, receiptText, receiptTotals } from '@/lib/receipt.mjs';
+import { PerfumePicker } from '../ventas/SaleForm';
+
+const dateFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Lima' });
+
+// "Rosa Pérez" → "Rosa_Perez", para el nombre del PDF.
+const fileSafe = (text) =>
+  text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+/** Arma el comprobante con descuento y lo descarga en PDF o lo copia para WhatsApp. */
+export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, site, whatsapp }) {
+  const [lines, setLines] = useState([]);
+  const [mode, setMode] = useState('soles');
+  const [value, setValue] = useState('');
+  const [customer, setCustomer] = useState('');
+  const [note, setNote] = useState('');
+  const [issuedAt, setIssuedAt] = useState(initialIssuedAt);
+  const [copied, setCopied] = useState(false);
+  const freeLines = useRef(0);
+
+  const totals = useMemo(() => receiptTotals(lines, { mode, value }), [lines, mode, value]);
+  const number = receiptNumber(issuedAt);
+  const dateLabel = dateFmt.format(new Date(issuedAt));
+  const modeInfo = DISCOUNT_MODES.find((m) => m.key === mode);
+  const ready = totals.items.length > 0;
+  const client = customer.trim();
+  const extra = note.trim();
+
+  function addPerfume(perfume) {
+    const key = `p${perfume.id}`;
+    setLines((current) =>
+      current.some((l) => l.key === key)
+        ? current.map((l) => (l.key === key ? { ...l, quantity: l.quantity + 1 } : l))
+        : [...current, { key, name: perfume.name, quantity: 1, unitPrice: perfume.price, free: false }],
+    );
+  }
+
+  /** Un producto escrito a mano: decant, encargo o algo que no está en el catálogo. */
+  function addFreeLine() {
+    freeLines.current += 1;
+    setLines((current) => [...current, { key: `f${freeLines.current}`, name: '', quantity: 1, unitPrice: '', free: true }]);
+  }
+
+  const update = (key, changes) => setLines((current) => current.map((l) => (l.key === key ? { ...l, ...changes } : l)));
+  const remove = (key) => setLines((current) => current.filter((l) => l.key !== key));
+
+  function changeMode(next) {
+    setMode(next);
+    setValue('');
+  }
+
+  function reset() {
+    setLines([]);
+    setMode('soles');
+    setValue('');
+    setCustomer('');
+    setNote('');
+    setIssuedAt(new Date().toISOString());
+  }
+
+  // "Guardar como PDF" usa el título de la página como nombre del archivo.
+  function downloadPdf() {
+    const previousTitle = document.title;
+    const restore = () => {
+      document.title = previousTitle;
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+    document.title = ['Comprobante_Alvian', fileSafe(client), number].filter(Boolean).join('_');
+    window.print();
+  }
+
+  async function copyText() {
+    const text = receiptText(totals, { number, dateLabel, customer: client, note: extra, whatsapp, site });
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Sin permiso de portapapeles: se muestra en un cuadro para copiar a mano.
+      window.prompt('Copia este texto:', text);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
+
+  return (
+    <div className="receipt-layout">
+      <div className="perfume-form sale-form receipt-form no-print">
+        <section className="sale-step">
+          <h3>
+            <span>1</span> ¿Qué lleva?
+          </h3>
+          <PerfumePicker perfumes={perfumes} onPick={addPerfume} allowNoStock autoFocus={false} />
+          {lines.length ? (
+            <ul className="sale-lines receipt-lines">
+              {lines.map((l) => (
+                <li key={l.key}>
+                  {l.free ? (
+                    <input
+                      className="receipt-line-name"
+                      value={l.name}
+                      placeholder="Producto (ej: decant 10 ml)"
+                      aria-label="Nombre del producto"
+                      maxLength={80}
+                      onChange={(event) => update(l.key, { name: event.target.value })}
+                    />
+                  ) : (
+                    <span className="sale-line-name">{l.name}</span>
+                  )}
+                  <div className="qty" aria-label={`Cantidad de ${l.name || 'producto'}`}>
+                    <button
+                      type="button"
+                      aria-label="Quitar uno"
+                      onClick={() => (l.quantity <= 1 ? remove(l.key) : update(l.key, { quantity: l.quantity - 1 }))}
+                    >
+                      −
+                    </button>
+                    <span>{l.quantity}</span>
+                    <button type="button" aria-label="Agregar uno" onClick={() => update(l.key, { quantity: l.quantity + 1 })}>
+                      +
+                    </button>
+                  </div>
+                  <label className="sale-line-price">
+                    <span className="sr-only">Precio normal de {l.name || 'producto'}</span>
+                    S/
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={l.unitPrice}
+                      onChange={(event) => update(l.key, { unitPrice: event.target.value })}
+                    />
+                  </label>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="hint">Busca y toca un perfume para agregarlo. Se pone su precio normal y puedes cambiarlo.</p>
+          )}
+          <button type="button" className="btn-secondary receipt-add-free" onClick={addFreeLine}>
+            + Otro producto (decant, encargo…)
+          </button>
+        </section>
+
+        <section className="sale-step">
+          <h3>
+            <span>2</span> Descuento
+          </h3>
+          <div className="sale-payments" role="radiogroup" aria-label="Cómo das el descuento">
+            {DISCOUNT_MODES.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                role="radio"
+                aria-checked={mode === m.key}
+                className={`sale-payment${mode === m.key ? ' active' : ''}`}
+                onClick={() => changeMode(m.key)}
+              >
+                <strong>{m.label}</strong>
+                <small>{m.hint}</small>
+              </button>
+            ))}
+          </div>
+          <label className="receipt-discount-input">
+            {modeInfo.input}
+            <input
+              type="number"
+              min="0"
+              max={mode === 'percent' ? 100 : undefined}
+              step={mode === 'percent' ? '0.5' : '0.01'}
+              inputMode="decimal"
+              placeholder={mode === 'percent' ? '10' : '0.00'}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+            />
+          </label>
+          {totals.warning ? <p className="form-error">{totals.warning}</p> : null}
+          {ready && totals.discount > 0 ? (
+            <p className="hint">
+              Precio normal {formatSoles(totals.subtotal)} → paga <strong>{formatSoles(totals.total)}</strong> y se ahorra{' '}
+              {formatSoles(totals.discount)} ({percentLabel(totals.ratio)}).
+            </p>
+          ) : null}
+        </section>
+
+        <section className="sale-step">
+          <h3>
+            <span>3</span> Cliente <small className="hint">(opcional)</small>
+          </h3>
+          <input
+            value={customer}
+            onChange={(event) => setCustomer(event.target.value)}
+            placeholder="Nombre del cliente"
+            aria-label="Nombre del cliente"
+            maxLength={80}
+          />
+          <textarea
+            rows={2}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Nota (ej: Pagó con Yape · Se entrega el sábado)"
+            aria-label="Nota para el cliente"
+            maxLength={200}
+          />
+        </section>
+
+        <div className="receipt-actions">
+          <button type="button" className="btn-primary" disabled={!ready} onClick={downloadPdf}>
+            Descargar PDF
+          </button>
+          <button type="button" className="btn-secondary" disabled={!ready} onClick={copyText}>
+            {copied ? '¡Copiado! Pégalo en WhatsApp' : 'Copiar texto para WhatsApp'}
+          </button>
+          <button type="button" className="btn-secondary" onClick={reset}>
+            Nuevo comprobante
+          </button>
+        </div>
+        <p className="hint">Para el PDF, elige «Guardar como PDF» en la ventana que se abre.</p>
+      </div>
+
+      <article className="receipt" aria-label="Vista previa del comprobante">
+        <header className="receipt-head">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="" width={52} height={52} />
+          <div className="receipt-title">
+            <span className="receipt-brand">Alvian Fragancias</span>
+            <strong>Comprobante de compra</strong>
+          </div>
+          <dl className="receipt-meta">
+            <div>
+              <dt>N.°</dt>
+              <dd>{number}</dd>
+            </div>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{dateLabel}</dd>
+            </div>
+          </dl>
+        </header>
+
+        {client ? (
+          <p className="receipt-customer">
+            <span>Cliente</span>
+            <strong>{client}</strong>
+          </p>
+        ) : null}
+
+        {ready ? (
+          <table className="receipt-table">
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Cant.</th>
+                <th scope="col">Precio normal</th>
+                <th scope="col">Importe</th>
+              </tr>
+            </thead>
+            <tbody>
+              {totals.items.map((i, index) => (
+                <tr key={index}>
+                  <td>{i.name}</td>
+                  <td>{i.quantity}</td>
+                  <td>{formatSoles(i.unitPrice)}</td>
+                  <td>{formatSoles(i.amount)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="receipt-empty">Agrega perfumes para ver el comprobante.</p>
+        )}
+
+        <dl className="receipt-totals">
+          {totals.discount > 0 ? (
+            <>
+              <div>
+                <dt>Precio normal</dt>
+                <dd>{formatSoles(totals.subtotal)}</dd>
+              </div>
+              <div className="receipt-off">
+                <dt>Descuento ({percentLabel(totals.ratio)})</dt>
+                <dd>{formatSoles(-totals.discount)}</dd>
+              </div>
+            </>
+          ) : null}
+          <div className="receipt-total">
+            <dt>Total a pagar</dt>
+            <dd>{formatSoles(totals.total)}</dd>
+          </div>
+        </dl>
+
+        {totals.discount > 0 ? (
+          <p className="receipt-saving">
+            ¡Te ahorras <strong>{formatSoles(totals.discount)}</strong>!
+          </p>
+        ) : null}
+
+        {extra ? <p className="receipt-note">{extra}</p> : null}
+
+        <footer className="receipt-foot">
+          <strong>¡Gracias por tu compra!</strong>
+          <span>
+            WhatsApp {phoneLabel(whatsapp)} · {site}
+          </span>
+          <small>Este documento no es boleta ni factura electrónica.</small>
+        </footer>
+      </article>
+    </div>
+  );
+}
