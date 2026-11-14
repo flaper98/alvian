@@ -40,7 +40,9 @@ function SetupChecklist() {
       text: !process.env.INFORME_EMAIL_TO
         ? 'Tu correo (el mismo con el que creaste la cuenta de Resend).'
         : to.valid.length === 0
-          ? 'No tiene un correo válido: pon solo tu correo, por ejemplo nombre@gmail.com (sin comillas ni espacios).'
+          ? to.looksLikeKey
+            ? 'Ahí pegaste una clave, no un correo: pon solo tu correo, por ejemplo nombre@gmail.com.'
+            : `No tiene un correo válido. Lo guardado es «${to.stored}». Pon solo tu correo, por ejemplo nombre@gmail.com, y vuelve a publicar (Redeploy).`
           : `Se enviará a: ${to.valid.join(', ')}${to.invalid.length ? ` · no válido, se ignora: ${to.invalid.join(', ')}` : ''}. Debe ser el correo de tu cuenta de Resend.`,
     },
     { ok: Boolean(process.env.CRON_SECRET), name: 'CRON_SECRET', text: 'Una clave larga inventada por ti: protege la tarea de los lunes.' },
