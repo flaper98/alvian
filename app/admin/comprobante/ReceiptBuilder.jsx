@@ -5,7 +5,6 @@ import { formatSoles } from '@/lib/money.mjs';
 import {
   DISCOUNT_MODES,
   percentLabel,
-  phoneLabel,
   receiptNumber,
   receiptText,
   receiptTotals,
@@ -13,10 +12,10 @@ import {
 } from '@/lib/receipt.mjs';
 import { PerfumePicker } from '../ventas/SaleForm';
 
-// La hoja del PDF: A5 sin márgenes, así el navegador no tiene dónde escribir la
+// La hoja del PDF: A4 sin márgenes, así el navegador no tiene dónde escribir la
 // fecha ni el nombre de la página. Va aquí (y no en globals.css) para que solo
 // cambie la hoja de esta pantalla: se quita al salir de ella.
-const PRINT_PAGE = '@media print { @page { size: A5; margin: 0; } }';
+const PRINT_PAGE = '@media print { @page { size: A4; margin: 0; } }';
 
 const dateFmt = new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Lima' });
 
@@ -29,7 +28,7 @@ const fileSafe = (text) =>
     .replace(/^_+|_+$/g, '');
 
 /** Arma el comprobante (cada perfume con su descuento) y lo descarga en PDF o lo copia para WhatsApp. */
-export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, site, whatsapp }) {
+export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, site, whatsapp, business }) {
   const [lines, setLines] = useState([]);
   const [mode, setMode] = useState('soles');
   const [customer, setCustomer] = useState('');
@@ -288,29 +287,29 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
 
       <article className="receipt" aria-label="Vista previa del comprobante">
         <header className="receipt-head">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="" width={52} height={52} />
-          <div className="receipt-title">
-            <span className="receipt-brand">Alvian Fragancias</span>
-            <strong>Comprobante de compra</strong>
-          </div>
-          <dl className="receipt-meta">
-            <div>
-              <dt>N.°</dt>
+          <div>
+            <h2 className="receipt-kind">Comprobante</h2>
+            <dl className="receipt-meta">
+              <dt>Comprobante n.°</dt>
               <dd>{number}</dd>
-            </div>
-            <div>
               <dt>Fecha</dt>
               <dd>{dateLabel}</dd>
-            </div>
-          </dl>
+            </dl>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="receipt-logo" src="/logo.jpg" alt="Alvian Fragancias" width={120} height={120} />
         </header>
 
-        {client ? (
-          <p className="receipt-customer">
-            <span>Cliente</span>
-            <strong>{client}</strong>
-          </p>
+        {client || extra ? (
+          <div className="receipt-customer">
+            {client ? (
+              <>
+                <span className="receipt-label">Cliente</span>
+                <strong>{client}</strong>
+              </>
+            ) : null}
+            {extra ? <p>{extra}</p> : null}
+          </div>
         ) : null}
 
         {ready ? (
@@ -351,39 +350,53 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
           <p className="receipt-empty">Agrega perfumes para ver el comprobante.</p>
         )}
 
-        <dl className="receipt-totals">
+        <div className="receipt-summary">
           {totals.discount > 0 ? (
-            <>
-              <div>
-                <dt>Precio normal</dt>
-                <dd>{formatSoles(totals.subtotal)}</dd>
-              </div>
-              <div className="receipt-off">
-                <dt>Descuento ({percentLabel(totals.ratio)})</dt>
-                <dd>{formatSoles(-totals.discount)}</dd>
-              </div>
-            </>
+            <p className="receipt-saving">
+              <span>¡Te ahorras</span>
+              <strong>{formatSoles(totals.discount)}</strong>
+              <span>en esta compra!</span>
+            </p>
           ) : null}
-          <div className="receipt-total">
-            <dt>Total a pagar</dt>
-            <dd>{formatSoles(totals.total)}</dd>
-          </div>
-        </dl>
-
-        {totals.discount > 0 ? (
-          <p className="receipt-saving">
-            ¡Te ahorras <strong>{formatSoles(totals.discount)}</strong>!
-          </p>
-        ) : null}
-
-        {extra ? <p className="receipt-note">{extra}</p> : null}
+          <dl className="receipt-totals">
+            {totals.discount > 0 ? (
+              <>
+                <div>
+                  <dt>Precio normal:</dt>
+                  <dd>{formatSoles(totals.subtotal)}</dd>
+                </div>
+                <div className="receipt-off">
+                  <dt>Descuento ({percentLabel(totals.ratio)}):</dt>
+                  <dd>{formatSoles(-totals.discount)}</dd>
+                </div>
+              </>
+            ) : null}
+            <div className="receipt-total">
+              <dt>Total a pagar:</dt>
+              <dd>{formatSoles(totals.total)}</dd>
+            </div>
+          </dl>
+        </div>
 
         <footer className="receipt-foot">
-          <strong>¡Gracias por tu compra!</strong>
-          <span>
-            WhatsApp {phoneLabel(whatsapp)} · {site}
-          </span>
-          <small>Este documento no es boleta ni factura electrónica.</small>
+          <p className="receipt-thanks">¡Gracias por tu compra!</p>
+          <div className="receipt-foot-cols">
+            {business.payment.length ? (
+              <div>
+                <h3>Formas de pago</h3>
+                {business.payment.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            ) : null}
+            <div>
+              <h3>Contacto</h3>
+              {business.contact.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+          </div>
+          <small className="receipt-legal">Este documento no es boleta ni factura electrónica.</small>
         </footer>
       </article>
     </div>
