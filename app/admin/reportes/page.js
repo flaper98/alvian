@@ -23,6 +23,7 @@ import LedgerTable from './LedgerTable';
 import StockTable from './StockTable';
 import { CustomersTable, ProductRanking, ProfitTable, SalesExport } from './SalesTables';
 import DashboardTab from './DashboardTab';
+import CompareTab from './CompareTab';
 import { ReportError, ReportSkeleton } from './ReportStates';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +33,8 @@ const TABS = [
   { key: 'resumen', label: 'Resumen', dated: true },
   { key: 'general', label: 'Flujo de caja', dated: true },
   { key: 'ventas', label: 'Ventas', dated: true },
+  // Comparativo: hoy, semana y mes contra el anterior a la misma altura (no usa el período).
+  { key: 'comparativo', label: 'Comparativo', dated: false },
   { key: 'movimientos', label: 'Movimientos', dated: true },
   { key: 'plan', label: 'Plan de caja', dated: false },
   { key: 'cobrar', label: 'Por cobrar', dated: false },
@@ -1228,6 +1231,7 @@ async function TabContent({ tab, range, params, period }) {
     if (tab.key === 'resumen') content = await DashboardTab({ range });
     else if (tab.key === 'general') content = await GeneralTab({ range, period });
     else if (tab.key === 'ventas') content = await SalesTab({ range, params });
+    else if (tab.key === 'comparativo') content = await CompareTab({ serie: params.serie });
     else if (tab.key === 'movimientos') content = await MovementsTab({ range, tipo: params.tipo, period });
     else if (tab.key === 'plan') content = await CashPlanTab({ year: planYear(params.anio) });
     else if (tab.key === 'cobrar') content = await ReceivablesTab();

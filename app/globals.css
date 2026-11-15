@@ -10102,3 +10102,168 @@ select:focus {
   color: var(--ink-soft);
   opacity: 0.7;
 }
+
+/* ---------- Reportes → Comparativo ---------- */
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+
+.cmp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-width: 0;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--green-800);
+  border-radius: var(--radius);
+  background: var(--cream-soft);
+  box-shadow: var(--shadow);
+}
+
+.cmp-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--green-900);
+}
+
+.cmp-card header .hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+}
+
+.cmp-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.cmp-hero strong {
+  font-size: 2.2rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--green-900);
+}
+
+.cmp-hero-prev {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.cmp-metrics {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cmp-metrics div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.cmp-metrics dt {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cmp-metrics dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0;
+  text-align: right;
+}
+
+.cmp-metrics dd strong {
+  font-size: 0.95rem;
+  color: var(--green-900);
+}
+
+.cmp-metrics dd span {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.cmp-metrics .kpi-delta {
+  font-size: 0.75rem;
+}
+
+.cmp-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.cmp-foot strong {
+  color: var(--green-900);
+}
+
+.cmp-series .cmp-units {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 11rem;
+}
+
+.cmp-bar {
+  flex: 1 1 4rem;
+  min-width: 3rem;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(14, 43, 33, 0.08);
+}
+
+.cmp-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--green-700);
+}
+
+.cmp-series .kpi-delta {
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.cmp-badge {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--status-attention-bg);
+  color: var(--status-attention);
+  font-size: 0.68rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.cmp-row-current th,
+.cmp-row-current td {
+  background: rgba(201, 153, 60, 0.07);
+}
+
+.cmp-nowrap,
+.cmp-series tbody th {
+  white-space: nowrap;
+}
+
+/* Comparativo: la flecha y el porcentaje nunca se separan. */
+.cmp-card .kpi-delta,
+.cmp-series .kpi-delta {
+  white-space: nowrap;
+}
