@@ -44,6 +44,8 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
   const ready = totals.items.length > 0;
   const client = customer.trim();
   const extra = note.trim();
+  // Nombre del PDF: "Comprobante_Alvian_Rosa_Perez_20261114-1532".
+  const pdfName = ['Comprobante_Alvian', fileSafe(client), number].filter(Boolean).join('_');
   // En la tabla: "c/u" solo si algún perfume va por más de una unidad.
   const each = totals.items.some((i) => i.quantity > 1) ? ' c/u' : '';
 
@@ -83,7 +85,8 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
     setIssuedAt(new Date().toISOString());
   }
 
-  // "Guardar como PDF" usa el título de la página como nombre del archivo.
+  // "Guardar como PDF" (Chrome, Edge) usa el título de la página como nombre del
+  // archivo. "Microsoft Print to PDF" de Windows no lo usa: siempre lo deja vacío.
   function downloadPdf() {
     const previousTitle = document.title;
     const restore = () => {
@@ -91,7 +94,7 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
       window.removeEventListener('afterprint', restore);
     };
     window.addEventListener('afterprint', restore);
-    document.title = ['Comprobante_Alvian', fileSafe(client), number].filter(Boolean).join('_');
+    document.title = pdfName;
     window.print();
   }
 
@@ -282,7 +285,10 @@ export default function ReceiptBuilder({ perfumes, issuedAt: initialIssuedAt, si
             Nuevo comprobante
           </button>
         </div>
-        <p className="hint">Para el PDF, elige «Guardar como PDF» en la ventana que se abre.</p>
+        <p className="hint">
+          Se guarda como <strong className="receipt-file-name">{pdfName}.pdf</strong>. En la ventana que se abre, en
+          «Destino» elige <strong>«Guardar como PDF»</strong> (no «Microsoft Print to PDF», que deja el nombre vacío).
+        </p>
       </div>
 
       <article className="receipt" aria-label="Vista previa del comprobante">
