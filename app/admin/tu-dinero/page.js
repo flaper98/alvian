@@ -36,9 +36,10 @@ export default async function TuDineroPage() {
       <p className="hint">
         Todo lo que pusiste de tu bolsillo en el negocio, movimiento por movimiento: cada «Puse dinero» de la Caja y
         las compras, gastos y pagos de deuda marcados «De tu bolsillo». Es lo que suma «Pusiste tú» en el Resumen y en
-        la Caja. Para corregir algo, edítalo o bórralo en su sección (<Link href="/admin/compras">Compras</Link>,{' '}
-        <Link href="/admin/gastos">Gastos</Link>, <Link href="/admin/deudas">Deudas</Link> o{' '}
-        <Link href="/admin/caja">Caja</Link>).
+        la Caja. Cada «Puse dinero» lo corriges aquí con «Editar» (para borrarlo, usa la{' '}
+        <Link href="/admin/caja">Caja</Link>). Las compras, gastos y pagos de deuda se corrigen en su sección (
+        <Link href="/admin/compras">Compras</Link>, <Link href="/admin/gastos">Gastos</Link> o{' '}
+        <Link href="/admin/deudas">Deudas</Link>).
       </p>
       <OwnMoneyBoard rows={rows} borrowed={Math.round(borrowed * 100) / 100} />
     </section>

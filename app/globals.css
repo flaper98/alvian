@@ -10064,3 +10064,25 @@ select:focus {
     break-inside: avoid;
   }
 }
+
+/* Nombre del PDF debajo del botón: que no se salga en el celular. */
+.receipt-file-name {
+  overflow-wrap: anywhere;
+}
+
+/* Tu dinero: corregir cada movimiento desde la lista. */
+.own-money-action {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.own-money .own-money-edit {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.own-money-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--green-800);
+}

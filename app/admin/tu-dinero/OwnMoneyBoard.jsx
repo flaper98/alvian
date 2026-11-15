@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { cashPurposeLabel } from '@/lib/cash-purposes';
+import EditOwnMoneyModal from './EditOwnMoneyModal';
 
 const soles = (value) =>
   `S/ ${Number(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -15,6 +16,12 @@ const KINDS = [
   { key: 'deuda', label: 'Pagos de deudas', hint: 'Pagados de tu bolsillo' },
 ];
 const KIND_LABEL = Object.fromEntries(KINDS.map((k) => [k.key, k.label]));
+// Compras, gastos y pagos de deuda se corrigen en su sección (afectan stock, gastos o deudas).
+const SECTION_OF = {
+  compra: { href: '/admin/compras', label: 'Compras' },
+  gasto: { href: '/admin/gastos', label: 'Gastos' },
+  deuda: { href: '/admin/deudas', label: 'Deudas' },
+};
 
 // Mes en hora de Lima ('2026-09') para filtrar por período.
 const monthOf = (date) => new Date(new Date(date).getTime() - 5 * 3600 * 1000).toISOString().slice(0, 7);
@@ -42,6 +49,7 @@ function detailOf(row) {
 export default function OwnMoneyBoard({ rows, borrowed = 0 }) {
   const [period, setPeriod] = useState('todo');
   const [kind, setKind] = useState('all');
+  const [editing, setEditing] = useState(null);
 
   const inPeriod = useMemo(
     () => (period === 'todo' ? rows : rows.filter((r) => monthOf(r.t) === periodMonth(period))),
@@ -138,6 +146,9 @@ export default function OwnMoneyBoard({ rows, borrowed = 0 }) {
                 <th scope="col" className="num">
                   Monto
                 </th>
+                <th scope="col">
+                  <span className="sr-only">Corregir</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -147,6 +158,17 @@ export default function OwnMoneyBoard({ rows, borrowed = 0 }) {
                   <td>{KIND_LABEL[r.kind]}</td>
                   <th scope="row">{detailOf(r)}</th>
                   <td className="num">{soles(r.amount)}</td>
+                  <td className="own-money-action">
+                    {r.kind === 'aporte' ? (
+                      <button type="button" className="btn-secondary own-money-edit" onClick={() => setEditing(r)}>
+                        Editar
+                      </button>
+                    ) : SECTION_OF[r.kind] ? (
+                      <Link href={SECTION_OF[r.kind].href} className="own-money-link">
+                        Editar en {SECTION_OF[r.kind].label}
+                      </Link>
+                    ) : null}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -158,11 +180,14 @@ export default function OwnMoneyBoard({ rows, borrowed = 0 }) {
                 <td className="num">
                   <strong>{soles(totalOf(visible))}</strong>
                 </td>
+                <td />
               </tr>
             </tfoot>
           </table>
         </div>
       )}
+
+      {editing ? <EditOwnMoneyModal row={editing} onClose={() => setEditing(null)} /> : null}
     </div>
   );
 }
