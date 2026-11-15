@@ -287,6 +287,113 @@ function labelSalesBuckets(buckets, granularity) {
   });
 }
 
+const PERIOD_WORD = { dia: 'día', semana: 'semana', mes: 'mes', anio: 'año' };
+const PERIOD_HEADER = { dia: 'Día', semana: 'Semana', mes: 'Mes', anio: 'Año' };
+const plural = (n, word) => `${n.toLocaleString('es-PE')} ${word}${n === 1 ? '' : 's'}`;
+
+/** Perfumes vendidos en cada día / semana / mes / año del período, del más reciente al más antiguo. */
+function UnitsByPeriod({ buckets, granularity, hrefFor }) {
+  const total = buckets.reduce(
+    (sum, b) => ({
+      units: sum.units + b.units,
+      decants: sum.decants + b.decants,
+      orders: sum.orders + b.orders,
+      revenue: sum.revenue + b.revenue,
+    }),
+    { units: 0, decants: 0, orders: 0, revenue: 0 },
+  );
+  const withDecants = total.decants > 0;
+  const best = buckets.reduce((top, b) => (b.units > (top?.units ?? 0) ? b : top), null);
+  const word = PERIOD_WORD[granularity];
+  const average = buckets.length ? total.units / buckets.length : 0;
+
+  return (
+    <div className="chart-card">
+      <div className="sales-chart-head">
+        <h3 className="chart-title">Perfumes vendidos por {word}</h3>
+        <nav className="filter-chips no-print" aria-label="Agrupar por">
+          {Object.entries(GRANULARITIES).map(([key, label]) => (
+            <Link
+              key={key}
+              href={hrefFor(key)}
+              className={`filter-chip${granularity === key ? ' active' : ''}`}
+              aria-current={granularity === key ? 'page' : undefined}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      {total.units + total.decants === 0 ? (
+        <p className="hint">No vendiste perfumes en este período.</p>
+      ) : (
+        <>
+          <p className="units-summary">
+            Vendiste <strong>{plural(total.units, 'perfume')}</strong>
+            {withDecants ? ` y ${plural(total.decants, 'decant')}` : ''} en este período. Promedio:{' '}
+            {average.toLocaleString('es-PE', { maximumFractionDigits: 1 })} por {word}
+            {best ? (
+              <>
+                {' '}
+                · tu mejor {word}: <strong>{best.fullLabel}</strong> con {plural(best.units, 'perfume')}
+              </>
+            ) : null}
+            .
+          </p>
+          <div className="pivot-scroll units-scroll">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th scope="col">{PERIOD_HEADER[granularity]}</th>
+                  <th scope="col" className="num">
+                    Perfumes
+                  </th>
+                  {withDecants ? (
+                    <th scope="col" className="num">
+                      Decants
+                    </th>
+                  ) : null}
+                  <th scope="col" className="num">
+                    Pedidos
+                  </th>
+                  <th scope="col" className="num">
+                    Ventas
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...buckets].reverse().map((b) => (
+                  <tr key={b.key} className={b.units + b.decants === 0 ? 'units-row-empty' : undefined}>
+                    <th scope="row">{b.fullLabel}</th>
+                    <td className="num">
+                      <strong>{b.units}</strong>
+                    </td>
+                    {withDecants ? <td className="num">{b.decants}</td> : null}
+                    <td className="num">{b.orders}</td>
+                    <td className="num">{soles(b.revenue)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">Total</th>
+                  <td className="num">
+                    <strong>{total.units}</strong>
+                  </td>
+                  {withDecants ? <td className="num">{total.decants}</td> : null}
+                  <td className="num">{total.orders}</td>
+                  <td className="num">{soles(total.revenue)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p className="hint">Cuenta cada frasco vendido en el período elegido arriba (con los filtros que tengas puestos).</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 /** Filtros del reporte: período, fechas y los datos que existen en cada venta. */
 function SalesFilters({ range, params, filters, options }) {
   const desde = range.start ? toDayString(range.start) : '';
@@ -520,6 +627,8 @@ async function SalesTab({ range, params }) {
           detailText="Toca para ver ese período"
         />
       </div>
+
+      <UnitsByPeriod buckets={buckets} granularity={r.granularity} hrefFor={groupHref} />
 
       <div className="chart-card">
         <h3 className="chart-title">Ranking de productos</h3>

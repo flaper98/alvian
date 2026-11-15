@@ -73,5 +73,25 @@ test('groupCustomers marca nuevos, recurrentes y mejores', () => {
 
 test('trend suma por grupo', () => {
   const b = trend([sale({}), sale({ id: 2 })], ['2026-10-05'], 'dia');
-  assert.deepEqual(b, [{ key: '2026-10-05', revenue: 400, profit: 160, orders: 2 }]);
+  assert.deepEqual(b, [{ key: '2026-10-05', revenue: 400, profit: 160, orders: 2, units: 2, decants: 0 }]);
+});
+
+test('trend cuenta los perfumes vendidos por día y por mes (decants aparte)', () => {
+  const rows = [
+    sale({ quantity: 2 }),
+    sale({ id: 2, created_at: '2026-10-05T20:00:00Z', quantity: 1 }),
+    sale({ id: 3, created_at: '2026-10-05T21:00:00Z', quantity: 3, decant_ml: 5 }),
+    // 2 a. m. UTC del 7 = 9 p. m. del 6 en Lima.
+    sale({ id: 4, created_at: '2026-10-07T02:00:00Z', quantity: 1 }),
+  ];
+  const days = trend(rows, ['2026-10-05', '2026-10-06'], 'dia');
+  assert.deepEqual(
+    days.map((d) => [d.key, d.units, d.decants]),
+    [
+      ['2026-10-05', 3, 3],
+      ['2026-10-06', 1, 0],
+    ],
+  );
+  const months = trend(rows, ['2026-10'], 'mes');
+  assert.deepEqual([months[0].units, months[0].decants], [4, 3]);
 });

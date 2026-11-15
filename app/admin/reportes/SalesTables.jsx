@@ -231,6 +231,11 @@ export function SalesExport({ report, fileName }) {
           rows: report.summary.map((s) => [s.label, s.value]),
         },
         {
+          title: 'Perfumes vendidos por período',
+          header: ['Período', 'Perfumes', 'Decants', 'Pedidos', 'Ventas'],
+          rows: report.trend.map((b) => [b.key, String(b.units), String(b.decants), String(b.orders), b.revenue]),
+        },
+        {
           title: 'Productos',
           header: ['Producto', 'Categoría', 'Unidades', 'Precio promedio', 'Costo unitario', 'Ingreso', 'Costo total', 'Ganancia', 'Margen %'],
           rows: report.products.map((p) => [
