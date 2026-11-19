@@ -14,13 +14,13 @@ import {
 import {
   boutiquePrice,
   boutiqueSplit,
+  breakEvenMarkup,
   compactDay,
   deliveryLines,
   deliverySheet,
   limaDay,
   nextBoutiqueCode,
 } from '@/lib/boutique.mjs';
-import { netMargin, suggestPrice } from '@/lib/pricing.mjs';
 
 const soles = (value) =>
   value == null
@@ -54,46 +54,38 @@ function Kpi({ label, value, sub, tone }) {
 
 // ---------- Simulador de precios ----------
 
-/** Precio web y precio en la boutique de cada perfume, con lo que ganas en cada uno. */
+/** Precio en la boutique de cada perfume (tu precio web + el aumento) y lo que te queda. */
 export function PriceSimulator({ catalog, config, rates, rounding }) {
   const [fee, setFee] = useState(String(config.feePercent));
-  const [margin, setMargin] = useState(String(config.marginPercent));
+  const [markup, setMarkup] = useState(String(config.markupPercent));
   const [query, setQuery] = useState('');
   const [onlyStock, setOnlyStock] = useState(false);
   const [state, formAction] = useActionState(saveBoutiqueConfigAction, { error: null });
 
   const feePercent = Number(fee) || 0;
-  const marginPercent = Number(margin) || 0;
-  const valid = feePercent >= 0 && marginPercent >= 0 && feePercent + marginPercent + rates.taxPercent < 100;
-  const webRates = { commissionPercent: rates.commissionPercent, taxPercent: rates.taxPercent };
+  const markupPercent = Number(markup) || 0;
+  const valid = feePercent >= 0 && feePercent <= 90 && markupPercent >= 0 && markupPercent <= 200;
+  const evenMarkup = breakEvenMarkup(feePercent);
+  // De cada S/ 100 de tu precio web, cuánto te paga la boutique (sin contar el redondeo).
+  const paysPerHundred = Math.round((1 + markupPercent / 100) * (1 - feePercent / 100) * 10000) / 100;
 
   const rows = useMemo(() => {
     const words = query.trim().toLowerCase();
     return catalog
-      .filter((item) => item.cost != null && item.price > 0)
+      .filter((item) => item.price > 0)
       .filter((item) => !words || item.name.toLowerCase().includes(words))
       .filter((item) => !onlyStock || item.stock > 0)
       .map((item) => {
-        const web = valid ? suggestPrice(item.cost, { marginPercent, ...webRates, rounding }) : null;
-        const shop = valid
-          ? boutiquePrice(item.cost, { feePercent, marginPercent, taxPercent: rates.taxPercent, rounding })
-          : null;
+        const shop = valid ? boutiquePrice(item.price, { markupPercent, rounding }) : null;
         const split = shop == null ? null : boutiqueSplit(shop, item.cost, { feePercent, taxPercent: rates.taxPercent });
-        const webProfit = web == null ? null : web - item.cost - (web * (webRates.commissionPercent + webRates.taxPercent)) / 100;
-        return {
-          ...item,
-          currentMargin: netMargin(item.price, item.cost, webRates),
-          web,
-          webProfit,
-          shop,
-          split,
-        };
+        // Lo que te paga la boutique frente a lo que cobras en la web por el mismo perfume.
+        const vsWeb = split ? Math.round((split.youGet - item.price) * 100) / 100 : null;
+        return { ...item, shop, split, vsWeb };
       })
       .sort((a, b) => a.name.localeCompare(b.name, 'es'));
-  }, [catalog, query, onlyStock, valid, feePercent, marginPercent, rounding, rates.taxPercent, webRates.commissionPercent, webRates.taxPercent]);
+  }, [catalog, query, onlyStock, valid, feePercent, markupPercent, rounding, rates.taxPercent]);
 
-  const withoutCost = catalog.filter((item) => item.cost == null && item.price > 0).length;
-  const keep = 100 - feePercent - marginPercent - rates.taxPercent;
+  const withoutCost = rows.filter((row) => row.cost == null).length;
 
   return (
     <>
@@ -105,8 +97,8 @@ export function PriceSimulator({ catalog, config, rates, rounding }) {
             <input name="feePercent" type="number" min="0" max="90" step="0.5" value={fee} onChange={(e) => setFee(e.target.value)} />
           </label>
           <label>
-            Lo que quieres ganar (%)
-            <input name="marginPercent" type="number" min="0" max="90" step="0.5" value={margin} onChange={(e) => setMargin(e.target.value)} />
+            Aumento sobre tu precio web (%)
+            <input name="markupPercent" type="number" min="0" max="200" step="0.5" value={markup} onChange={(e) => setMarkup(e.target.value)} />
           </label>
           <div className="boutique-sim-actions">
             <SubmitButton className="btn-secondary">Guardar estos %</SubmitButton>
@@ -114,13 +106,15 @@ export function PriceSimulator({ catalog, config, rates, rounding }) {
         </div>
         {valid ? (
           <p className="hint">
-            <strong>En la web:</strong> costo ÷ {((100 - marginPercent - rates.commissionPercent - rates.taxPercent) / 100).toFixed(2)}
-            {rates.commissionPercent > 0 ? ` (incluye la comisión de la vendedora, ${rates.commissionPercent}%)` : ''} ·{' '}
-            <strong>En la boutique:</strong> costo ÷ {(keep / 100).toFixed(2)} ({feePercent}% de la boutique + {marginPercent}% para
-            ti = {feePercent + marginPercent}% del precio). Precios redondeados hacia arriba.
+            <strong>Precio en la boutique</strong> = tu precio web + {markupPercent}%, redondeado hacia arriba como tus
+            precios. La boutique se queda el {feePercent}% de ese precio: de cada S/ 100 de tu precio web te paga unos{' '}
+            <strong>S/ {paysPerHundred.toLocaleString('es-PE', { maximumFractionDigits: 2 })}</strong>.
+            {evenMarkup != null && markupPercent < evenMarkup
+              ? ` Para que te pague lo mismo que cobras en la web, el aumento tendría que ser ${evenMarkup.toLocaleString('es-PE')}%.`
+              : ''}
           </p>
         ) : (
-          <p className="form-error">La comisión de la boutique más lo que quieres ganar deben sumar menos de 100%.</p>
+          <p className="form-error">La comisión va de 0% a 90% y el aumento de 0% a 200%.</p>
         )}
         {state?.error ? <p className="form-error">{state.error}</p> : null}
         {state?.success ? <p className="form-ok">Guardado: se usarán al dejar perfumes en la boutique.</p> : null}
@@ -145,11 +139,11 @@ export function PriceSimulator({ catalog, config, rates, rounding }) {
             <tr>
               <th scope="col">Perfume</th>
               <th scope="col" className="num">Costo</th>
-              <th scope="col" className="num">Web hoy</th>
-              <th scope="col" className="num">Web al {marginPercent}%</th>
-              <th scope="col" className="num">Boutique</th>
-              <th scope="col" className="num">Se queda la boutique</th>
+              <th scope="col" className="num">Web</th>
+              <th scope="col" className="num">Boutique (+{markupPercent}%)</th>
+              <th scope="col" className="num">Se queda la boutique ({feePercent}%)</th>
               <th scope="col" className="num">Te paga</th>
+              <th scope="col" className="num">Frente a la web</th>
               <th scope="col" className="num">Ganas por perfume</th>
             </tr>
           </thead>
@@ -164,39 +158,38 @@ export function PriceSimulator({ catalog, config, rates, rounding }) {
                   </span>
                 </th>
                 <td className="num">{soles(row.cost)}</td>
-                <td className="num">
-                  {soles(row.price)}
-                  <span className={`boutique-sub ${row.currentMargin != null && row.currentMargin < marginPercent ? 'text-critical' : ''}`}>
-                    gana {pct(row.currentMargin)}
-                  </span>
-                </td>
-                <td className="num">
-                  <strong>{soles(row.web)}</strong>
-                  <span className="boutique-sub">ganas {soles(row.webProfit)}</span>
-                </td>
+                <td className="num">{soles(row.price)}</td>
                 <td className="num">
                   <strong>{soles(row.shop)}</strong>
                 </td>
                 <td className="num">{soles(row.split?.fee)}</td>
                 <td className="num">{soles(row.split?.youGet)}</td>
                 <td className="num">
+                  {row.vsWeb == null ? (
+                    '—'
+                  ) : (
+                    <span className={row.vsWeb < 0 ? 'text-critical' : 'text-good'}>
+                      {row.vsWeb > 0 ? '+' : ''}
+                      {soles(row.vsWeb)}
+                    </span>
+                  )}
+                </td>
+                <td className="num">
                   <strong className="text-good">{soles(row.split?.profit)}</strong>
-                  <span className="boutique-sub">{pct(row.split?.margin)} del precio</span>
+                  {row.split?.margin != null ? <span className="boutique-sub">{pct(row.split.margin)} del precio</span> : null}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {rows.length === 0 ? <p className="hint">No hay perfumes con costo que coincidan.</p> : null}
-      {withoutCost > 0 ? (
-        <p className="hint">
-          {withoutCost} perfume{withoutCost === 1 ? '' : 's'} no aparece{withoutCost === 1 ? '' : 'n'} porque no tiene
-          {withoutCost === 1 ? '' : 'n'} costo: registra su compra o su precio de proveedor.
-        </p>
-      ) : null}
+      {rows.length === 0 ? <p className="hint">No hay perfumes con precio que coincidan.</p> : null}
       <p className="hint">
-        «Web al {marginPercent}%» es solo una simulación: para cambiar los precios de tu tienda usa Catálogo → Precios.
+        «Frente a la web»: lo que te paga la boutique menos lo que cobras en tu web por ese perfume (en verde si recibes
+        más).
+        {withoutCost > 0
+          ? ` ${withoutCost} perfume${withoutCost === 1 ? '' : 's'} sin costo registrado muestra${withoutCost === 1 ? '' : 'n'} «—» en «Ganas».`
+          : ''}
       </p>
     </>
   );
@@ -209,8 +202,8 @@ function ConfigForm({ config }) {
   return (
     <details className="chart-card boutique-config">
       <summary>
-        Datos de la boutique · {config.sedes.join(' y ')} · comisión {config.feePercent}% · tu margen{' '}
-        {config.marginPercent}%
+        Datos de la boutique · {config.sedes.join(' y ')} · comisión {config.feePercent}% · precio web +
+        {config.markupPercent}%
       </summary>
       <form action={formAction} className="boutique-form-grid">
         <label>
@@ -222,8 +215,8 @@ function ConfigForm({ config }) {
           <input name="feePercent" type="number" min="0" max="90" step="0.5" defaultValue={config.feePercent} />
         </label>
         <label>
-          Tu margen (%)
-          <input name="marginPercent" type="number" min="0" max="90" step="0.5" defaultValue={config.marginPercent} />
+          Aumento sobre tu precio web (%)
+          <input name="markupPercent" type="number" min="0" max="200" step="0.5" defaultValue={config.markupPercent} />
         </label>
         {config.sedes.map((name, index) => (
           <label key={index}>
@@ -258,9 +251,8 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
   const [sede, setSede] = useState('1');
   const perfume = available.find((item) => String(item.id) === perfumeId) || null;
   const newCode = useMemo(() => nextBoutiqueCode(catalog.map((item) => item.code)), [catalog]);
-  const suggested = perfume
-    ? boutiquePrice(perfume.cost, { feePercent: config.feePercent, marginPercent: config.marginPercent, taxPercent, rounding })
-    : null;
+  // Precio sugerido: tu precio web + el aumento de la boutique.
+  const suggested = perfume ? boutiquePrice(perfume.price, { markupPercent: config.markupPercent, rounding }) : null;
   const split = perfume && Number(price) > 0 ? boutiqueSplit(Number(price), perfume.cost, { feePercent: config.feePercent, taxPercent }) : null;
 
   useEffect(() => {
@@ -293,9 +285,7 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
             onChange={(e) => {
               setPerfumeId(e.target.value);
               const next = available.find((item) => String(item.id) === e.target.value);
-              const value = next
-                ? boutiquePrice(next.cost, { feePercent: config.feePercent, marginPercent: config.marginPercent, taxPercent, rounding })
-                : null;
+              const value = next ? boutiquePrice(next.price, { markupPercent: config.markupPercent, rounding }) : null;
               setPrice(value == null ? '' : String(value));
             }}
           >
@@ -322,10 +312,10 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
           <input name="unitPrice" type="number" min="1" step="0.01" required value={price} onChange={(e) => setPrice(e.target.value)} />
           {suggested != null ? (
             <span className="hint">
-              Sugerido {soles(suggested)} · en tu web {soles(perfume.price)}
+              Sugerido {soles(suggested)}: tu web {soles(perfume.price)} + {config.markupPercent}%
             </span>
           ) : perfume ? (
-            <span className="hint">Sin costo registrado: pon el precio a mano.</span>
+            <span className="hint">Sin precio en la web: pon el precio a mano.</span>
           ) : null}
         </label>
       </div>

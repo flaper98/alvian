@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   boutiqueCode,
   boutiquePrice,
+  breakEvenMarkup,
   boutiqueSplit,
   boutiqueStock,
   compactDay,
@@ -15,11 +16,15 @@ import {
   settlementOf,
 } from '../lib/boutique.mjs';
 
-test('precio en la boutique: cubre su 25% y te deja tu 30%', () => {
-  // 100 ÷ (1 − 0.25 − 0.30) = 222.22 → 229 (terminado en 9).
-  assert.equal(boutiquePrice(100, { feePercent: 25, marginPercent: 30 }), 229);
-  assert.equal(boutiquePrice(100, { feePercent: 25, marginPercent: 30, rounding: 'sol' }), 223);
-  assert.equal(boutiquePrice(null, { feePercent: 25, marginPercent: 30 }), null);
+test('precio en la boutique: tu precio web + el aumento, redondeado hacia arriba', () => {
+  // 169 × 1.20 = 202.80 → 209 (terminado en 9) o 203 (al sol).
+  assert.equal(boutiquePrice(169, { markupPercent: 20 }), 209);
+  assert.equal(boutiquePrice(169, { markupPercent: 20, rounding: 'sol' }), 203);
+  assert.equal(boutiquePrice(150, { markupPercent: 20, rounding: 'sol' }), 180);
+  assert.equal(boutiquePrice(null, { markupPercent: 20 }), null);
+  // Con 20% de comisión, para que te pague lo mismo que en la web el aumento debe ser 25%.
+  assert.equal(breakEvenMarkup(20), 25);
+  assert.equal(breakEvenMarkup(25), 33.3);
 });
 
 test('reparto de un precio de boutique', () => {
@@ -50,13 +55,16 @@ test('liquidación: la boutique paga el saldo menos su comisión', () => {
 });
 
 test('datos de la boutique', () => {
-  assert.deepEqual(normalizeBoutiqueConfig({ name: ' Boutique Sol ', feePercent: '25', marginPercent: 30 }), {
+  assert.deepEqual(normalizeBoutiqueConfig({ name: ' Boutique Sol ', feePercent: '25', markupPercent: '30' }), {
     name: 'Boutique Sol',
     feePercent: 25,
-    marginPercent: 30,
+    markupPercent: 30,
     sedes: ['Sede 1', 'Sede 2'],
   });
-  assert.throws(() => normalizeBoutiqueConfig({ feePercent: 60, marginPercent: 40 }), /menos de 100%/);
+  // Sin aumento guardado (o con el «margen» antiguo): el aumento es igual a la comisión.
+  assert.equal(normalizeBoutiqueConfig({ feePercent: 20, marginPercent: 30 }).markupPercent, 20);
+  assert.throws(() => normalizeBoutiqueConfig({ feePercent: 95 }), /comisión/);
+  assert.throws(() => normalizeBoutiqueConfig({ markupPercent: 250 }), /aumento/);
   assert.throws(() => normalizeBoutiqueConfig({ name: '  ' }), /nombre/);
 });
 
