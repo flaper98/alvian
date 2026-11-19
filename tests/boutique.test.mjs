@@ -127,3 +127,29 @@ test('el código muestra la sede: ALV001-AMA', () => {
   assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({ sedes: ['Amazonas', 'Amazonas Norte'] })), ['AM1', 'AM2']);
   assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({ sedes: ['Lo', 'Plaza'] })), ['LO1', 'PLA']);
 });
+
+test('Excel de entrega: lo devuelto en esos días se descuenta', () => {
+  const deliveries = [
+    { sede: 1, occurredAt: '2026-11-19T04:31:00Z', perfumeId: 1, code: 'ALV001-AMA', name: 'Fakhar Rose', quantity: 1, unitPrice: 189 },
+    { sede: 1, occurredAt: '2026-11-19T04:36:00Z', perfumeId: 5, code: 'ALV005-AMA', name: 'Asad Lattafa', quantity: 1, unitPrice: 207 },
+    { sede: 1, occurredAt: '2026-11-17T15:00:00Z', perfumeId: 2, code: 'ALV002-AMA', name: 'Yara Tous', quantity: 3, unitPrice: 199 },
+  ];
+  const returns = [
+    // Asad: lo dejaste y lo devolviste el mismo día → no sale.
+    { sede: 1, occurredAt: '2026-11-19T04:48:00Z', perfumeId: 5, quantity: 1 },
+    // Yara Tous: devolvió 1 de 3 → salen 2.
+    { sede: 1, occurredAt: '2026-11-18T15:00:00Z', perfumeId: 2, quantity: 1 },
+    // Devolución de otra sede: no cuenta.
+    { sede: 2, occurredAt: '2026-11-18T15:00:00Z', perfumeId: 1, quantity: 1 },
+  ];
+  const lines = deliveryLines(deliveries, { sede: 1, from: '2026-11-17', to: '2026-11-18' }, returns);
+  assert.deepEqual(
+    lines.map((l) => [l.code, l.quantity]),
+    [
+      ['ALV002-AMA', 2],
+      ['ALV001-AMA', 1],
+    ],
+  );
+  // Si el día elegido no incluye la devolución, la entrega sale completa.
+  assert.equal(deliveryLines(deliveries, { sede: 1, from: '2026-11-17', to: '2026-11-17' }, returns)[0].quantity, 3);
+});

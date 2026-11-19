@@ -505,14 +505,14 @@ function StockTable({ stock, sedes, config }) {
  * Excel de entrega para la boutique: lo que dejaste en una sede entre dos días,
  * con el formato de sus guías (FECHA, CODIGO, DESCRIPCION, CANTIDAD, PRECIO).
  */
-function DeliveryExcel({ deliveries, config }) {
+function DeliveryExcel({ deliveries, returns, config }) {
   const today = limaDay(new Date());
   const [sede, setSede] = useState('1');
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
   const [error, setError] = useState(null);
   const [saving, startSaving] = useTransition();
-  const lines = useMemo(() => deliveryLines(deliveries, { sede, from, to }), [deliveries, sede, from, to]);
+  const lines = useMemo(() => deliveryLines(deliveries, { sede, from, to }, returns), [deliveries, returns, sede, from, to]);
   const sedeLabel = config.sedes[Number(sede) - 1] || 'Sede';
   // Como las guías de la boutique (MANDI14102026.xlsx): ALVIAN_<sede>_<día>.xlsx
   const fileName = `ALVIAN_${sedeLabel.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '')}_${compactDay(to || today)}.xlsx`;
@@ -537,7 +537,7 @@ function DeliveryExcel({ deliveries, config }) {
       <h3 className="chart-title">Excel de entrega para la boutique</h3>
       <p className="hint">
         Elige la sede y los días: sale lo que dejaste en esa sede, con el código de cada perfume y su sede (ALV001-AMA…), la cantidad y
-        el precio, igual que las guías que recibe la boutique.
+        el precio, igual que las guías que recibe la boutique. Lo que esa sede te devolvió en esos días se descuenta.
       </p>
       <div className="boutique-form-grid">
         <label>
@@ -789,7 +789,7 @@ export function BoutiqueControl({ board }) {
 
       <ConfigForm config={board.config} />
       <DeliverForm catalog={board.catalog} config={board.config} taxPercent={board.taxPercent} rounding={board.rounding} />
-      <DeliveryExcel deliveries={board.deliveries} config={board.config} />
+      <DeliveryExcel deliveries={board.deliveries} returns={board.returns} config={board.config} />
 
       <div className="chart-card">
         <h3 className="chart-title">Lo que tiene cada sede</h3>
