@@ -11,7 +11,15 @@ import {
   saveBoutiqueConfigAction,
   settleBoutiqueSalesAction,
 } from '@/lib/actions';
-import { boutiquePrice, boutiqueSplit } from '@/lib/boutique.mjs';
+import {
+  boutiquePrice,
+  boutiqueSplit,
+  compactDay,
+  deliveryLines,
+  deliverySheet,
+  limaDay,
+  nextBoutiqueCode,
+} from '@/lib/boutique.mjs';
 import { netMargin, suggestPrice } from '@/lib/pricing.mjs';
 
 const soles = (value) =>
@@ -201,7 +209,8 @@ function ConfigForm({ config }) {
   return (
     <details className="chart-card boutique-config">
       <summary>
-        Datos de la boutique · comisión {config.feePercent}% · tu margen {config.marginPercent}%
+        Datos de la boutique · {config.sedes.join(' y ')} · comisión {config.feePercent}% · tu margen{' '}
+        {config.marginPercent}%
       </summary>
       <form action={formAction} className="boutique-form-grid">
         <label>
@@ -216,13 +225,22 @@ function ConfigForm({ config }) {
           Tu margen (%)
           <input name="marginPercent" type="number" min="0" max="90" step="0.5" defaultValue={config.marginPercent} />
         </label>
+        {config.sedes.map((name, index) => (
+          <label key={index}>
+            Sede {index + 1}
+            <input name="sedes" required maxLength={40} defaultValue={name} />
+          </label>
+        ))}
         <div className="boutique-form-actions">
           <SubmitButton>Guardar</SubmitButton>
         </div>
         {state?.error ? <p className="form-error">{state.error}</p> : null}
         {state?.success ? <p className="form-ok">Guardado.</p> : null}
       </form>
-      <p className="hint">La comisión nueva se aplica a las ventas que registres desde ahora.</p>
+      <p className="hint">
+        La comisión nueva se aplica a las ventas que registres desde ahora. Puedes cambiar el nombre de cada sede: lo
+        que ya dejaste en ella no se pierde.
+      </p>
     </details>
   );
 }
@@ -236,7 +254,10 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
   const [perfumeId, setPerfumeId] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('1');
+  // La sede se queda elegida: así puedes dejar varios perfumes seguidos en la misma.
+  const [sede, setSede] = useState('1');
   const perfume = available.find((item) => String(item.id) === perfumeId) || null;
+  const newCode = useMemo(() => nextBoutiqueCode(catalog.map((item) => item.code)), [catalog]);
   const suggested = perfume
     ? boutiquePrice(perfume.cost, { feePercent: config.feePercent, marginPercent: config.marginPercent, taxPercent, rounding })
     : null;
@@ -253,6 +274,16 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
     <form action={formAction} className="chart-card">
       <h3 className="chart-title">Dejar perfumes en la boutique</h3>
       <div className="boutique-form-grid">
+        <label>
+          Sede
+          <select name="sede" required value={sede} onChange={(e) => setSede(e.target.value)}>
+            {config.sedes.map((name, index) => (
+              <option key={index} value={index + 1}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           Perfume
           <select
@@ -271,10 +302,16 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
             <option value="">Elige un perfume…</option>
             {available.map((item) => (
               <option key={item.id} value={item.id}>
+                {item.code ? `${item.code} · ` : ''}
                 {item.name} ({item.stock} en stock)
               </option>
             ))}
           </select>
+          {perfume ? (
+            <span className="hint">
+              {perfume.code ? `Código ${perfume.code}` : `Es la primera vez que lo dejas: tendrá el código ${newCode}`}
+            </span>
+          ) : null}
         </label>
         <label>
           Cantidad
@@ -299,9 +336,13 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
         </p>
       ) : null}
       {state?.error ? <p className="form-error">{state.error}</p> : null}
-      {state?.success ? <p className="form-ok">Listo: se descontó de tu stock de la web.</p> : null}
+      {state?.success ? (
+        <p className="form-ok">
+          Listo: {state.code} quedó en {config.sedes[state.sede - 1] || 'la boutique'} y se descontó de tu stock de la web.
+        </p>
+      ) : null}
       <div className="boutique-form-actions">
-        <SubmitButton>Dejar en la boutique</SubmitButton>
+        <SubmitButton>Dejar en {config.sedes[Number(sede) - 1] || 'la boutique'}</SubmitButton>
       </div>
     </form>
   );
@@ -317,6 +358,7 @@ function RowForm({ row, mode, onDone }) {
   return (
     <form action={formAction} className="boutique-row-form">
       <input type="hidden" name="perfumeId" value={row.perfumeId} />
+      <input type="hidden" name="sede" value={row.sede} />
       <label>
         Cantidad
         <input name="quantity" type="number" min="1" max={row.atBoutique} defaultValue="1" required />
@@ -342,7 +384,8 @@ function RowForm({ row, mode, onDone }) {
   );
 }
 
-function StockTable({ stock }) {
+/** Lo que queda en cada sede, separado por sede, con su código y las acciones. */
+function StockTable({ stock, sedes }) {
   const [open, setOpen] = useState(null);
   const rows = stock.filter((row) => row.atBoutique > 0);
   if (!rows.length) return <p className="hint">Todavía no tienes perfumes en la boutique.</p>;
@@ -351,6 +394,7 @@ function StockTable({ stock }) {
       <table className="report-table boutique-stock-table">
         <thead>
           <tr>
+            <th scope="col">Código</th>
             <th scope="col">Perfume</th>
             <th scope="col" className="num">Quedan</th>
             <th scope="col" className="num">Vendidos</th>
@@ -358,35 +402,144 @@ function StockTable({ stock }) {
             <th scope="col" />
           </tr>
         </thead>
-        <tbody>
-          {rows.map((row) => {
-            const key = (mode) => `${row.perfumeId}-${mode}`;
-            return (
-              <tr key={row.perfumeId}>
-                <th scope="row">
-                  {row.name}
-                  {open === key('venta') || open === key('devolucion') ? (
-                    <RowForm row={row} mode={open.endsWith('venta') ? 'venta' : 'devolucion'} onDone={() => setOpen(null)} />
-                  ) : null}
+        {sedes.map((sede) => {
+          const sedeRows = rows.filter((row) => row.sede === sede.id);
+          if (!sedeRows.length) return null;
+          return (
+            <tbody key={sede.id}>
+              <tr className="boutique-sede-row">
+                <th scope="colgroup" colSpan={6}>
+                  {sede.name} · {sede.units} perfume{sede.units === 1 ? '' : 's'} · {soles(sede.value)}
                 </th>
-                <td className="num">
-                  <strong>{row.atBoutique}</strong>
-                </td>
-                <td className="num">{row.sold}</td>
-                <td className="num">{soles(row.price)}</td>
-                <td className="boutique-row-actions">
-                  <button type="button" className="btn-primary" onClick={() => setOpen(key('venta'))}>
-                    Vendió
-                  </button>
-                  <button type="button" className="btn-secondary" onClick={() => setOpen(key('devolucion'))}>
-                    Devolver
-                  </button>
-                </td>
               </tr>
-            );
-          })}
-        </tbody>
+              {sedeRows.map((row) => {
+                const key = (mode) => `${row.sede}-${row.perfumeId}-${mode}`;
+                return (
+                  <tr key={`${row.sede}-${row.perfumeId}`}>
+                    <td className="boutique-code">{row.code || '—'}</td>
+                    <th scope="row">
+                      {row.name}
+                      {open === key('venta') || open === key('devolucion') ? (
+                        <RowForm row={row} mode={open.endsWith('venta') ? 'venta' : 'devolucion'} onDone={() => setOpen(null)} />
+                      ) : null}
+                    </th>
+                    <td className="num">
+                      <strong>{row.atBoutique}</strong>
+                    </td>
+                    <td className="num">{row.sold}</td>
+                    <td className="num">{soles(row.price)}</td>
+                    <td className="boutique-row-actions">
+                      <button type="button" className="btn-primary" onClick={() => setOpen(key('venta'))}>
+                        Vendió
+                      </button>
+                      <button type="button" className="btn-secondary" onClick={() => setOpen(key('devolucion'))}>
+                        Devolver
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          );
+        })}
       </table>
+    </div>
+  );
+}
+
+/**
+ * Excel de entrega para la boutique: lo que dejaste en una sede entre dos días,
+ * con el formato de sus guías (FECHA, CODIGO, DESCRIPCION, CANTIDAD, PRECIO).
+ */
+function DeliveryExcel({ deliveries, config }) {
+  const today = limaDay(new Date());
+  const [sede, setSede] = useState('1');
+  const [from, setFrom] = useState(today);
+  const [to, setTo] = useState(today);
+  const [error, setError] = useState(null);
+  const [saving, startSaving] = useTransition();
+  const lines = useMemo(() => deliveryLines(deliveries, { sede, from, to }), [deliveries, sede, from, to]);
+  const sedeLabel = config.sedes[Number(sede) - 1] || 'Sede';
+  // Como las guías de la boutique (MANDI14102026.xlsx): ALVIAN_<sede>_<día>.xlsx
+  const fileName = `ALVIAN_${sedeLabel.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9]+/g, '')}_${compactDay(to || today)}.xlsx`;
+  const units = lines.reduce((total, line) => total + line.quantity, 0);
+
+  function download() {
+    setError(null);
+    startSaving(async () => {
+      try {
+        // La librería se carga solo al descargar: no pesa en el resto del panel.
+        const { default: writeExcelFile } = await import('write-excel-file/browser');
+        const { data, columns } = deliverySheet(lines);
+        await writeExcelFile(data, { sheet: 'Entrega', columns }, { fontFamily: 'Times New Roman', fontSize: 11 }).toFile(fileName);
+      } catch (err) {
+        setError(`No se pudo crear el Excel: ${err.message}`);
+      }
+    });
+  }
+
+  return (
+    <div className="chart-card">
+      <h3 className="chart-title">Excel de entrega para la boutique</h3>
+      <p className="hint">
+        Elige la sede y los días: sale lo que dejaste en esa sede, con el código de cada perfume (ALV001…), la cantidad y
+        el precio, igual que las guías que recibe la boutique.
+      </p>
+      <div className="boutique-form-grid">
+        <label>
+          Sede
+          <select value={sede} onChange={(e) => setSede(e.target.value)}>
+            {config.sedes.map((name, index) => (
+              <option key={index} value={index + 1}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Desde
+          <input type="date" value={from} max={to || today} onChange={(e) => setFrom(e.target.value)} />
+        </label>
+        <label>
+          Hasta
+          <input type="date" value={to} min={from} max={today} onChange={(e) => setTo(e.target.value)} />
+        </label>
+      </div>
+      {lines.length ? (
+        <div className="pivot-scroll">
+          <table className="report-table boutique-excel-table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Código</th>
+                <th scope="col">Descripción</th>
+                <th scope="col" className="num">Cantidad</th>
+                <th scope="col" className="num">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((line) => (
+                <tr key={`${line.day}-${line.code}-${line.unitPrice}`}>
+                  <td>{line.day.split('-').reverse().join('/')}</td>
+                  <td className="boutique-code">{line.code}</td>
+                  <th scope="row">{line.name.toUpperCase()}</th>
+                  <td className="num">{line.quantity}</td>
+                  <td className="num">{soles(line.unitPrice)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="hint">No dejaste perfumes en {sedeLabel} en esos días.</p>
+      )}
+      {error ? <p className="form-error">{error}</p> : null}
+      <div className="boutique-form-actions">
+        <button type="button" className="btn-primary" disabled={!lines.length || saving} onClick={download}>
+          {saving ? 'Creando…' : `Descargar Excel · ${units} perfume${units === 1 ? '' : 's'}`}
+        </button>
+        {lines.length ? <span className="hint">{fileName}</span> : null}
+      </div>
     </div>
   );
 }
@@ -449,7 +602,9 @@ function PendingPayments({ pending }) {
                 <th scope="row">
                   {sale.name}
                   {sale.quantity > 1 ? ` × ${sale.quantity}` : ''}
-                  <span className="boutique-sub">{dayFmt.format(new Date(sale.createdAt))}</span>
+                  <span className="boutique-sub">
+                    {sale.sedeName} · {dayFmt.format(new Date(sale.createdAt))}
+                  </span>
                 </th>
                 <td className="num">{soles(sale.due.balance)}</td>
                 <td className="num">−{soles(sale.due.fee)}</td>
@@ -513,9 +668,12 @@ function MovesList({ moves, sales }) {
           <li key={move.id}>
             <span className={`boutique-move boutique-move-${move.kind}`}>{MOVE_LABELS[move.kind]}</span>
             <span className="boutique-move-text">
-              {move.quantity} × {move.name}
+              {move.quantity} × {move.code ? `${move.code} · ` : ''}
+              {move.name}
               {move.unitPrice != null ? ` · ${soles(move.unitPrice)}` : ''}
-              <span className="boutique-sub">{dayFmt.format(new Date(move.occurredAt))}</span>
+              <span className="boutique-sub">
+                {move.sedeName} · {dayFmt.format(new Date(move.occurredAt))}
+              </span>
             </span>
             {move.kind === 'venta' ? (
               pendingIds.has(move.saleId) ? (
@@ -550,7 +708,11 @@ export function BoutiqueControl({ board }) {
   return (
     <>
       <div className="kpi-grid">
-        <Kpi label="En la boutique" value={`${t.units} perfume${t.units === 1 ? '' : 's'}`} sub={`${soles(t.value)} a precio de boutique`} />
+        <Kpi
+          label="En la boutique"
+          value={`${t.units} perfume${t.units === 1 ? '' : 's'}`}
+          sub={`${soles(t.value)} a precio de boutique · ${board.sedes.map((s) => `${s.name}: ${s.units}`).join(' · ')}`}
+        />
         <Kpi label="Te debe" value={soles(t.owed)} sub="Ya sin su comisión" tone={t.owed > 0 ? 'bad' : undefined} />
         <Kpi label="Vendió" value={soles(t.soldTotal)} sub={`${t.count} perfume${t.count === 1 ? '' : 's'} · su comisión ${soles(t.fees)}`} />
         <Kpi label="Ganaste en la boutique" value={soles(t.profit)} sub="Después del costo y su comisión" tone="good" />
@@ -558,10 +720,11 @@ export function BoutiqueControl({ board }) {
 
       <ConfigForm config={board.config} />
       <DeliverForm catalog={board.catalog} config={board.config} taxPercent={board.taxPercent} rounding={board.rounding} />
+      <DeliveryExcel deliveries={board.deliveries} config={board.config} />
 
       <div className="chart-card">
-        <h3 className="chart-title">Lo que tiene la boutique</h3>
-        <StockTable stock={board.stock} />
+        <h3 className="chart-title">Lo que tiene cada sede</h3>
+        <StockTable stock={board.stock} sedes={board.sedes} />
       </div>
 
       <div className="chart-card">

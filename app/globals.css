@@ -10267,3 +10267,25 @@ select:focus {
 .cmp-series .kpi-delta {
   white-space: nowrap;
 }
+
+/* Boutique: una fila de título por sede y el código ALV de cada perfume. */
+.boutique-stock-table .boutique-sede-row th {
+  padding-top: 0.9rem;
+  background: var(--cream);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--green-900);
+}
+
+.boutique-code {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--green-800);
+}
+
+.boutique-excel-table th[scope="row"] {
+  font-weight: 500;
+}
