@@ -12,7 +12,9 @@ import {
   isValidSede,
   nextBoutiqueCode,
   normalizeBoutiqueConfig,
+  sedeCodes,
   sedeName,
+  sedeProductCode,
   settlementOf,
 } from '../lib/boutique.mjs';
 
@@ -111,4 +113,17 @@ test('Excel de entrega: lo que mandaste a una sede, por día', () => {
   assert.equal(date.format, 'dd/mm/yy');
   assert.deepEqual([code.value, name.value, quantity.value, price.value], ['ALV001', 'ASAD', 3, 199]);
   assert.equal(sheet.data.length, 3);
+});
+
+test('el código muestra la sede: ALV001-AMA', () => {
+  const config = normalizeBoutiqueConfig({ sedes: ['Amazonas', 'Pucallpa'] });
+  assert.deepEqual(sedeCodes(config), ['AMA', 'PUC']);
+  assert.equal(sedeProductCode('ALV001', config, 1), 'ALV001-AMA');
+  assert.equal(sedeProductCode('ALV001', config, '2'), 'ALV001-PUC');
+  assert.equal(sedeProductCode(null, config, 1), '');
+  // Tildes fuera; si dos sedes empiezan igual o el nombre es corto: 2 letras + número.
+  assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({ sedes: ['Ñaña', 'Óvalo'] })), ['NAN', 'OVA']);
+  assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({})), ['SE1', 'SE2']);
+  assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({ sedes: ['Amazonas', 'Amazonas Norte'] })), ['AM1', 'AM2']);
+  assert.deepEqual(sedeCodes(normalizeBoutiqueConfig({ sedes: ['Lo', 'Plaza'] })), ['LO1', 'PLA']);
 });

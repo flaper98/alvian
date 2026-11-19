@@ -10289,3 +10289,36 @@ select:focus {
 .boutique-excel-table th[scope="row"] {
   font-weight: 500;
 }
+
+/* Boutique: corregir una entrega (desde la tabla de la sede o desde Movimientos). */
+.boutique-moves li {
+  flex-wrap: wrap;
+}
+
+.boutique-moves li .boutique-row-form,
+.boutique-row-note {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.boutique-row-form select {
+  width: 9rem;
+}
+
+.boutique-move-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.btn-link-edit {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--green-800);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

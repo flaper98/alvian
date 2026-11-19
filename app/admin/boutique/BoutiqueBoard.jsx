@@ -10,6 +10,7 @@ import {
   returnFromBoutiqueAction,
   saveBoutiqueConfigAction,
   settleBoutiqueSalesAction,
+  updateBoutiqueDeliveryAction,
 } from '@/lib/actions';
 import {
   boutiquePrice,
@@ -20,6 +21,7 @@ import {
   deliverySheet,
   limaDay,
   nextBoutiqueCode,
+  sedeProductCode,
 } from '@/lib/boutique.mjs';
 
 const soles = (value) =>
@@ -292,14 +294,16 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
             <option value="">Elige un perfume…</option>
             {available.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.code ? `${item.code} · ` : ''}
+                {item.code ? `${sedeProductCode(item.code, config, sede)} · ` : ''}
                 {item.name} ({item.stock} en stock)
               </option>
             ))}
           </select>
           {perfume ? (
             <span className="hint">
-              {perfume.code ? `Código ${perfume.code}` : `Es la primera vez que lo dejas: tendrá el código ${newCode}`}
+              {perfume.code
+                ? `Código ${sedeProductCode(perfume.code, config, sede)}`
+                : `Es la primera vez que lo dejas: tendrá el código ${sedeProductCode(newCode, config, sede)}`}
             </span>
           ) : null}
         </label>
@@ -328,7 +332,8 @@ function DeliverForm({ catalog, config, taxPercent, rounding }) {
       {state?.error ? <p className="form-error">{state.error}</p> : null}
       {state?.success ? (
         <p className="form-ok">
-          Listo: {state.code} quedó en {config.sedes[state.sede - 1] || 'la boutique'} y se descontó de tu stock de la web.
+          Listo: {sedeProductCode(state.code, config, state.sede)} quedó en {config.sedes[state.sede - 1] || 'la boutique'} y
+          se descontó de tu stock de la web.
         </p>
       ) : null}
       <div className="boutique-form-actions">
@@ -374,8 +379,50 @@ function RowForm({ row, mode, onDone }) {
   );
 }
 
+/** Corregir una entrega: sede, cantidad, precio y fecha. Tu stock y el de la sede se ajustan solos. */
+function EditDeliveryForm({ delivery, config, note, onDone }) {
+  const [state, formAction] = useActionState(updateBoutiqueDeliveryAction.bind(null, delivery.id), { error: null });
+  const date = limaDay(delivery.occurredAt);
+  useEffect(() => {
+    if (state?.success) onDone();
+  }, [state, onDone]);
+  return (
+    <form action={formAction} className="boutique-row-form">
+      {note ? <p className="hint boutique-row-note">{note}</p> : null}
+      <label>
+        Sede
+        <select name="sede" defaultValue={delivery.sede}>
+          {config.sedes.map((name, index) => (
+            <option key={index} value={index + 1}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Cantidad
+        <input name="quantity" type="number" min="1" defaultValue={delivery.quantity} required />
+      </label>
+      <label>
+        Precio (S/)
+        <input name="unitPrice" type="number" min="1" step="0.01" defaultValue={delivery.unitPrice ?? ''} required />
+      </label>
+      <label>
+        Fecha
+        <input name="date" type="date" defaultValue={date} max={todayLima()} required />
+      </label>
+      <input type="hidden" name="originalDate" value={date} />
+      <SubmitButton>Guardar cambios</SubmitButton>
+      <button type="button" className="btn-secondary" onClick={onDone}>
+        Cancelar
+      </button>
+      {state?.error ? <p className="form-error">{state.error}</p> : null}
+    </form>
+  );
+}
+
 /** Lo que queda en cada sede, separado por sede, con su código y las acciones. */
-function StockTable({ stock, sedes }) {
+function StockTable({ stock, sedes, config }) {
   const [open, setOpen] = useState(null);
   const rows = stock.filter((row) => row.atBoutique > 0);
   if (!rows.length) return <p className="hint">Todavía no tienes perfumes en la boutique.</p>;
@@ -412,6 +459,18 @@ function StockTable({ stock, sedes }) {
                       {open === key('venta') || open === key('devolucion') ? (
                         <RowForm row={row} mode={open.endsWith('venta') ? 'venta' : 'devolucion'} onDone={() => setOpen(null)} />
                       ) : null}
+                      {open === key('editar') && row.lastDelivery ? (
+                        <EditDeliveryForm
+                          delivery={row.lastDelivery}
+                          config={config}
+                          note={
+                            row.deliveryCount > 1
+                              ? `Editas la última entrega (${dayFmt.format(new Date(row.lastDelivery.occurredAt))} · ${row.lastDelivery.quantity} u.). Las otras ${row.deliveryCount - 1}, en «Movimientos».`
+                              : null
+                          }
+                          onDone={() => setOpen(null)}
+                        />
+                      ) : null}
                     </th>
                     <td className="num">
                       <strong>{row.atBoutique}</strong>
@@ -425,6 +484,11 @@ function StockTable({ stock, sedes }) {
                       <button type="button" className="btn-secondary" onClick={() => setOpen(key('devolucion'))}>
                         Devolver
                       </button>
+                      {row.lastDelivery ? (
+                        <button type="button" className="btn-secondary" onClick={() => setOpen(key('editar'))}>
+                          Editar
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 );
@@ -472,7 +536,7 @@ function DeliveryExcel({ deliveries, config }) {
     <div className="chart-card">
       <h3 className="chart-title">Excel de entrega para la boutique</h3>
       <p className="hint">
-        Elige la sede y los días: sale lo que dejaste en esa sede, con el código de cada perfume (ALV001…), la cantidad y
+        Elige la sede y los días: sale lo que dejaste en esa sede, con el código de cada perfume y su sede (ALV001-AMA…), la cantidad y
         el precio, igual que las guías que recibe la boutique.
       </p>
       <div className="boutique-form-grid">
@@ -637,9 +701,10 @@ function PendingPayments({ pending }) {
 
 const MOVE_LABELS = { entrega: 'Dejaste', devolucion: 'Te devolvió', venta: 'Vendió' };
 
-function MovesList({ moves, sales }) {
+function MovesList({ moves, sales, config }) {
   const [busy, startBusy] = useTransition();
   const [error, setError] = useState(null);
+  const [editing, setEditing] = useState(null);
   const pendingIds = new Set(sales.filter((s) => s.pending && s.due.balance === s.total).map((s) => s.id));
   if (!moves.length) return null;
   const run = (fn, message) => {
@@ -677,15 +742,29 @@ function MovesList({ moves, sales }) {
                 </button>
               ) : null
             ) : (
-              <button
-                type="button"
-                className="btn-link-danger"
-                disabled={busy}
-                onClick={() => run(() => deleteBoutiqueMoveAction(move.id), '¿Borrar este movimiento? El stock se corrige solo.')}
-              >
-                Borrar
-              </button>
+              <span className="boutique-move-actions">
+                {move.kind === 'entrega' ? (
+                  <button
+                    type="button"
+                    className="btn-link-edit"
+                    onClick={() => setEditing(editing === move.id ? null : move.id)}
+                  >
+                    Editar
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="btn-link-danger"
+                  disabled={busy}
+                  onClick={() => run(() => deleteBoutiqueMoveAction(move.id), '¿Borrar este movimiento? El stock se corrige solo.')}
+                >
+                  Borrar
+                </button>
+              </span>
             )}
+            {editing === move.id ? (
+              <EditDeliveryForm delivery={move} config={config} onDone={() => setEditing(null)} />
+            ) : null}
           </li>
         ))}
       </ul>
@@ -714,7 +793,7 @@ export function BoutiqueControl({ board }) {
 
       <div className="chart-card">
         <h3 className="chart-title">Lo que tiene cada sede</h3>
-        <StockTable stock={board.stock} sedes={board.sedes} />
+        <StockTable stock={board.stock} sedes={board.sedes} config={board.config} />
       </div>
 
       <div className="chart-card">
@@ -729,7 +808,7 @@ export function BoutiqueControl({ board }) {
       {board.moves.length ? (
         <div className="chart-card">
           <h3 className="chart-title">Movimientos</h3>
-          <MovesList moves={board.moves} sales={board.sales} />
+          <MovesList moves={board.moves} sales={board.sales} config={board.config} />
         </div>
       ) : null}
     </>
