@@ -153,3 +153,15 @@ test('Excel de entrega: lo devuelto en esos días se descuenta', () => {
   // Si el día elegido no incluye la devolución, la entrega sale completa.
   assert.equal(deliveryLines(deliveries, { sede: 1, from: '2026-11-17', to: '2026-11-17' }, returns)[0].quantity, 3);
 });
+
+test('Excel de entrega: la devolución cancela la entrega de antes, no la que vino después', () => {
+  // Como Asad Lattafa: S/ 207 a las 11:36 p. m., devuelto a las 11:48 y vuelto a dejar a S/ 199 a las 11:54.
+  const asad = { sede: 1, perfumeId: 5, code: 'ALV005-AMA', name: 'Asad Lattafa', quantity: 1 };
+  const deliveries = [
+    { ...asad, occurredAt: '2026-11-19T04:36:00Z', unitPrice: 207 },
+    { ...asad, occurredAt: '2026-11-19T04:54:00Z', unitPrice: 199 },
+  ];
+  const returns = [{ sede: 1, perfumeId: 5, occurredAt: '2026-11-19T04:48:00Z', quantity: 1 }];
+  const lines = deliveryLines(deliveries, { sede: 1, from: '2026-11-18', to: '2026-11-18' }, returns);
+  assert.deepEqual(lines.map((l) => [l.code, l.quantity, l.unitPrice]), [['ALV005-AMA', 1, 199]]);
+});
